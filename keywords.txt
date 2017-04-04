@@ -1,0 +1,61 @@
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+VitoWifi	     KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+begin        KEYWORD2
+loop	     KEYWORD2
+sendDP       KEYWORD2
+getStatus    KEYWORD2
+getValue     KEYWORD2
+
+setLoggingPrinter KEYWORD2
+enableLogger KEYWORD2
+getLogger    KEYWORD2
+
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+#Type
+Datapoint       LITERAL1
+ConnectionState LITERAL1
+CommunicationState LITERAL1
+DPType		LITERAL1
+Transformation	LITERAL1
+
+#DPType
+READ		LITERAL1
+WRITE		LITERAL1
+
+#Connection
+RESET           LITERAL1
+INIT            LITERAL1
+CONNECTED       LITERAL1
+
+#CommunicationState
+IDLE            LITERAL1
+SEND            LITERAL1
+RECEIVE         LITERAL1
+RETURN          LITERAL1
+
+#Transformation
+TEMP		LITERAL1
+H		LITERAL1
+C		LITERAL1
+E_OM1		LITERAL1
+E_OM2		LITERAL1
+E_S		LITERAL1
+E_SF		LITERAL1
+E_M		LITERAL1
+E_PM		LITERAL1
+E_FW		LITERAL1
+TXT		LITERAL1
+E_SV		LITERAL1
+NONE    	//no transformation

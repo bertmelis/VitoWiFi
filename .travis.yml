@@ -1,0 +1,18 @@
+language: python
+python:
+    - "2.7"
+
+# Cache PlatformIO packages using Travis CI container-based infrastructure
+sudo: false
+cache:
+    directories:
+        - "~/.platformio"
+
+env:
+    - PLATFORMIO_CI_SRC=examples/simple-read/simple-read.ino
+
+install:
+    - pip install -U platformio
+
+script:
+    - platformio ci --board=d1_mini --board=esp01_1m --board=esp01 --lib="./src"
