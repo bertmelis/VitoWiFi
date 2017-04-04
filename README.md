@@ -27,6 +27,7 @@ I was using the original openv/vcontrold code from wikispaces on a Raspberry Pi 
 
 
 ## Credits go to
-- robtillaart @ Arduino.cc forum
-- Marvin ROGER for the logger code
-and many others for code and inspiration
+- Hex print: 2011, robtillaart @ Arduino.cc forum
+- Logger: MIT 2015, marvinroger @ Github
+- Serial Protocol @ openv.wikispaces.com
+- and many others for code and inspiration
