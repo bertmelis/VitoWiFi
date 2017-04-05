@@ -1,25 +1,25 @@
 /*
 
-Copyright 2017 Bert Melis 
+Copyright 2017 Bert Melis
 
-Permission is hereby granted, free of charge, to any person obtaining a 
-copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject to 
-the following conditions: 
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
 
-The above copyright notice and this permission notice shall be included 
-in all copies or substantial portions of the Software. 
+The above copyright notice and this permission notice shall be included
+in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS 
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY 
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
-SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
 
@@ -44,8 +44,6 @@ and many others
 #include <Arduino.h>
 #include "Logger.h"
 #include "Typedefs.h"
-#include "StreamingOperator.h"
-
 
 class VitoWifi{
   public:
@@ -57,7 +55,7 @@ class VitoWifi{
     void sendDP(Datapoint* DP);
     void sendDP(Datapoint* DP, uint32_t value);
     CommunicationState getStatus();
-    int32_t getValue();
+    float getValue();
 
     void setLoggingPrinter(Print* printer);
     Logger& getLogger();
@@ -74,23 +72,25 @@ class VitoWifi{
     uint8_t _rcvLen = 0;
 
     //connection methods and properties
-    void _connectionHandler();
-    ConnectionState _connectionState = RESET;
+    void connectionHandler();
+    ConnectionState _connectionState;
     uint32_t _timeoutTimer = 0;
     uint32_t _lastMillis = 0;
     uint8_t _errorCount = 0;
 
     //communication methods and properties
-    void _communicationHandler();
-    CommunicationState _communicationState = IDLE;
-    bool _messageSent = false;
+    void communicationHandler();
+    CommunicationState _communicationState;
+    bool _sendMessage;
     Datapoint* _DP;
     int32_t _value = 0;
+    float transform(int32_t value);
 
     //helper functions
-    bool _decodeMessage();
-    uint8_t _calcChecksum(uint8_t* message, uint8_t lenght);
-    bool _checkChecksum(uint8_t* message, uint8_t lenght);
-    void _printHex83(uint8_t* data, uint8_t length);
-    void _clearInputBuffer();
+    bool _debugMessage = true;
+    bool decodeMessage();
+    uint8_t calcChecksum(uint8_t* message, uint8_t lenght);
+    bool checkChecksum(uint8_t* message, uint8_t lenght);
+    void printHex83(uint8_t* data, uint8_t length);
+    void clearInputBuffer();
 };
