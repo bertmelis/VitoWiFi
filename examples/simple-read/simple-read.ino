@@ -7,7 +7,6 @@ You can specify another printer like Serial1 or use a telnet server to see the d
 */
 
 
-#include <Arduino.h>
 #include <ESP8266WiFi.h>
 
 #include <VitoWifi.h>
@@ -49,7 +48,6 @@ void loop(){
 
   //if flag is set, get values
   if(getValues){
-    //only get values if CONNected
     //pass Datapoint by reference
     myVitoWifi.sendDP(&DP);
     getValues = false;
@@ -57,7 +55,10 @@ void loop(){
 
   //when value is available, display
   if( myVitoWifi.getStatus() == RETURN ){
-      myVitoWifi.getLogger() << "Name: " << DP.name << endl;
-      myVitoWifi.getLogger() << "Value: " << myVitoWifi.getValue() << endl << endl;
+      myVitoWifi.getLogger().print("Name: ");
+      myVitoWifi.getLogger().println(DP.name);
+      myVitoWifi.getLogger().print("Value: ");
+      myVitoWifi.getLogger().println(myVitoWifi.getValue());
+      myVitoWifi.getLogger().println();
   }
 }
