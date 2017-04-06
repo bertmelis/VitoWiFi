@@ -69,11 +69,11 @@ void loop(){
   //when value is available, display
   if( myVitoWifi.getStatus() == RETURN ){
       //Display value and move to next DP
-      currentDP++;
       myVitoWifi.getLogger().print("Name: ");
-      myVitoWifi.getLogger().println(DP.name);
+      myVitoWifi.getLogger().println(DP[currentDP].name);
       myVitoWifi.getLogger().print("Value: ");
       myVitoWifi.getLogger().println(myVitoWifi.getValue());
       myVitoWifi.getLogger().println();
+      currentDP++;
   }
 }
