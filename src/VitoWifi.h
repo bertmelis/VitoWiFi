@@ -49,11 +49,12 @@ class VitoWifi{
   public:
 	  VitoWifi();
 	  ~VitoWifi();
+    void begin(HardwareSerial& serial);
 	  void begin(HardwareSerial* serial);
     void loop();
 
-    void sendDP(Datapoint* DP);
-    void sendDP(Datapoint* DP, uint32_t value);
+    void sendDP(const Datapoint& DP);
+    void sendDP(const Datapoint& DP, uint32_t value);
     CommunicationState getStatus();
     float getValue();
 
@@ -66,28 +67,28 @@ class VitoWifi{
     Logger _logger;
     HardwareSerial* _serial;
     uint8_t _sndBuffer[12];
-    uint8_t _sndLen = 0;
+    uint8_t _sndLen;
     uint8_t _rcvBuffer[12];
-    uint8_t _rcvBufferLen = 0;
-    uint8_t _rcvLen = 0;
+    uint8_t _rcvBufferLen;
+    uint8_t _rcvLen;
 
     //connection methods and properties
     void connectionHandler();
     ConnectionState _connectionState;
-    uint32_t _timeoutTimer = 0;
-    uint32_t _lastMillis = 0;
-    uint8_t _errorCount = 0;
+    uint32_t _timeoutTimer;
+    uint32_t _lastMillis;
+    uint8_t _errorCount;
 
     //communication methods and properties
     void communicationHandler();
     CommunicationState _communicationState;
     bool _sendMessage;
-    Datapoint* _DP;
-    int32_t _value = 0;
+    Datapoint _DP;
+    int32_t _value;
     float transform(int32_t value);
 
     //helper functions
-    bool _debugMessage = true;
+    bool _debugMessage;
     bool decodeMessage();
     uint8_t calcChecksum(uint8_t* message, uint8_t lenght);
     bool checkChecksum(uint8_t* message, uint8_t lenght);

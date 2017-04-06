@@ -2,11 +2,22 @@
 
 
 //constructor
-VitoWifi::VitoWifi(){
-  _serial = NULL;
-  Logger logger;
-}
-
+VitoWifi::VitoWifi():
+  _serial(NULL),
+  _sndBuffer{0},
+  _sndLen(0),
+  _rcvBuffer{0},
+  _rcvBufferLen(0),
+  _rcvLen(0),
+  _timeoutTimer(0),
+  _lastMillis(0),
+  _errorCount(0),
+  _sendMessage(true),
+  _value(0),
+  _debugMessage(true),
+  _connectionState(RESET),
+  _communicationState(IDLE)
+{}
 
 //destructor --> needs to be populated when there's need to destruct
 VitoWifi::~VitoWifi(){
@@ -20,16 +31,14 @@ void VitoWifi::loop(){
 }
 
 
+void VitoWifi::begin(HardwareSerial& serial){
+	//Start serial to Viessmann @4800/8E2
+	begin(serial);
+}
 void VitoWifi::begin(HardwareSerial* serial){
 	//Start serial to Viessmann @4800/8E2
 	_serial = serial;
   _serial->begin(4800, SERIAL_8E2);
-  _timeoutTimer = 0;
-  _lastMillis = 0;
-  _debugMessage = true;
-  _connectionState = RESET;
-  _sendMessage = false;
-  _communicationState = IDLE;
   getLogger().println(F("VitoWifi: Setup done."));
 }
 
@@ -52,6 +61,7 @@ void VitoWifi::connectionHandler(){
           _debugMessage = true;
           getLogger().println(F("reset.\n"));
         }
+        else _serial->read();
       }
       if(millis() - _lastMillis > 500){
         //send reset request 0x04/EOT every 500msec
@@ -83,6 +93,7 @@ void VitoWifi::connectionHandler(){
           _communicationState = IDLE;
           _timeoutTimer = millis();
           _debugMessage = true;
+          _errorCount = 0;
           clearInputBuffer();
           getLogger().println(F("connected.\n"));
         }
@@ -125,12 +136,12 @@ void VitoWifi::communicationHandler(){
       if(_sendMessage){
         //only send a command every 100msec to avoid congestion
         //can be removed after testing/debugging
-        if(_lastMillis - millis() > 100) _serial->write(_sndBuffer, _sndLen);
+        if(millis() - _lastMillis > 100) _serial->write(_sndBuffer, _sndLen);
         _timeoutTimer = millis();
         _lastMillis = _timeoutTimer;
         _sendMessage = false;
         getLogger().print(F("VitoWifi: Sending command for "));
-        getLogger().println(_DP->name);;
+        getLogger().println(_DP.name);;
         getLogger().print(F("          Data: "));
         printHex83(_sndBuffer, _sndLen);
         getLogger().println();
@@ -153,6 +164,13 @@ void VitoWifi::communicationHandler(){
           getLogger().println(F("VitoWifi: Command sent unsuccesfully, trying again"));
         }
       }
+      if(millis() - _timeoutTimer > 10000){
+        //timeout
+        _sendMessage = true;
+        _errorCount++;
+        clearInputBuffer();
+        getLogger().println(F("VitoWifi: Timeout, trying again."));
+      }
       break;
 
     case RECEIVE:
@@ -169,7 +187,7 @@ void VitoWifi::communicationHandler(){
         if(!checkChecksum(_rcvBuffer, _rcvLen)) flagError = true; //check checksum
         if(flagError){
           _errorCount++;
-          _sendMessage = false;
+          _sendMessage = true;
           _communicationState = SEND;
           getLogger().println(F("Message received unsuccesfully, trying again"));
           break;
@@ -209,10 +227,10 @@ void VitoWifi::communicationHandler(){
 
 
 //construct message from datapoint and move state to SEND
-void VitoWifi::sendDP(Datapoint* DP){
+void VitoWifi::sendDP(const Datapoint& DP){
   if(_communicationState != IDLE) getLogger().println(F("Warning: sendDP before previous action was completed. Using new DP."));
   _DP = DP;
-  switch(_DP->RW){
+  switch(_DP.RW){
     case READ:
       //construct READ message
       //has fixed length of 8 chars
@@ -221,17 +239,18 @@ void VitoWifi::sendDP(Datapoint* DP){
       _sndBuffer[1] = 0x05;
       _sndBuffer[2] = 0x00;
       _sndBuffer[3] = 0x01;
-      _sndBuffer[4] = (_DP->address >> 8) & 0xFF;
-      _sndBuffer[5] = _DP->address & 0xFF;
-      _sndBuffer[6] = _DP->length;
+      _sndBuffer[4] = (_DP.address >> 8) & 0xFF;
+      _sndBuffer[5] = _DP.address & 0xFF;
+      _sndBuffer[6] = _DP.length;
       _sndBuffer[7] = calcChecksum(_sndBuffer, _sndLen);
 
       //set length of expected answer
-      _rcvLen = _sndLen + _DP->length;
+      _rcvLen = _sndLen + _DP.length;
 
       //setup properties for next state in communicationHandler
       _sendMessage = true;
       _communicationState = SEND;
+      getLogger().println(F("VitoWifi: new sendDP command requested."));
       break;
 
     case WRITE:
@@ -247,10 +266,10 @@ void VitoWifi::sendDP(Datapoint* DP){
 
 //overload method for write request
 //construct message from datapoint and move state to SEND
-void VitoWifi::sendDP(Datapoint* DP, uint32_t value){
+void VitoWifi::sendDP(const Datapoint& DP, uint32_t value){
   if(_communicationState != IDLE) getLogger().println(F("Warning: sendDP before previous value was cleared."));
   _DP = DP;
-  switch(_DP->RW){
+  switch(_DP.RW){
     case READ:
       //should be in primary method
       getLogger().println(F("VitoWifi: Error! Read request with value argument. Skipping!"));
@@ -258,19 +277,20 @@ void VitoWifi::sendDP(Datapoint* DP, uint32_t value){
       _value = 0;
       _communicationState = RETURN;
       break;
+
     case WRITE:
       //construct READ message
       //has length of 8 chars + length of value
-      _sndLen = 8 + _DP->length;
+      _sndLen = 8 + _DP.length;
       _sndBuffer[0] = 0x41;
-      _sndBuffer[1] = 5 + _DP->length;
+      _sndBuffer[1] = 5 + _DP.length;
       _sndBuffer[2] = 0x00;
       _sndBuffer[3] = 0x02;
-      _sndBuffer[4] = (_DP->address >> 8) & 0xFF;
-      _sndBuffer[5] = _DP->address & 0xFF;
-      _sndBuffer[6] = _DP->length;
+      _sndBuffer[4] = (_DP.address >> 8) & 0xFF;
+      _sndBuffer[5] = _DP.address & 0xFF;
+      _sndBuffer[6] = _DP.length;
       //add value to message
-      for(uint8_t i = 0; i < _DP->length; i++){
+      for(uint8_t i = 0; i < _DP.length; i++){
         _sndBuffer[6 + i] = (value >> (8 * i)) & 0xFF;
       }
       _sndBuffer[7 + _sndLen] = calcChecksum(_sndBuffer, _sndLen);
@@ -281,6 +301,7 @@ void VitoWifi::sendDP(Datapoint* DP, uint32_t value){
       //setup properties for next state in communicationHandler
       _sendMessage = true;
       _communicationState = SEND;
+      getLogger().println(F("VitoWifi: new sendDP command requested."));
       break;
   }
 }
@@ -299,7 +320,7 @@ float VitoWifi::getValue(){
 
 
 float VitoWifi::transform(int32_t value){
-  switch(_DP->transformation){
+  switch(_DP.transformation){
     case TEMP:    //temperature
       return (value / 10.0);
     case H:       //hours

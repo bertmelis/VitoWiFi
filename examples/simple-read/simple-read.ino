@@ -14,7 +14,7 @@ You can specify another printer like Serial1 or use a telnet server to see the d
 const char* ssid     = "xxxx";
 const char* password = "xxxx";
 
-//new Optilink instance using Serial
+
 VitoWifi myVitoWifi;
 
 uint32_t lastMillis = 0;
@@ -23,7 +23,7 @@ bool getValues = false;
 //Use struct to hold Viessmann datapoints
 //name - RW - address - length - type
 //char[15+1] - READ/WRITE - uint16_t - uint8_t - type
-Datapoint DP = { "OutsideTemp", READ, 0x5525, 16, TEMP};
+const Datapoint DP = { "OutsideTemp", READ, 0x5525, 16, TEMP};
 
 
 void setup(){
@@ -49,8 +49,7 @@ void loop(){
 
   //if flag is set, get values
   if(getValues){
-    //pass Datapoint by reference
-    myVitoWifi.sendDP(&DP);
+    myVitoWifi.sendDP(DP);
     getValues = false;
   }
 
@@ -61,5 +60,6 @@ void loop(){
       myVitoWifi.getLogger().print("Value: ");
       myVitoWifi.getLogger().println(myVitoWifi.getValue());
       myVitoWifi.getLogger().println();
+      getValues = true;
   }
 }
