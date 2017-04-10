@@ -5,7 +5,8 @@ Arduino Library for ESP8266 to communicate with Viessmann boilers using a (DIY) 
 
 Based on the fantastic work on http://openv.wikispaces.com. Check out this site for a simple hardware implementations
 
-**WARNING: This code compiles but is largely untested!**
+**WARNING: This code compiles and works**
+**Reliability has to improve to be useable however**
 
 **This library is asynchronous**
 This means that the use of blocking code is not supported. On the upside, this library itself is non blocking.
@@ -19,8 +20,10 @@ Since we're talking serial @4800 baud, we would be wasting precious processing t
 
 
 ## TO DO
-- test and debug
+- improve reliability
 - add transformation functions for returned values
+- communication is really slow. After initializing, it is quite fast however.
+Maybe I could reset the connection after every TX/RX.
 
 
 ## HISTORY
