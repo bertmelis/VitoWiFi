@@ -87,6 +87,7 @@ void loop(){
         Index++;
         sendNewDP = true;
     }
+    if(Index > numberOfDPs){
       //reset when array has completely been handled
       doLoop = false;
     }
