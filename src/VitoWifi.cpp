@@ -38,8 +38,8 @@ void VitoWifi::begin(HardwareSerial& serial){
 void VitoWifi::begin(HardwareSerial* serial){
 	//Start serial to Viessmann @4800/8E2
 	_serial = serial;
-  _serial->begin(4800, SERIAL_8E2);
-  getLogger().println(F("VitoWifi: Setup done."));
+	_serial->begin(4800, SERIAL_8E2);
+	getLogger().println(F("VitoWifi: Setup done."));
 }
 
 
@@ -307,7 +307,7 @@ void VitoWifi::sendDP(const Datapoint& DP, uint32_t value){
 }
 
 
-CommunicationState VitoWifi::getStatus(){
+CommunicationState VitoWifi::getStatus() const {
   return _communicationState;
 }
 

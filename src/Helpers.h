@@ -1,25 +1,28 @@
 #pragma once
 #include <Arduino.h>
 
-enum DPType {
+enum DPType: bool {
   READ,
   WRITE
 };
 
-enum ConnectionState {
+
+enum ConnectionState: uint8_t {
   RESET,
   INIT,
   CONNECTED
 };
 
-enum CommunicationState {
+
+enum CommunicationState: uint8_t {
   IDLE,
   SEND,
   RECEIVE,
   RETURN
 };
 
-enum Transformation {
+
+enum Transformation: uint8_t {
   TEMP,   //temperatures
   H,      //hours
   C,      //counter
@@ -35,6 +38,7 @@ enum Transformation {
   NONE    //no transformation
 };
 
+
 //DataPoint = FriendlyName - R/W - VS-Address - Length
 struct Datapoint {
   char name[15+1];
@@ -43,6 +47,19 @@ struct Datapoint {
   uint8_t length; //length of read or written value in bytes
   Transformation transformation;
 };
+
+
+//read from PROGMEM
+template <typename T> void PROGMEM_readAnything (const T * sce, T& dest){
+  memcpy_P (&dest, sce, sizeof (T));
+}
+template <typename T> T PROGMEM_getAnything (const T * sce){
+  static T temp;
+  memcpy_P (&temp, sce, sizeof (T));
+  return temp;
+}
+// number of items in an array
+template< typename T, size_t N > size_t ArraySize (T (&) [N]){ return N; }
 
 
 /*

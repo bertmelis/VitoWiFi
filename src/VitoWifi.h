@@ -43,7 +43,7 @@ and many others
 
 #include <Arduino.h>
 #include "Logger.h"
-#include "Typedefs.h"
+#include "Helpers.h"
 
 class VitoWifi{
   public:
@@ -55,7 +55,7 @@ class VitoWifi{
 
     void sendDP(const Datapoint& DP);
     void sendDP(const Datapoint& DP, uint32_t value);
-    CommunicationState getStatus();
+    CommunicationState getStatus() const;
     float getValue();
 
     void setLoggingPrinter(Print* printer);

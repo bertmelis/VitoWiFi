@@ -21,12 +21,15 @@ VitoWifi myVitoWifi;
 uint32_t lastMillis = 0;
 bool doLoop = false;
 bool sendNewDP = true;
+uint8_t currentDPIndex = 0;
+Datapoint currentDP;
 
 
 //Use struct to hold Viessmann datapoints
-//name - RW - address - length - type
+//name - RW - address - length - returntype
 //char[15+1] - READ/WRITE - uint16_t - uint8_t - type
-const Datapoint DP[] = {
+//const Datapoint DP[] = {
+const PROGMEM Datapoint DP[] = {
   "toutside", READ, 0x5525, 2, TEMP,
   "tdhw", READ, 0x0812, 2, TEMP,
   "tdhwsolar", READ, 0x6566, 2, TEMP,
@@ -35,10 +38,8 @@ const Datapoint DP[] = {
   "tboiler", READ, 0x0810, 2, TEMP,
   "tfluegas", READ, 0x5642, 2, TEMP
 };
-
-
-uint8_t numberOfDPs = sizeof(DP) / sizeof(DP[0]);
-uint8_t currentDP = 0;
+//const uint8_t numberOfDPs = sizeof(DP) / sizeof(DP[0]);
+const uint8_t numberOfDPs = ArraySize(DP);
 
 
 void setup(){
@@ -65,13 +66,15 @@ void loop(){
     lastMillis = millis();
     doLoop = true;
     sendNewDP = true;
-    currentDP = 0;
+    currentDPIndex = 0;
   }
 
   if(doLoop){
     //if flag is set, loop through DPs
     if(sendNewDP){
-      myVitoWifi.sendDP(DP[currentDP]);
+      //currentDP = DP[currentDPIndex];
+      PROGMEM_readAnything(&DP[currentDPIndex], currentDP);
+      myVitoWifi.sendDP(currentDP);
       sendNewDP = false;
     }
 
@@ -79,17 +82,18 @@ void loop(){
     if( myVitoWifi.getStatus() == RETURN ){
         //Display value and move to next DP
         myVitoWifi.getLogger().print("Name: ");
-        myVitoWifi.getLogger().println(DP[currentDP].name);
+        myVitoWifi.getLogger().println(currentDP.name);
         myVitoWifi.getLogger().print("Value: ");
         myVitoWifi.getLogger().println(myVitoWifi.getValue());
         myVitoWifi.getLogger().println();
-        currentDP++;
+        currentDPIndex++;
         sendNewDP = true;
     }
 
     //stop sending new DPs when all DPs are sent.
-    if(currentDP >= numberOfDPs) doLoop = false;
+    if(currentDPIndex >= numberOfDPs) doLoop = false;
 
   }
 
 }//end loop()
+
