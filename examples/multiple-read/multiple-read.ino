@@ -21,7 +21,7 @@ VitoWifi myVitoWifi;
 uint32_t lastMillis = 0;
 bool doLoop = false;
 bool sendNewDP = true;
-uint8_t currentDPIndex = 0;
+uint8_t Index = 0;
 Datapoint currentDP;
 
 
@@ -61,23 +61,21 @@ void loop(){
   //put loop() function inside main loop
   myVitoWifi.loop();
 
-  //get loop through DPs every interval
   if(millis() - lastMillis >= interval * 1000UL){
+    //loop through DPs every interval
     lastMillis = millis();
     doLoop = true;
-    sendNewDP = true;
-    currentDPIndex = 0;
+    Index = 0;
   }
 
   if(doLoop){
-    //if flag is set, loop through DPs
+    //Loop when flag is raised
     if(sendNewDP){
-      //currentDP = DP[currentDPIndex];
-      PROGMEM_readAnything(&DP[currentDPIndex], currentDP);
+      //handle when previous has been handled
+      PROGMEM_readAnything(&DP[Index], currentDP);
       myVitoWifi.sendDP(currentDP);
       sendNewDP = false;
     }
-
     //when value is available, display
     if( myVitoWifi.getStatus() == RETURN ){
         //Display value and move to next DP
@@ -86,14 +84,11 @@ void loop(){
         myVitoWifi.getLogger().print("Value: ");
         myVitoWifi.getLogger().println(myVitoWifi.getValue());
         myVitoWifi.getLogger().println();
-        currentDPIndex++;
+        Index++;
         sendNewDP = true;
     }
-
-    //stop sending new DPs when all DPs are sent.
-    if(currentDPIndex >= numberOfDPs) doLoop = false;
-
+      //reset when array has completely been handled
+      doLoop = false;
+    }
   }
-
 }//end loop()
-

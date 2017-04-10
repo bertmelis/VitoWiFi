@@ -45,6 +45,7 @@ void VitoWifi::begin(HardwareSerial* serial){
 
 //Connection handler, is called in loop()
 void VitoWifi::connectionHandler(){
+  uint8_t tmpBuffer[3] = {0};
   switch(_connectionState){
     case RESET: //reset connection: keep sending 0x04/EOT to reset optolink
       if(_debugMessage){
@@ -53,8 +54,8 @@ void VitoWifi::connectionHandler(){
       }
       if(_serial->available()){
         //use peek so connection can be made immediately in next state
-        _rcvBuffer[0] = _serial->peek();
-        if(_rcvBuffer[0] == 0x05){
+        tmpBuffer[0] = _serial->peek();
+        if(tmpBuffer[0] == 0x05){
           //received 0x05/enquiry: optolink has been reset
           _connectionState = INIT;
           _timeoutTimer = millis();
@@ -65,8 +66,8 @@ void VitoWifi::connectionHandler(){
       }
       if(millis() - _lastMillis > 500){
         //send reset request 0x04/EOT every 500msec
-        _sndBuffer[0] = 0x04;
-        _serial->write(_sndBuffer, 1);
+        tmpBuffer[0] = 0x04;
+        _serial->write(tmpBuffer, 1);
         _lastMillis = millis();
         getLogger().print(F("."));
       }
@@ -78,19 +79,19 @@ void VitoWifi::connectionHandler(){
         _debugMessage = false;
       }
       if(_serial->available()){
-        _rcvBuffer[0] = _serial->read();
-        if(_rcvBuffer[0] == 0x05){
+        tmpBuffer[0] = _serial->read();
+        if(tmpBuffer[0] == 0x05){
           //0x05/enquiry received, request to connect hence sending initiator
-          _sndBuffer[0] = 0x16;
-          _sndBuffer[1] = 0x00;
-          _sndBuffer[2] = 0x00;
-          _serial->write(_sndBuffer, 3);
+          tmpBuffer[0] = 0x16;
+          tmpBuffer[1] = 0x00;
+          tmpBuffer[2] = 0x00;
+          _serial->write(tmpBuffer, 3);
           _timeoutTimer = millis();
           getLogger().print(F("."));
         }
-        if(_rcvBuffer[0] == 0x06){
+        if(tmpBuffer[0] == 0x06){
           _connectionState = CONNECTED;
-          _communicationState = IDLE;
+          //_communicationState = IDLE;
           _timeoutTimer = millis();
           _debugMessage = true;
           _errorCount = 0;
@@ -106,6 +107,11 @@ void VitoWifi::connectionHandler(){
         _connectionState = RESET;
         getLogger().println(F("VitoWifi: Connection has been reset: timeout\n"));
       }
+      if(_errorCount >= 5){
+        _connectionState = RESET;
+        getLogger().println(F("VitoWifi: Connection has been reset: too many errors.\n"));
+        return;
+      }
       break;
   }
 }
@@ -114,11 +120,6 @@ void VitoWifi::connectionHandler(){
 //Communication handler, is called in loop()
 void VitoWifi::communicationHandler(){
   if(_connectionState != CONNECTED) return;
-  if(_errorCount >= 5){
-    _connectionState = RESET;
-    getLogger().println(F("VitoWifi: Connection has been reset: too many errors.\n"));
-    return;
-  }
   switch(_communicationState){
     case IDLE:
       //stay in this state untill sendDP has been called.
@@ -140,6 +141,7 @@ void VitoWifi::communicationHandler(){
         _timeoutTimer = millis();
         _lastMillis = _timeoutTimer;
         _sendMessage = false;
+        _rcvBufferLen = 0;
         getLogger().print(F("VitoWifi: Sending command for "));
         getLogger().println(_DP.name);;
         getLogger().print(F("          Data: "));
@@ -164,7 +166,7 @@ void VitoWifi::communicationHandler(){
           getLogger().println(F("VitoWifi: Command sent unsuccesfully, trying again"));
         }
       }
-      if(millis() - _timeoutTimer > 10000){
+      if(millis() - _timeoutTimer > 20000){
         //timeout
         _sendMessage = true;
         _errorCount++;
@@ -181,15 +183,21 @@ void VitoWifi::communicationHandler(){
       }
       if(_rcvBufferLen == _rcvLen){
         //message complete, check/decode
+        printHex83(_rcvBuffer, _rcvLen);
+        getLogger().println();
+        getLogger().print(F("Message receive complete, checking..."));
         bool flagError = false;
-        if(_rcvBuffer[1] != (_rcvLen - 4)) flagError = true; //length wrong
-        if(_rcvBuffer[2] != 0x01) flagError = true; //should be type "response"
-        if(!checkChecksum(_rcvBuffer, _rcvLen)) flagError = true; //check checksum
+        if(_rcvBuffer[1] != (_rcvLen - 3)) flagError = true; //length wrong
+        if(_rcvBuffer[2] != 0x01 && _rcvBuffer[2] != 0x03) flagError = true; //should be type "response"
+        if(!checkChecksum(_rcvBuffer, _rcvLen)) flagError = true; //error checksum
         if(flagError){
           _errorCount++;
           _sendMessage = true;
           _communicationState = SEND;
-          getLogger().println(F("Message received unsuccesfully, trying again"));
+          getLogger().println(F("error. Trying again."));
+          getLogger().print(F("          Data: "));
+          printHex83(_rcvBuffer, _rcvBufferLen);
+          getLogger().println();
           break;
         }
         if(_rcvBuffer[3] == 0x01){
@@ -215,7 +223,7 @@ void VitoWifi::communicationHandler(){
             }
           }
           _communicationState = RETURN;
-          getLogger().println(F("Message received succesfully.\n"));
+          getLogger().println(F("succes!\n"));
         }
       break;
 
