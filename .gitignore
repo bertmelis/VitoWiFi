@@ -34,3 +34,4 @@ lib/*
 platformio.ini
 .pioenvs
 .piolibdeps
+.gitignore
