@@ -2,21 +2,21 @@
 # Datatypes (KEYWORD1)
 #######################################
 
-VitoWifi	     KEYWORD1
+VitoWifi	KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
 #######################################
 
-begin        KEYWORD2
-loop	     KEYWORD2
-sendDP       KEYWORD2
-getStatus    KEYWORD2
-getValue     KEYWORD2
+begin	KEYWORD2
+loop	KEYWORD2
+sendDP	KEYWORD2
+getStatus	KEYWORD2
+getValue	KEYWORD2
 
-setLoggingPrinter KEYWORD2
-getLogger    KEYWORD2
-enableLogger KEYWORD2
+setLoggingPrinter	KEYWORD2
+getLogger	KEYWORD2
+enableLogger	KEYWORD2
 
 
 #######################################
@@ -24,38 +24,38 @@ enableLogger KEYWORD2
 #######################################
 
 #Type
-Datapoint       LITERAL1
-ConnectionState LITERAL1
-CommunicationState LITERAL1
-DPType		LITERAL1
+Datapoint	LITERAL1
+ConnectionState	LITERAL1
+CommunicationState	LITERAL1
+DPType	LITERAL1
 Transformation	LITERAL1
 
 #DPType
-READ		LITERAL2
-WRITE		LITERAL2
+READ	LITERAL2
+WRITE	LITERAL2
 
 #Connection
-RESET           LITERAL2
-INIT            LITERAL2
-CONNECTED       LITERAL2
+RESET	LITERAL2
+INIT	LITERAL2
+CONNECTED	LITERAL2
 
 #CommunicationState
-IDLE            LITERAL2
-SEND            LITERAL2
-RECEIVE         LITERAL2
-RETURN          LITERAL2
+IDLE	LITERAL2
+SEND	LITERAL2
+RECEIVE	LITERAL2
+RETURN	LITERAL2
 
 #Transformation
-TEMP		LITERAL2
-H		LITERAL2
-C		LITERAL2
-E_OM1		LITERAL2
-E_OM2		LITERAL2
-E_S		LITERAL2
-E_SF		LITERAL2
-E_M		LITERAL2
-E_PM		LITERAL2
-E_FW		LITERAL2
-TXT		LITERAL2
-E_SV		LITERAL2
-NONE    	LITERAL2
+TEMP	LITERAL2
+H	LITERAL2
+C	LITERAL2
+E_OM1	LITERAL2
+E_OM2	LITERAL2
+E_S	LITERAL2
+E_SF	LITERAL2
+E_M	LITERAL2
+E_PM	LITERAL2
+E_FW	LITERAL2
+TXT	LITERAL2
+E_SV	LITERAL2
+NONE	LITERAL2

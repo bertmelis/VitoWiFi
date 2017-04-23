@@ -2,6 +2,7 @@
 
 Attention! Since Serial (aka UART0) is used for communication with the Viessmann boiler,
 serial logging is disabled by default.
+Hence, this sketch generates no output.
 You can specify another printer like Serial1 or use a telnet server to see the debug messages.
 
 */
@@ -19,6 +20,7 @@ VitoWifi myVitoWifi;
 
 uint32_t lastMillis = 0;
 bool getValues = false;
+char value[8] = {0};
 
 //Use struct to hold Viessmann datapoints
 //name - RW - address - length - type
@@ -34,6 +36,9 @@ void setup(){
   }
   //Start Viessmann communication on Serial (aka UART0)
   myVitoWifi.begin(&Serial);
+
+  //myVitoWifi.setLoggingPrinter(&XXXX); //replace XXXX by your printer
+  //myVitoWifi.enableLogger(true);
 }
 
 
@@ -54,11 +59,13 @@ void loop(){
   }
 
   //when value is available, display
-  if( myVitoWifi.getStatus() == RETURN ){
+  if(myVitoWifi.available()){
+      //read value and put it in 'value'
+      myVitoWifi.read(value, sizeof(value));
       myVitoWifi.getLogger().print("Name: ");
       myVitoWifi.getLogger().println(DP.name);
       myVitoWifi.getLogger().print("Value: ");
-      myVitoWifi.getLogger().println(myVitoWifi.getValue());
+      myVitoWifi.getLogger().println(value);
       myVitoWifi.getLogger().println();
       getValues = true;
   }

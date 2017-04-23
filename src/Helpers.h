@@ -7,22 +7,7 @@ enum DPType: bool {
 };
 
 
-enum ConnectionState: uint8_t {
-  RESET,
-  INIT,
-  CONNECTED
-};
-
-
-enum CommunicationState: uint8_t {
-  IDLE,
-  SEND,
-  RECEIVE,
-  RETURN
-};
-
-
-enum Transformation: uint8_t {
+enum ValueType: uint8_t {
   TEMP,   //temperatures
   H,      //hours
   C,      //counter
@@ -42,10 +27,10 @@ enum Transformation: uint8_t {
 //DataPoint = FriendlyName - R/W - VS-Address - Length
 struct Datapoint {
   char name[15+1];
-  DPType RW;
+  DPType rw;
   uint16_t address; //0x5525
   uint8_t length; //length of read or written value in bytes
-  Transformation transformation;
+  ValueType type;
 };
 
 
@@ -58,6 +43,8 @@ template <typename T> T PROGMEM_getAnything (const T * sce){
   memcpy_P (&temp, sce, sizeof (T));
   return temp;
 }
+
+
 // number of items in an array
 template< typename T, size_t N > size_t ArraySize (T (&) [N]){ return N; }
 

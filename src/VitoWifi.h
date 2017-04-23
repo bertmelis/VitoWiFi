@@ -47,23 +47,26 @@ and many others
 
 class VitoWifi{
   public:
+    //setup and general methods
 	  VitoWifi();
 	  ~VitoWifi();
     void begin(HardwareSerial& serial);
 	  void begin(HardwareSerial* serial);
     void loop();
 
-    void sendDP(const Datapoint& DP);
-    void sendDP(const Datapoint& DP, uint32_t value);
-    CommunicationState getStatus() const;
-    float getValue();
+    //communication methods
+    void sendDP(const Datapoint& DP); //to read a value
+    void sendDP(const Datapoint& DP, uint32_t value); //to write a value
+    bool available() const; //check is action is completed eg. an answer is available
+    float read(); //read the answer and return as float
+    float read(char* buffer, uint8_t max_buffer_size = 8); //read the answer into your buffer
 
+    //debugging methods
     void setLoggingPrinter(Print* printer);
     Logger& getLogger();
     void enableLogger(bool enable);
 
   private:
-    //general methods and properties
     Logger _logger;
     HardwareSerial* _serial;
     uint8_t _sndBuffer[12];
@@ -71,27 +74,45 @@ class VitoWifi{
     uint8_t _rcvBuffer[12];
     uint8_t _rcvBufferLen;
     uint8_t _rcvLen;
+    uint8_t _valBuffer[4];
+    Datapoint _DP;
 
-    //connection methods and properties
-    void connectionHandler();
-    ConnectionState _connectionState;
+    enum VitoWifiState: uint8_t {
+      RESET,
+      INIT,
+      IDLE,
+      SYNC,
+      SEND,
+      RECEIVE,
+      RETURN
+    } _state;
+
+    union ReturnType{
+      int32_t byte4Value; //aal counters are 4 bytes
+      int16_t byte2Value; //all temperatures and floats are 2 bytes (factor 10)
+      int8_t byte1Value; //statusses and enums are 1 byte
+      ReturnType() {
+        this->byte4Value = 0;
+        }
+    } _returnValue;
     uint32_t _timeoutTimer;
     uint32_t _lastMillis;
     uint8_t _errorCount;
-
-    //communication methods and properties
-    void communicationHandler();
-    CommunicationState _communicationState;
     bool _sendMessage;
-    Datapoint _DP;
-    int32_t _value;
-    float transform(int32_t value);
+    bool _sendSync;
+    void _resetHandler();
+    void _initHandler();
+    void _idleHandler();
+    void _syncHandler();
+    void _sendHandler();
+    void _receiveHandler();
+    void _returnHandler();
 
-    //helper functions
     bool _debugMessage;
-    bool decodeMessage();
-    uint8_t calcChecksum(uint8_t* message, uint8_t lenght);
-    bool checkChecksum(uint8_t* message, uint8_t lenght);
-    void printHex83(uint8_t* data, uint8_t length);
-    void clearInputBuffer();
+    bool _decodeMessage();
+    uint8_t _calcChecksum(uint8_t* message, uint8_t lenght);
+    bool _checkChecksum(uint8_t* message, uint8_t lenght);
+    void _printHex83(uint8_t* data, uint8_t length);
+    void _clearInputBuffer();
+
 };

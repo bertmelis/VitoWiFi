@@ -2,6 +2,7 @@
 
 Attention! Since Serial (aka UART0) is used for communication with the Viessmann boiler,
 serial logging is disabled by default.
+Hence, this sketch generates no output.
 You can specify another printer like Serial1 or use a telnet server to see the debug messages.
 
 */
@@ -21,8 +22,9 @@ VitoWifi myVitoWifi;
 uint32_t lastMillis = 0;
 bool doLoop = false;
 bool sendNewDP = true;
-uint8_t Index = 0;
+uint8_t DPindex = 0;
 Datapoint currentDP;
+char value[8] = {0};
 
 
 //Use struct to hold Viessmann datapoints
@@ -53,6 +55,9 @@ void setup(){
   //Start Viessmann communication on Serial (aka UART0)
   myVitoWifi.begin(&Serial);
 
+  //myVitoWifi.setLoggingPrinter(&XXXX); //replace XXXX by your printer
+  //myVitoWifi.enableLogger(true);
+
 }
 
 
@@ -65,29 +70,30 @@ void loop(){
     //loop through DPs every interval
     lastMillis = millis();
     doLoop = true;
-    Index = 0;
+    DPindex = 0;
   }
 
   if(doLoop){
     //Loop when flag is raised
     if(sendNewDP){
       //handle when previous has been handled
-      PROGMEM_readAnything(&DP[Index], currentDP);
+      PROGMEM_readAnything(&DP[DPindex], currentDP);
       myVitoWifi.sendDP(currentDP);
       sendNewDP = false;
     }
     //when value is available, display
-    if( myVitoWifi.getStatus() == RETURN ){
+    if(myVitoWifi.available()){
         //Display value and move to next DP
+        myVitoWifi.read(value, sizeof(value));
         myVitoWifi.getLogger().print("Name: ");
         myVitoWifi.getLogger().println(currentDP.name);
         myVitoWifi.getLogger().print("Value: ");
-        myVitoWifi.getLogger().println(myVitoWifi.getValue());
+        myVitoWifi.getLogger().println(value);
         myVitoWifi.getLogger().println();
-        Index++;
+        DPindex++;
         sendNewDP = true;
     }
-    if(Index > numberOfDPs){
+    if(DPindex > numberOfDPs){
       //reset when array has completely been handled
       doLoop = false;
     }
