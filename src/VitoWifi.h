@@ -57,7 +57,7 @@ class VitoWifi{
     //communication methods
     void sendDP(const Datapoint& DP); //to read a value
     void sendDP(const Datapoint& DP, uint32_t value); //to write a value
-    bool available() const; //check is action is completed eg. an answer is available
+    bool available() const; //check if action is completed eg. an answer is available
     float read(); //read the answer and return as float
     float read(char* buffer, uint8_t max_buffer_size = 8); //read the answer into your buffer
 

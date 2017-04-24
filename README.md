@@ -18,6 +18,8 @@ Since we're talking serial @4800 baud, we would be wasting precious processing t
 - a (DIY) serial optocoupler to connect your ESP8266 to your Viessmann boiler
 - As this is an implementation of the P300 (aka VS2) protocol, your boiler must be compatible with this protocol.
 
+## Usage
+see [usage](https://github.com/bertmelis/VitoWifi/blob/master/USAGE.md) for more details or explore the examples.
 
 ## TO DO
 - improve reliability
