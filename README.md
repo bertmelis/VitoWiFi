@@ -6,7 +6,7 @@ Arduino Library for ESP8266 to communicate with Viessmann boilers using a (DIY) 
 Based on the fantastic work on http://openv.wikispaces.com. Check out this site for a simple hardware implementations
 
 **WARNING: This code compiles and works**
-**Reliability has to improve to be useable however**
+**However, this is only a testing release**
 
 **This library is asynchronous**
 This means that the use of blocking code is not supported. On the upside, this library itself is non blocking.
@@ -19,13 +19,14 @@ Since we're talking serial @4800 baud, we would be wasting precious processing t
 - As this is an implementation of the P300 (aka VS2) protocol, your boiler must be compatible with this protocol.
 
 ## Usage
-see [usage](https://github.com/bertmelis/VitoWifi/blob/master/USAGE.md) for more details or explore the examples.
+See [usage](https://github.com/bertmelis/VitoWifi/blob/master/USAGE.md) for more details or explore the examples.
+A working example using Homie and my [WifiPrinter](https://github.com/bertmelis/WifiPrinter) can be found on my [Github page](https://github.com/bertmelis/homie-boiler).
 
 ## TO DO
 - improve reliability
 - add transformation functions for returned values
-- communication is really slow. After initializing, it is quite fast however.
-Maybe I could reset the connection after every TX/RX.
+- ~~communication is really slow. After initializing, it is quite fast however.
+Maybe I could reset the connection after every TX/RX.~~ Done!
 
 
 ## HISTORY

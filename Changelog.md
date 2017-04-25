@@ -1,5 +1,10 @@
 # Changelog
 
+## 2017-04-25
+- FSM reworked (ACK-states added)
+- Temp RX-buffers removed
+- Returntypes in progress: TEMP and E_S working
+
 ## 2017-04-23
 - reworked state machine
 - renamed returntype in datapoint struct

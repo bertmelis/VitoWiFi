@@ -79,18 +79,22 @@ class VitoWifi{
 
     enum VitoWifiState: uint8_t {
       RESET,
+      RESET_ACK,
       INIT,
+      INIT_ACK,
       IDLE,
       SYNC,
+      SYNC_ACK,
       SEND,
+      SEND_ACK,
       RECEIVE,
       RETURN
     } _state;
 
     union ReturnType{
-      int32_t byte4Value; //aal counters are 4 bytes
-      int16_t byte2Value; //all temperatures and floats are 2 bytes (factor 10)
-      int8_t byte1Value; //statusses and enums are 1 byte
+      int32_t byte4Value;
+      int16_t byte2Value;
+      int8_t byte1Value;
       ReturnType() {
         this->byte4Value = 0;
         }
@@ -99,12 +103,15 @@ class VitoWifi{
     uint32_t _lastMillis;
     uint8_t _errorCount;
     bool _sendMessage;
-    bool _sendSync;
     void _resetHandler();
+    void _resetAckHandler();
     void _initHandler();
+    void _initAckHandler();
     void _idleHandler();
     void _syncHandler();
+    void _syncAckHandler();
     void _sendHandler();
+    void _sendAckHandler();
     void _receiveHandler();
     void _returnHandler();
 

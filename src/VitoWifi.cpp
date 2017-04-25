@@ -13,7 +13,6 @@ VitoWifi::VitoWifi():
   _lastMillis(0),
   _errorCount(0),
   _sendMessage(false),
-  _sendSync(true),
   _debugMessage(true),
   _state(RESET)
   //_returnValue.byte4Value = 0 as initialized in the union
@@ -26,12 +25,30 @@ VitoWifi::~VitoWifi(){
 
 //Loop handler, state machine
 void VitoWifi::loop(){
+  if(millis() - _timeoutTimer > 6 * 60 * 1000UL){
+    //timeout in 6 minutes, reset
+    _state = RESET;
+    getLogger().println(F("VitoWifi: Connection reset: timeout"));
+    return;
+  }
+  if(_errorCount >= 5){
+    //5 errors, reset
+    _state = RESET;
+    getLogger().println(F("VitoWifi: Connection reset: too many errors."));
+    return;
+  }
   switch(_state){
     case RESET:
       _resetHandler();
       break;
+    case RESET_ACK:
+      _resetAckHandler();
+      break;
     case INIT:
       _initHandler();
+      break;
+    case INIT_ACK:
+      _initAckHandler();
       break;
     case IDLE:
       _idleHandler();
@@ -39,8 +56,14 @@ void VitoWifi::loop(){
     case SYNC:
       _syncHandler();
       break;
+    case SYNC_ACK:
+      _syncAckHandler();
+      break;
     case SEND:
       _sendHandler();
+      break;
+    case SEND_ACK:
+      _sendAckHandler();
       break;
     case RECEIVE:
       _receiveHandler();
@@ -69,46 +92,54 @@ void VitoWifi::_resetHandler(){
     getLogger().print(F("VitoWifi: Resetting..."));
     _debugMessage = false;
   }
+  const uint8_t buff[] = {0x04};
+  _serial->write(buff, sizeof(buff));
+  _lastMillis = millis();
+  _state = RESET_ACK;
+  return;
+}
+void VitoWifi::_resetAckHandler(){
   if(_serial->available()){
-    //use peek so connection can be made immediately in next state
-    _rcvBuffer[0] = _serial->peek();
-    if(_rcvBuffer[0] == 0x05){
+    if(_serial->peek() == 0x05){ //use peek so connection can be made immediately in next state
       //received 0x05/enquiry: optolink has been reset
       _state = INIT;
       _timeoutTimer = millis();
       _debugMessage = true;
-      _rcvBuffer[0] = 0;
       getLogger().println(F("done"));
     }
-    else
+    else{
       _clearInputBuffer();
+    }
   }
-  if(millis() - _lastMillis > 500){
-    //send reset request 0x04/EOT every 500msec
-    _sndBuffer[0] = 0x04;
-    _serial->write(_sndBuffer, 1);
-    _lastMillis = millis();
+  else{
+    if(millis() - _lastMillis > 500){
+      _state = RESET;
+    }
   }
-  return;
 }
 
 
+//send initiator to Vitotronic to establish connection
 void VitoWifi::_initHandler(){
   if(_debugMessage){
     getLogger().print(F("VitoWifi: Syncing..."));
     _debugMessage = false;
   }
   if(_serial->available()){
-    _rcvBuffer[0] = _serial->read();
-    if(_rcvBuffer[0] == 0x05){
-      //0x05/enquiry received, request to connect hence sending initiator
-      _sndBuffer[0] = 0x16;
-      _sndBuffer[1] = 0x00;
-      _sndBuffer[2] = 0x00;
-      _serial->write(_sndBuffer, 3);
-      _timeoutTimer = millis();
+    if(_serial->read() == 0x05){
+      //0x05/ENQ received, sending initiator
+      const uint8_t buff[] = {0x16, 0x00, 0x00};
+      _serial->write(buff, sizeof(buff));
+      _lastMillis = millis();
+      _timeoutTimer = _lastMillis;
+      _state = INIT_ACK;
     }
-    if(_rcvBuffer[0] == 0x06){
+  }
+  return;
+}
+void VitoWifi::_initAckHandler(){
+  if(_serial->available()){
+    if(_serial->read() == 0x06){
       //ACK received, moving to next state
       _state = IDLE;
       _timeoutTimer = millis();
@@ -117,99 +148,96 @@ void VitoWifi::_initHandler(){
       getLogger().println(F("done"));
       getLogger().println(F("          Connection established"));
     }
+    else{
+      //return to previous state
+      _clearInputBuffer();
+      _state = INIT;
+    }
   }
   return;
 }
 
 
+//idle state, waiting for user action
 void VitoWifi::_idleHandler(){
-  if(millis() - _lastMillis > 2* 60 * 1000UL){
+  if(millis() - _lastMillis > 2 * 60 * 1000UL){
     //send SYNC every 2 minutes to keep communication alive
     _state = SYNC;
-    _sendSync = true;
-  }
-  if(millis() - _timeoutTimer > 6 * 60 * 1000UL){
-    //timeout in 6 minutes, reset
-    _state = RESET;
-    getLogger().println(F("VitoWifi: Connection reset: timeout"));
-  }
-  if(_errorCount >= 5){
-    //5 errors, reset
-    _state = RESET;
-    getLogger().println(F("VitoWifi: Connection reset: too many errors."));
-    return;
   }
   _clearInputBuffer(); //keep input clean
+  return;
 }
 
+
+//send SYNC (= initiator)
 void VitoWifi::_syncHandler(){
   if(_debugMessage){
     getLogger().print(F("VitoWifi: Syncing..."));
     _debugMessage = false;
   }
-  if(_sendSync){
-    uint8_t buff[3] = {0x16, 0x00, 0x00};
-    _serial->write(buff, 3);
-    _sendSync = false;
-    _lastMillis = millis();
-  }
-  if(_serial->available()) _rcvBuffer[0] = _serial->read();
-  if(_rcvBuffer[0] == 0x06){
-    _timeoutTimer = millis();
-    _debugMessage = true;
-    _errorCount = 0;
-    _rcvBuffer[0] = 0;
-    getLogger().println(F("done"));
-    if(_sendMessage) _state = SEND;
-    else _state = IDLE;
-  }
-  else{
-    _errorCount++;
-    _sendSync = true;
+  const uint8_t buff[] = {0x16, 0x00, 0x00};
+  _serial->write(buff, sizeof(buff));
+  _state = SYNC_ACK;
+  _lastMillis = millis();
+  return;
+}
+void VitoWifi::_syncAckHandler(){
+  if(_serial->available()){
+    if(_serial->read() == 0x06){
+      _timeoutTimer = millis();
+      _debugMessage = true;
+      _errorCount = 0;
+      getLogger().println(F("done"));
+      if(_sendMessage) _state = SEND;
+      else _state = IDLE;
+    }
+    else{
+      _errorCount++;
+    }
   }
   return;
 }
 
 
 void VitoWifi::_sendHandler(){
-  //stay in this state untill message has been acknowledged
-  //but send message only once every try
   //message payload is set in sendDP/writeDP method.
+  //send Message and move to next state
   if(_sendMessage){
     _serial->write(_sndBuffer, _sndLen);
-    _timeoutTimer = millis();
-    _lastMillis = _timeoutTimer;
+    _lastMillis = millis();
     _sendMessage = false;
-    _rcvBufferLen = 0;
+    _state = SEND_ACK;
     getLogger().print(F("VitoWifi: Sending command for "));
     getLogger().println(_DP.name);
     getLogger().print(F("          Data: 0x"));
     _printHex83(_sndBuffer, _sndLen);
     getLogger().println();
   }
+  return;
+}
+void VitoWifi::_sendAckHandler(){
   if(_serial->available()){
-    _rcvBuffer[0] = _serial->read();
-    if(_rcvBuffer[0] == 0x06){
+    uint8_t buff = _serial->read();
+    _timeoutTimer = millis();
+    if(buff == 0x06){
       //transmit succesful, moving to next state
-      _timeoutTimer = millis();
       _state = RECEIVE;
-      _rcvBufferLen = 0;
-      _clearInputBuffer();
       getLogger().println(F("          Succes"));
     }
-    if(_rcvBuffer[0] == 0x15){
-      //transmit negatively acknowledged
+    else if(buff == 0x15){
+      //transmit negatively acknowledged, return to SYNC
       _timeoutTimer = millis();
       _sendMessage = true;
       _errorCount++;
-      _rcvBuffer[0] = 0;
+      _state = SYNC;
       _clearInputBuffer();
       getLogger().println(F("          CRC error, trying again"));
     }
   }
-  if(millis() - _timeoutTimer > 1000){
+  else if(millis() - _timeoutTimer > 1000){
     //timeout waiting for ACK 1sec
     _sendMessage = true;
+    _state = SYNC;
     _errorCount++;
     _clearInputBuffer();
     getLogger().println(F("          Timeout error, trying again"));
@@ -222,7 +250,7 @@ void VitoWifi::_receiveHandler(){
   static bool flagError = false;
   if(_serial->available() > 0){
     _rcvBuffer[_rcvBufferLen] = _serial->read();
-    if(_rcvBuffer[0] != 0x41) return;
+    if(_rcvBuffer[0] != 0x41) return; //find out why this is needed! I'd expect the rx-buffer to be empty.
     _rcvBufferLen++;
     _timeoutTimer = millis();
   }
@@ -264,19 +292,15 @@ void VitoWifi::_receiveHandler(){
       switch(_rcvLen - 8){
         case 1:
           //value is 1 bit or 1 byte
-          _returnValue.byte1Value = (_rcvBuffer[7]) ? 1 : 0;
+          _returnValue.byte1Value = _rcvBuffer[7];
           break;
         case 2:
           //value is 2 bytes
-          _returnValue.byte2Value = _rcvBuffer[8];
-          _returnValue.byte2Value = _returnValue.byte2Value << 8 | _rcvBuffer[9];
+          _returnValue.byte2Value = (_rcvBuffer[8] << 8) | _rcvBuffer[7];
           break;
         case 4:
           //value is 4 bytes
-          _returnValue.byte4Value = _rcvBuffer[8];
-          _returnValue.byte4Value = _returnValue.byte4Value << 8 | _rcvBuffer[9];
-          _returnValue.byte4Value = _returnValue.byte4Value << 8 | _rcvBuffer[10];
-          _returnValue.byte4Value = _returnValue.byte4Value << 8 | _rcvBuffer[11];
+          _returnValue.byte4Value = (_rcvBuffer[10] << 24) | (_rcvBuffer[9] << 16) | (_rcvBuffer[8] << 8) | _rcvBuffer[7];
           break;
       }
       _state = RETURN;
@@ -315,8 +339,8 @@ void VitoWifi::sendDP(const Datapoint& DP){
       _rcvLen = _sndLen + _DP.length;
 
       //setup properties for next state in communicationHandler
-      _sendSync = true;
       _sendMessage = true;
+      _rcvBufferLen = 0;
       _state = SYNC;
       break;
 
@@ -328,8 +352,6 @@ void VitoWifi::sendDP(const Datapoint& DP){
       break;
   }
 }
-
-
 //overload method for write request
 //construct message from datapoint and move state to SEND
 void VitoWifi::sendDP(const Datapoint& DP, uint32_t value){
@@ -361,8 +383,8 @@ void VitoWifi::sendDP(const Datapoint& DP, uint32_t value){
       _sndBuffer[7 + _sndLen] = _calcChecksum(_sndBuffer, _sndLen);
       //setup variables for next state
       _rcvLen = 8;
-      _sendSync = true;
       _sendMessage = true;
+      _rcvBufferLen = 0;
       _state = SYNC;
       break;
   }
@@ -377,13 +399,13 @@ bool VitoWifi::available() const {
 //return value and reset comunication to IDLE
 float VitoWifi::read(){
   if(_state != RETURN)
-    getLogger().println(F("VitoWifi: Warning, read before processing. Undefined output."));
+    getLogger().println(F("VitoWifi: Warning, read value before it is available."));
   _state = IDLE;
   switch(_DP.type){
     case TEMP:    //temperature
-      return (float)(_returnValue.byte2Value / 10.0);
+      return (float)(_returnValue.byte2Value) / 10.0;
     case H:       //hours
-      return (float)_returnValue.byte4Value / 3600.0;
+      return (float)(_returnValue.byte4Value) / 3600.0;
       break;
     case C:      //counter
       return (float)_returnValue.byte4Value;
@@ -428,7 +450,8 @@ float VitoWifi::read(char* buffer, uint8_t max_buffer_size){
     abort();
   }
   float readValue = read();
-  dtostrf(readValue, 3, 1, buffer); //copy float with minimum width of 3 and 1 number after decimal to buffer
+  if(_DP.type == TEMP) dtostrf(readValue, 3, 1, buffer); //copy float with minimum width of 3 and 1 number after decimal to buffer
+  else dtostrf(readValue, 1, 0, buffer); //no decimals on these types
   return readValue;
 }
 
@@ -480,7 +503,7 @@ bool VitoWifi::_decodeMessage(){
 void VitoWifi::_clearInputBuffer(){
   //_logger->print(F("Received \"0x"));
   uint8_t byte = 0;
-  if(_serial->available() > 0){
+  while(_serial->available() > 0){
     byte |= _serial->read();
     //_printHex83(&byte, 1);
   }
