@@ -8,9 +8,9 @@ Based on the fantastic work on http://openv.wikispaces.com. Check out this site 
 **WARNING: This code compiles and works**
 **However, this is only a testing release**
 
-**This library is asynchronous**
-This means that the use of blocking code is not supported. On the upside, this library itself is non blocking.
-Since we're talking serial @4800 baud, we would be wasting precious processing time while reading and writing to the optolink. Furthermore this library is useable in other async frameworks such as the marvellous <a href="https://github.com/marvinroger/homie-esp8266">Homie for ESP8266</a> framework.
+**This library is non-blocking**
+This also means that the use of blocking code is not supported.
+Since we're talking serial @4800 baud, we would be wasting precious processing time while reading and writing to the optolink. Furthermore this library is useable in async frameworks such as the marvellous <a href="https://github.com/marvinroger/homie-esp8266">Homie for ESP8266</a> framework.
 
 
 ## Prerequisites
