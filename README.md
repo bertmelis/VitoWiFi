@@ -20,9 +20,9 @@ Since we're talking serial @4800 baud, we would be wasting precious processing t
 - As this is an implementation of the P300 (aka VS2) protocol, your boiler must be compatible with this protocol.
 
 ## Usage
-~~See [usage](https://github.com/bertmelis/VitoWifi/blob/master/USAGE.md) for more details or explore the examples.~~
-~~A working example using Homie and my [WifiPrinter](https://github.com/bertmelis/WifiPrinter) can be found on my [Github page](https://github.com/bertmelis/homie-boiler).~~
-Look into the examples to explore the functionality. Documentation is on it's way!
+~~See [usage](https://github.com/bertmelis/VitoWifi/blob/master/USAGE.md) for more details or explore the examples.~~  
+A working example using Homie and my [WifiPrinter](https://github.com/bertmelis/WifiPrinter) can be found on my [Github page](https://github.com/bertmelis/homie-boiler).  
+In the meantime: look into the examples to explore the functionality, documentation is on it's way!
 
 ## TO DO
 - improve/implement error handling
