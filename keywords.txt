@@ -8,54 +8,36 @@ VitoWifi	KEYWORD1
 # Methods and Functions (KEYWORD2)
 #######################################
 
-begin	KEYWORD2
+#VitoWifi
+setup	KEYWORD2
 loop	KEYWORD2
-sendDP	KEYWORD2
-getStatus	KEYWORD2
-getValue	KEYWORD2
-
-setLoggingPrinter	KEYWORD2
-getLogger	KEYWORD2
+setGlobalCallback	KEYWORD2
+addDatapoint	KEYWORD2
+getDatapoint	KEYWORD2
+readAll	KEYWORD2
+readGroup	KEYWORD2
+readDatapoint	KEYWORD2
+writeDatapoint	KEYWORD2
+enableLed	KEYWORD2
+setLedPin	KEYWORD2
 enableLogger	KEYWORD2
+disableLogger	KEYWORD2
+setLoggingPrinter	KEYWORD2
+#getLogger	KEYWORD2
 
+
+#Datapoint public methods
+setWriteable	KEYWORD2
+setCallback	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
 #######################################
 
-#Type
-Datapoint	LITERAL1
-ConnectionState	LITERAL1
-CommunicationState	LITERAL1
-DPType	LITERAL1
-Transformation	LITERAL1
-
-#DPType
-READ	LITERAL2
-WRITE	LITERAL2
-
-#Connection
-RESET	LITERAL2
-INIT	LITERAL2
-CONNECTED	LITERAL2
-
-#CommunicationState
-IDLE	LITERAL2
-SEND	LITERAL2
-RECEIVE	LITERAL2
-RETURN	LITERAL2
-
 #Transformation
 TEMP	LITERAL2
-H	LITERAL2
-C	LITERAL2
-E_OM1	LITERAL2
-E_OM2	LITERAL2
-E_S	LITERAL2
-E_SF	LITERAL2
-E_M	LITERAL2
-E_PM	LITERAL2
-E_FW	LITERAL2
-TXT	LITERAL2
-E_SV	LITERAL2
-NONE	LITERAL2
+STAT	LITERAL2
+#MODE	LITERAL2
+#HOURS	LITERAL2
+#HOURSL	LITERAL2
+#COUNT	LITERAL2

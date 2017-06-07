@@ -9,8 +9,10 @@ cache:
         - "~/.platformio"
 
 env:
-    - PLATFORMIO_CI_SRC=examples/simple-read/simple-read.ino
-    - PLATFORMIO_CI_SRC=examples/multiple-read/multiple-read.ino
+    - PLATFORMIO_CI_SRC=examples/globalCallback/globalCallback.ino
+    - PLATFORMIO_CI_SRC=examples/specificCallback/specificCallback.ino
+    - PLATFORMIO_CI_SRC=examples/readDatapoint/readDatapoint.ino
+    - PLATFORMIO_CI_SRC=examples/setupMethods/setupMethods.ino
 
 install:
     - pip install -U platformio

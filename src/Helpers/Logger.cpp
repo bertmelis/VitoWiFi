@@ -1,8 +1,8 @@
 #include "Logger.h"
 
-Logger::Logger()
-: _loggingEnabled(false)
-, _printer(&Serial1) {
+Logger::Logger():
+  _loggingEnabled(false),
+  _printer(nullptr) {
 }
 
 void Logger::setPrinter(Print* printer) {

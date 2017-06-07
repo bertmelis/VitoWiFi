@@ -1,5 +1,9 @@
 # Changelog
 
+## 2017-06-07
+- BREAKING: library interface is using callbacks
+- BREAKING: datapoints are added to VitoWifi and stored inside the lib.
+
 ## 2017-04-25
 - FSM reworked (ACK-states added)
 - Temp RX-buffers removed

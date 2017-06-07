@@ -7,6 +7,7 @@ Based on the fantastic work on http://openv.wikispaces.com. Check out this site 
 
 **WARNING: This code compiles and works**
 **However, this is only a testing release**
+**Writing to Vitotronic is not tested**
 
 **This library is non-blocking**
 This also means that the use of blocking code is not supported.
@@ -19,14 +20,14 @@ Since we're talking serial @4800 baud, we would be wasting precious processing t
 - As this is an implementation of the P300 (aka VS2) protocol, your boiler must be compatible with this protocol.
 
 ## Usage
-See [usage](https://github.com/bertmelis/VitoWifi/blob/master/USAGE.md) for more details or explore the examples.
-A working example using Homie and my [WifiPrinter](https://github.com/bertmelis/WifiPrinter) can be found on my [Github page](https://github.com/bertmelis/homie-boiler).
+~~See [usage](https://github.com/bertmelis/VitoWifi/blob/master/USAGE.md) for more details or explore the examples.~~
+~~A working example using Homie and my [WifiPrinter](https://github.com/bertmelis/WifiPrinter) can be found on my [Github page](https://github.com/bertmelis/homie-boiler).~~
+Look into the examples to explore the functionality. Documentation is on it's way!
 
 ## TO DO
-- improve reliability
-- add transformation functions for returned values
-- ~~communication is really slow. After initializing, it is quite fast however.
-Maybe I could reset the connection after every TX/RX.~~ Done!
+- improve/implement error handling
+- integrate missing datapoint types
+- update USAGE.md
 
 
 ## HISTORY
@@ -36,6 +37,6 @@ An ESP8266 has built-in serial/UART communication and is obviously connectable v
 
 ## Credits go to
 - Hex print: 2011, robtillaart @ Arduino.cc forum
-- Logger: MIT 2015, marvinroger @ Github
+- Logger/Blinker: MIT 2015, marvinroger @ Github
 - Serial Protocol @ openv.wikispaces.com
 - and many others for code and inspiration
