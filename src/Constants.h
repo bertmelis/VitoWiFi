@@ -1,6 +1,6 @@
 #pragma once
 
-#define USE_SOFTWARESERIAL
+//#define USE_SOFTWARESERIAL
 
 /*
 

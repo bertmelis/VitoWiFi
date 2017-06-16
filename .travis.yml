@@ -19,4 +19,4 @@ install:
     - pip install -U platformio
 
 script:
-    - platformio ci --board=d1_mini --board=lolin32 --lib="."
+    - platformio ci --board=d1_mini --lib="."
