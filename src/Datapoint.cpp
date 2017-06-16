@@ -2,7 +2,7 @@
 
 //declare static global callback function as part of the Datapoint base class
 GlobalCallbackFunction Datapoint::_globalCallback = nullptr;
-Print* Datapoint::_debugPrinter = nullptr;
+
 
 Datapoint::Datapoint(const char* name, const char* group, const uint16_t address, bool isWriteable):
   _name(name),
@@ -32,11 +32,6 @@ const uint16_t Datapoint::getAddress() const {
 }
 
 
-const uint8_t Datapoint::getLength() const {
-  return 0;
-}
-
-
 const bool Datapoint::isWriteable() const {
   return _writeable;
 }
@@ -50,11 +45,6 @@ Datapoint& Datapoint::setWriteable() {
 
 void Datapoint::setGlobalCallback(GlobalCallbackFunction globalCallback) {
   _globalCallback = globalCallback;
-}
-
-
-void Datapoint::setDebugPrinter(Print* printer) {
-  _debugPrinter = printer;
 }
 
 
@@ -73,26 +63,13 @@ Datapoint& TempDP::setCallback(TempCallbackFunction callback) {
 void TempDP::callback(uint8_t value[]) {
   int16_t tmp = value[1] << 8 | value[0];
   float floatValue = (float)(tmp) / 10.0;
-  _debugPrinter->println(floatValue, 1);
   if (_callback) {
-    _debugPrinter->print(F("Calling callback of "));
-    _debugPrinter->print(_group);
-    _debugPrinter->print(F(" - "));
-    _debugPrinter->print(_name);
-    _debugPrinter->print(F(" with value "));
-    _debugPrinter->print(floatValue, 1);
     _callback(_name, _group, floatValue);
   }
   else if (Datapoint::_globalCallback) {
-    char str[5] = {'\0'};
+    char str[6] = {'\0'};
     //snprintf(str, sizeof str, "%f", floatValue);
     dtostrf(floatValue, 3, 1, str);
-    _debugPrinter->print(F("Calling global callback of "));
-    _debugPrinter->print(_group);
-    _debugPrinter->print(F(" - "));
-    _debugPrinter->print(_name);
-    _debugPrinter->print(F(" with value "));
-    _debugPrinter->print(str);
     _globalCallback(_name, _group, str);
   }
   return;
@@ -100,7 +77,6 @@ void TempDP::callback(uint8_t value[]) {
 
 
 void TempDP::transformValue(uint8_t transformedValue[], float value) {
-  //to do: think about this conversion
   int16_t tmp = floor((value * 10) + 0.5);
   transformedValue[1] = tmp >> 8;
   transformedValue[0] = tmp & 0xFF;
@@ -122,22 +98,10 @@ Datapoint& StatDP::setCallback(StatCallbackFunction callback) {
 void StatDP::callback(uint8_t value[]) {
   bool boolValue = (value[0]) ? true : false;
   if (_callback) {
-    _debugPrinter->print(F("Calling callback of "));
-    _debugPrinter->print(_group);
-    _debugPrinter->print(F(" - "));
-    _debugPrinter->print(_name);
-    _debugPrinter->print(F(" with value "));
-    _debugPrinter->print(boolValue, BIN);
     _callback(_name, _group, boolValue);
   }
   else if (_globalCallback) {
     const char* str = (boolValue) ? "1" : "0";  //or "true/false"?
-    _debugPrinter->print(F("Calling global callback of "));
-    _debugPrinter->print(_group);
-    _debugPrinter->print(F(" - "));
-    _debugPrinter->print(_name);
-    _debugPrinter->print(F(" with value "));
-    _debugPrinter->print(str);
     _globalCallback(_name, _group, str);
   }
 }

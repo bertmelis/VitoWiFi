@@ -7,9 +7,10 @@ VitoWifiClass VitoWifi;
 VitoWifiClass::VitoWifiClass():
   _optolink(),
   _enableLed(false),
-  _blinker(),
+  //_blinker(),
+  _errorString(),
   _logger() {
-    _optolink.setDebugPrinter(&_logger);
+    _errorString = new char[40];
 }
 
 
@@ -20,15 +21,17 @@ VitoWifiClass::~VitoWifiClass() {
 
 
 //pass serial to Optolink
-void VitoWifiClass::setup(HardwareSerial& serial) {
-  setup(serial);
+#ifdef USE_SOFTWARESERIAL
+void VitoWifiClass::setup(const uint8_t rxPin, const uint8_t txPin) {
+  _optolink.begin(rxPin, txPin);
+  _datapoints.shrink_to_fit();
 }
+#else
 void VitoWifiClass::setup(HardwareSerial* serial) {
-  //pass serial to OptoLink
   _optolink.begin(serial);
-  //_blinker.start(1);
-  _logger.println(F("VitoWifi: Setup...done"));
+  _datapoints.shrink_to_fit();
 }
+#endif
 
 
 void VitoWifiClass::setGlobalCallback(GlobalCallbackFunction globalCallback) {
@@ -38,19 +41,19 @@ void VitoWifiClass::setGlobalCallback(GlobalCallbackFunction globalCallback) {
 }
 
 
-Datapoint& VitoWifiClass::addDatapoint(const char* name, const char* group, const uint16_t address, const DPType type) {
+Datapoint& VitoWifiClass::addDatapoint(const char* name, const char* group, const uint16_t address, const DPType type, bool isWriteable) {
   switch (type) {
     case TEMP :
     {
-      Datapoint* tempDP = new TempDP(name, group, address, false);
-      tempDP->setDebugPrinter(&_logger);
+      Datapoint* tempDP = new TempDP(name, group, address, isWriteable);
+      if (!tempDP) {  abort(); }  //out of memory
       _datapoints.push_back(tempDP);
       break;
     }
     case STAT :
     {
-      Datapoint* statDP = new StatDP(name, group, address, false);
-      statDP->setDebugPrinter(&_logger);
+      Datapoint* statDP = new StatDP(name, group, address, isWriteable);
+      if (!statDP) { abort(); }  //out of memory
       _datapoints.push_back(statDP);
       break;
     }
@@ -59,20 +62,17 @@ Datapoint& VitoWifiClass::addDatapoint(const char* name, const char* group, cons
 }
 
 
-/*
-Datapoint& VitoWifiClass::addDatapoint(const char* name, const char* group, const uint16_t address, const DPType type, bool isWriteable) {
-  _datapoints.push_back(Datapoint(name, group, address, isWriteable));
-  return _datapoints.back();
+Datapoint& VitoWifiClass::addDatapoint(const char* name, const char* group, const uint16_t address, const DPType type) {
+  return addDatapoint(name, group, address, type, false);
 }
-*/
 
 
-Datapoint* VitoWifiClass::getDatapoint(const char* name) {
-  //find DP and return reference
+Datapoint* VitoWifiClass::_getDatapoint(const char* name) {
+  //find DP and return pointer
   Datapoint* DP = nullptr;
-  for (uint8_t i = 0; i < _datapoints.size(); i++) {
-    if (strcmp(name, _datapoints.at(i)->getName()) == 0)
-      DP = _datapoints.at(i);
+  for(std::vector<Datapoint*>::iterator it = _datapoints.begin(); it != _datapoints.end(); ++it) {
+    if (strcmp(name, (*it)->getName()) == 0)
+      DP = *it;
   }
   return DP;
 }
@@ -90,7 +90,6 @@ void VitoWifiClass::readAll() {
   }
   if (foundOne) return;
   _logger.println(F("No datapoints available, skipping"));
-  return;
 }
 
 
@@ -122,7 +121,6 @@ void VitoWifiClass::readDatapoint(const char* name) {
     }
   }
   _logger.println(F("Datapoint not found, skipping"));
-  return;
 }
 
 
@@ -142,13 +140,12 @@ void VitoWifiClass::writeDatapoint(const char* name, bool value) {
     return;
   }
   _logger.println(F("Datapoint not found, skipping"));
-  return;
 }
 */
 
 
 void VitoWifiClass::writeDatapoint(const char* name, uint8_t value) {
-  Datapoint* DP = getDatapoint(name);
+  Datapoint* DP = _getDatapoint(name);
   if (DP) {
     if (DP->getLength() != 1) {
       _logger.println(F("Wrong \"writeDatapoint\" method, skipping."));
@@ -162,12 +159,11 @@ void VitoWifiClass::writeDatapoint(const char* name, uint8_t value) {
     return;
   }
   _logger.println(F("Datapoint not found, skipping"));
-  return;
 }
 
 
 void VitoWifiClass::writeDatapoint(const char* name, float value) {
-  Datapoint* DP = getDatapoint(name);
+  Datapoint* DP = _getDatapoint(name);
   if (DP) {
     if (DP->getLength() != 2) {
       _logger.println(F("Wrong \"writeDatapoint\" method, skipping."));
@@ -183,53 +179,47 @@ void VitoWifiClass::writeDatapoint(const char* name, float value) {
     return;
   }
   _logger.println(F("Datapoint not found, skipping"));
-  return;
 }
 
 
 void VitoWifiClass::loop(){
   _optolink.loop();
-  if (_queue.empty()) return;  //do nothing when queue is empty
-  if (!_isBusy) {  //do something but not when busy
-    if (_queue.front().write) {
-      _optolink.writeToDP(_queue.front().DP->getAddress(), _queue.front().DP->getLength(), _queue.front().value);
-      _isBusy = true;
-    }
-    else {
-      _optolink.readFromDP(_queue.front().DP->getAddress(), _queue.front().DP->getLength());
-      _isBusy = true;
-    }
+  if (!_queue.empty() && !_optolink.isBusy()) {
+    if (_queue.front().write) _optolink.writeToDP(_queue.front().DP->getAddress(), _queue.front().DP->getLength(), _queue.front().value);
+    else _optolink.readFromDP(_queue.front().DP->getAddress(), _queue.front().DP->getLength());
   }
-  //trigger callback when ready and remove element from queue
-  if (_optolink.available() > 0) {
-    _logger.println("Value available, fetching.");
+  if (_optolink.available() > 0) {  //trigger callback when ready and remove element from queue
+    _logger.print(F("Datapoint "));
+    _logger.print(_queue.front().DP->getName());
+    _logger.println(F(" action succesful."));
     uint8_t value[4] = {0};
     _optolink.read(value);
     _queue.front().DP->callback(value);
     _queue.pop();
-    _isBusy = false;
   }
-  if (_optolink.available() < 0) {
-    uint8_t value[4] = {0};
-    _optolink.read(value);
+  if (_optolink.available() < 0) {  //display error message and remove element from queue
     _logger.print(F("Datapoint "));
     _logger.print(_queue.front().DP->getName());
-    _logger.println(F(" action unsuccesfull. Skipped."));
+    _logger.print(F(" action unsuccesful. CODE:"));
+    uint8_t errorCode = _optolink.readError();
+    _logger.println(errorCode, DEC);
     _queue.pop();
-    _isBusy = false;
   }
 }
 
 
+/*
 void VitoWifiClass::enableLed(uint8_t pin, uint8_t on) {
  _enableLed = true;
  _blinker.setLedPin(pin, on);
 }
+*/
 
 
 //Logger stuff, taken from Marvin ROGER's Homie for ESP8266
 void VitoWifiClass::setLoggingPrinter(Print* printer) {
   _logger.setPrinter(printer);
+  _optolink.setDebugPrinter(&_logger);
 }
 void VitoWifiClass::enableLogger() {
   _logger.setLogging(true);
@@ -237,8 +227,3 @@ void VitoWifiClass::enableLogger() {
 void VitoWifiClass::disableLogger() {
   _logger.setLogging(false);
 }
-/*
-Logger& VitoWifiClass::getLogger() {
-  return _logger;
-}
-*/

@@ -43,19 +43,26 @@ and many others
 #pragma once
 #include <Arduino.h>
 #include <queue>
-#include "Helpers/Datatypes.h"
+#include "Constants.h"
+#include "Datatypes.h"
 #include "Datapoint.h"
 #include "Optolink.h"
 #include "Helpers/Logger.h"
-#include "Helpers/Blinker.h"
+//#include "Helpers/Blinker.h"
+#ifdef USE_SOFTWARESERIAL
+#include <SoftwareSerial.h>
+#endif
 
 
 class VitoWifiClass {
   public:
     VitoWifiClass();
     ~VitoWifiClass();
-    void setup(HardwareSerial& serial);
+#ifdef USE_SOFTWARESERIAL
+    void setup(uint8_t rxPin, uint8_t txPin);
+#else
     void setup(HardwareSerial* serial);
+#endif
     void loop();
     void setGlobalCallback(GlobalCallbackFunction globalCallback);
     Datapoint& addDatapoint(const char* name, const char* group, const uint16_t address, const DPType type, bool isWriteable);
@@ -64,19 +71,18 @@ class VitoWifiClass {
     void readAll();
     void readGroup(const char* group);
     void readDatapoint(const char* name);
-    void writeDatapoint(const char* name, bool value);
-    void writeDatapoint(const char* name, uint8_t value);
-    void writeDatapoint(const char* name, float value);
+    void writeDatapoint(const char* name, bool value);  //no known DPs use this
+    void writeDatapoint(const char* name, uint8_t value);  //for MODE DPs
+    void writeDatapoint(const char* name, float value);  //for TEMP DPs
 
-    void enableLed(uint8_t pin, uint8_t on);
+    //void enableLed(uint8_t pin, uint8_t on);
 
     void enableLogger();
     void disableLogger();
     void setLoggingPrinter(Print* printer);
-    //Logger& getLogger();  //getter for Logger for use in main sketch.
 
   private:
-    Datapoint* getDatapoint(const char* name);
+    Datapoint* _getDatapoint(const char* name);
     std::vector<Datapoint*> _datapoints;
     struct Action {
       Datapoint* DP;
@@ -84,9 +90,9 @@ class VitoWifiClass {
       uint8_t value[4];
     };
     std::queue<Action> _queue;
-    bool _isBusy;
     Optolink _optolink;
     bool _enableLed;
-    Blinker _blinker;
+    //Blinker _blinker;
     Logger _logger;
+    char* _errorString;
 } extern VitoWifi;

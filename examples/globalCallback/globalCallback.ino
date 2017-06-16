@@ -1,6 +1,3 @@
-#include <ESP8266WiFi.h>
-#include <VitoWifi.h>
-
 /*
 
 This example defines 2 datapoints of type "TEMP".
@@ -10,9 +7,7 @@ For each Datapoint, the read value is returned using globalCallbackHandler
 
 */
 
-const char* ssid     = "XXXX";
-const char* password = "XXXX";
-
+#include <VitoWifi.h>
 
 void globalCallbackHandler(const char* name, const char* group, const char* value) {
   Serial1.print(group);
@@ -31,14 +26,7 @@ void setup() {
   VitoWifi.setup(&Serial);
 
   Serial1.begin(115200);
-  Serial1.println(F("Connecting to Wifi..."));
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-  }
-  Serial1.println(F("IP address: "));
-  Serial1.println(WiFi.localIP());
+  Serial1.println(F("Setup finished..."));
 }
 
 void loop() {

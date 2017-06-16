@@ -13,9 +13,10 @@ env:
     - PLATFORMIO_CI_SRC=examples/specificCallback/specificCallback.ino
     - PLATFORMIO_CI_SRC=examples/readDatapoint/readDatapoint.ino
     - PLATFORMIO_CI_SRC=examples/setupMethods/setupMethods.ino
+    - PLATFORMIO_CI_SRC=examples/rawOptolink/rawOptolink.ino
 
 install:
     - pip install -U platformio
 
 script:
-    - platformio ci --board=d1_mini --board=esp01_1m --board=esp01 --lib="./src"
+    - platformio ci --board=d1_mini --board=lolin32 --lib="."

@@ -1,6 +1,6 @@
 #pragma once
 #include <Arduino.h>
-#include "Helpers/Datatypes.h"
+#include "Datatypes.h"
 
 
 class Datapoint {
@@ -10,20 +10,21 @@ class Datapoint {
     const char* getName() const;
     const char* getGroup() const;
     const uint16_t getAddress() const;
-    virtual const uint8_t getLength() const;
     const bool isWriteable() const;
     Datapoint& setWriteable();
     void setGlobalCallback(GlobalCallbackFunction globalCallback);
-    void setDebugPrinter(Print* printer);
+
+    //virtual methods, see inherited classes for implementation
+    virtual const uint8_t getLength() const { return 0; };
     virtual void callback(uint8_t value[]);
     virtual void setCallback(GlobalCallbackFunction globalCallback) {};
     virtual Datapoint& setCallback(TempCallbackFunction callback) {};
     virtual Datapoint& setCallback(StatCallbackFunction callback) {};
     virtual void transformValue(uint8_t transformedValue[], float value) {};
     virtual void transformValue(uint8_t transformedValue[], bool value) {};
+
   protected:  //all properties are protected for ease of use in inherited classes
     static GlobalCallbackFunction _globalCallback;
-    static Print* _debugPrinter;
     const char* _name;
     const char* _group;
     const uint16_t _address;
