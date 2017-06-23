@@ -57,6 +57,13 @@ Datapoint& VitoWifiClass::addDatapoint(const char* name, const char* group, cons
       _datapoints.push_back(statDP);
       break;
     }
+    case COUNTL :
+    {
+      Datapoint* countlDP = new CountLDP(name, group, address, isWriteable);
+      if (!countlDP) { abort(); }  //out of memory
+      _datapoints.push_back(countlDP);
+      break;
+    }
   }
   return *_datapoints.back();
 }
@@ -170,7 +177,7 @@ void VitoWifiClass::writeDatapoint(const char* name, float value) {
       return;
     }
     uint8_t transformedValue[] = {0};
-    DP->transformValue(transformedValue, value);
+    DP->transform(transformedValue, value);
     Action action;
     action.DP = DP;
     action.write = true;

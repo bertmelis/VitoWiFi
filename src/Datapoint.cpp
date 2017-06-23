@@ -1,4 +1,5 @@
 #include "Datapoint.h"
+#include "Helpers/Helpers.h"
 
 //declare static global callback function as part of the Datapoint base class
 GlobalCallbackFunction Datapoint::_globalCallback = nullptr;
@@ -76,7 +77,7 @@ void TempDP::callback(uint8_t value[]) {
 }
 
 
-void TempDP::transformValue(uint8_t transformedValue[], float value) {
+void TempDP::transform(uint8_t transformedValue[], float value) {
   int16_t tmp = floor((value * 10) + 0.5);
   transformedValue[1] = tmp >> 8;
   transformedValue[0] = tmp & 0xFF;
@@ -107,8 +108,45 @@ void StatDP::callback(uint8_t value[]) {
 }
 
 
-void StatDP::transformValue(uint8_t transformedValue[], bool value) {
+void StatDP::transform(uint8_t transformedValue[], bool value) {
   transformedValue[0] = (value) ? 0x01 : 0x00;
+  return;
+}
+
+
+CountLDP::CountLDP(const char* name, const char* group, const uint16_t address, bool isWriteable):
+  Datapoint(name, group, address, isWriteable)
+  {}
+
+
+Datapoint& CountLDP::setCallback(CountLCallbackFunction callback) {
+  _callback = callback;
+  return *this;
+}
+
+
+void CountLDP::callback(uint8_t value[]) {
+  uint32_t uintValue = 0;
+  uintValue = value[0];
+  uintValue = uintValue << 8 && value [1];
+  uintValue = uintValue << 16 && value [2];
+  uintValue = uintValue << 24 && value [3];
+  if (_callback) {
+    _callback(_name, _group, uintValue);
+  }
+  else if (_globalCallback) {
+    char str[11] = {'\0'};
+    uinttochar(str, uintValue);
+    _globalCallback(_name, _group, str);
+  }
+}
+
+
+void CountLDP::transform(uint8_t transformedValue[], uint32_t value) {
+  transformedValue[3] = value >> 24;
+  transformedValue[2] = value >> 16;
+  transformedValue[1] = value >> 8;
+  transformedValue[0] = value & 0xFF;
   return;
 }
 
@@ -160,14 +198,4 @@ Datapoint& HoursLDP::setCallback(HoursLCallbackFunction callback) {
   return *this;
 }
 
-
-CountDP::CountDP(const char* name, const char* group, const uint16_t address, bool isWriteable):
-  Datapoint(name, group, address, isWriteable)
-  {}
-
-
-Datapoint& CountDP::setCallback(CountCallbackFunction callback) {
-  _callback = callback;
-  return *this;
-}
 */

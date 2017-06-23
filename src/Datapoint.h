@@ -15,13 +15,15 @@ class Datapoint {
     void setGlobalCallback(GlobalCallbackFunction globalCallback);
 
     //virtual methods, see inherited classes for implementation
-    virtual const uint8_t getLength() const { return 0; };
-    virtual void callback(uint8_t value[]);
+    virtual const uint8_t getLength() const = 0;
+    virtual void callback(uint8_t value[]) = 0;
     virtual void setCallback(GlobalCallbackFunction globalCallback) {};
     virtual Datapoint& setCallback(TempCallbackFunction callback) {};
     virtual Datapoint& setCallback(StatCallbackFunction callback) {};
-    virtual void transformValue(uint8_t transformedValue[], float value) {};
-    virtual void transformValue(uint8_t transformedValue[], bool value) {};
+    virtual Datapoint& setCallback(CountLCallbackFunction callback) {};
+    virtual void transform(uint8_t transformedValue[], float value) {};
+    virtual void transform(uint8_t transformedValue[], bool value) {};
+    //virtual void transformValue(uint8_t transformedValue[], bool value) {};  //not implemented in Vitotronic
 
   protected:  //all properties are protected for ease of use in inherited classes
     static GlobalCallbackFunction _globalCallback;
@@ -31,30 +33,40 @@ class Datapoint {
     bool _writeable;
 };
 
+
 class TempDP : public Datapoint {
   public:
     TempDP(const char* name, const char* group, const uint16_t address, bool isWriteable);
-    Datapoint& setCallback(TempCallbackFunction callback);
-    Datapoint& setCallback(StatCallbackFunction callback) {};
-    const uint8_t getLength() const { return 2; }
-    void callback(uint8_t value[]);
-    void transformValue(uint8_t transformedValue[], float value);
-    void transformValue(uint8_t transformedValue[], bool value) { /* you shouldn't be here */ };
+    virtual Datapoint& setCallback(TempCallbackFunction callback);
+    virtual const uint8_t getLength() const { return 2; }
+    virtual void callback(uint8_t value[]);
+    virtual void transform(uint8_t transformedValue[], float value);
   private:
     TempCallbackFunction _callback;
 };
 
+
 class StatDP : public Datapoint {
   public:
     StatDP(const char* name, const char* group, const uint16_t address, bool isWriteable);
-    Datapoint& setCallback(StatCallbackFunction callback);
-    Datapoint& setCallback(TempCallbackFunction callback) {};
-    const uint8_t getLength() const { return 1; }
-    void callback(uint8_t value[]);
-    void transformValue(uint8_t transformedValue[], float value) { /* you shouldn't be here */ };
-    void transformValue(uint8_t transformedValue[], bool value);
+    virtual Datapoint& setCallback(StatCallbackFunction callback);
+    virtual const uint8_t getLength() const { return 1; }
+    virtual void callback(uint8_t value[]);
+    virtual void transform(uint8_t transformedValue[], bool value);
   private:
     StatCallbackFunction _callback;
+};
+
+
+class CountLDP : public Datapoint {
+  public:
+    CountLDP(const char* name, const char* group, const uint16_t address, bool isWriteable = false);
+    virtual Datapoint& setCallback(CountLCallbackFunction callback);
+    virtual const uint8_t getLength() const { return 4; }
+    virtual void callback(uint8_t value[]);
+    virtual void transform(uint8_t transformedValue[], uint32_t value);
+  private:
+    CountLCallbackFunction _callback;
 };
 
 /*
@@ -90,14 +102,4 @@ class HoursLDP : public Datapoint {
     HoursLCallbackFunction _callback;
 };
 
-
-class CountDP : public Datapoint {
-  public:
-    CountDP(const char* name, const char* group, const uint16_t address, bool isWriteable);
-    Datapoint& setCallback(CountCallbackFunction callback);
-    virtual void callback(uint8_t value[]);
-    virtual const uint8_t getLength() const { return 4; }
-  private:
-    CountCallbackFunction _callback;
-};
 */

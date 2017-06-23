@@ -48,7 +48,6 @@ and many others
 #include "Datapoint.h"
 #include "Optolink.h"
 #include "Helpers/Logger.h"
-//#include "Helpers/Blinker.h"
 #ifdef USE_SOFTWARESERIAL
 #include <SoftwareSerial.h>
 #endif
@@ -92,7 +91,6 @@ class VitoWifiClass {
     std::queue<Action> _queue;
     Optolink _optolink;
     bool _enableLed;
-    //Blinker _blinker;
     Logger _logger;
     char* _errorString;
 } extern VitoWifi;
