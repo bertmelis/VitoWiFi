@@ -9,6 +9,10 @@ For each Datapoint, the read value is printed as HEX ni Serial1
 
 #include <Optolink.h>
 
+#ifdef ARDUINO_ARCH_ESP32
+  HardwareSerial Serial1(2);
+#endif
+
 Optolink myOptolink;
 uint32_t lastMillis = 0;
 bool getValues = false;

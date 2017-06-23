@@ -1,7 +1,7 @@
 /*
 
 This example defines 2 datapoints of type "TEMP".
-Every 30 seconds, the loop function call the updateAll-method.
+Every 60 seconds, the loop function call the updateAll-method.
 
 For each Datapoint, the read value is returned using globalCallbackHandler
 
@@ -9,6 +9,9 @@ For each Datapoint, the read value is returned using globalCallbackHandler
 
 #include <VitoWifi.h>
 
+#ifdef ARDUINO_ARCH_ESP32
+  HardwareSerial Serial1(2);
+#endif
 
 void globalCallbackHandler(const char* name, const char* group, const char* value) {
   Serial1.print(group);
@@ -33,7 +36,7 @@ void setup() {
 void loop() {
 
   static unsigned long lastMillis = 0;
-  if (millis() - lastMillis > 30 * 1000UL) {  //read all values every 30 seconds
+  if (millis() - lastMillis > 60 * 1000UL) {  //read all values every 30 seconds
     lastMillis = millis();
     VitoWifi.readDatapoint("outsidetemp");
   }
