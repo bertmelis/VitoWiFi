@@ -7,7 +7,6 @@ VitoWifiClass VitoWifi;
 VitoWifiClass::VitoWifiClass():
   _optolink(),
   _enableLed(false),
-  //_blinker(),
   _errorString(),
   _logger() {
     _errorString = new char[40];
@@ -59,9 +58,9 @@ Datapoint& VitoWifiClass::addDatapoint(const char* name, const char* group, cons
     }
     case COUNTL :
     {
-      Datapoint* countlDP = new CountLDP(name, group, address, isWriteable);
-      if (!countlDP) { abort(); }  //out of memory
-      _datapoints.push_back(countlDP);
+      Datapoint* countLDP = new CountLDP(name, group, address, isWriteable);
+      if (!countLDP) { abort(); }  //out of memory
+      _datapoints.push_back(countLDP);
       break;
     }
   }
@@ -92,7 +91,7 @@ void VitoWifiClass::readAll() {
     _queue.push(action);
     _logger.print(F("Datapoint "));
     _logger.print(iDP->getName());
-    _logger.println(F(" READ action added."));
+    _logger.println(F(" READ action added"));
     foundOne = true;
   }
   if (foundOne) return;
@@ -108,7 +107,7 @@ void VitoWifiClass::readGroup(const char* group) {
       _queue.push(action);
       _logger.print(F("Datapoint "));
       _logger.print(iDP->getName());
-      _logger.println(F(" READ action added."));
+      _logger.println(F(" READ action added"));
       foundOne = true;
     }
   }
@@ -123,7 +122,7 @@ void VitoWifiClass::readDatapoint(const char* name) {
       _queue.push(action);
       _logger.print(F("Datapoint "));
       _logger.print(iDP->getName());
-      _logger.println(F(" READ action added."));
+      _logger.println(F(" READ action added"));
       return;
     }
   }
@@ -155,7 +154,7 @@ void VitoWifiClass::writeDatapoint(const char* name, uint8_t value) {
   Datapoint* DP = _getDatapoint(name);
   if (DP) {
     if (DP->getLength() != 1) {
-      _logger.println(F("Wrong \"writeDatapoint\" method, skipping."));
+      _logger.println(F("Wrong \"writeDatapoint\" method, skipping"));
       return;
     }
     Action action;
@@ -173,7 +172,7 @@ void VitoWifiClass::writeDatapoint(const char* name, float value) {
   Datapoint* DP = _getDatapoint(name);
   if (DP) {
     if (DP->getLength() != 2) {
-      _logger.println(F("Wrong \"writeDatapoint\" method, skipping."));
+      _logger.println(F("Wrong \"writeDatapoint\" method, skipping"));
       return;
     }
     uint8_t transformedValue[] = {0};
@@ -194,23 +193,27 @@ void VitoWifiClass::loop(){
   if (!_queue.empty() && !_optolink.isBusy()) {
     if (_queue.front().write) _optolink.writeToDP(_queue.front().DP->getAddress(), _queue.front().DP->getLength(), _queue.front().value);
     else _optolink.readFromDP(_queue.front().DP->getAddress(), _queue.front().DP->getLength());
+    return;
   }
   if (_optolink.available() > 0) {  //trigger callback when ready and remove element from queue
     _logger.print(F("Datapoint "));
     _logger.print(_queue.front().DP->getName());
-    _logger.println(F(" action succesful."));
+    _logger.println(F(" action successful"));
     uint8_t value[4] = {0};
     _optolink.read(value);
+    _logger.println(F("Value received"));
     _queue.front().DP->callback(value);
     _queue.pop();
+    return;
   }
   if (_optolink.available() < 0) {  //display error message and remove element from queue
     _logger.print(F("Datapoint "));
     _logger.print(_queue.front().DP->getName());
-    _logger.print(F(" action unsuccesful. CODE:"));
+    _logger.print(F(" action unsuccessful - CODE:"));
     uint8_t errorCode = _optolink.readError();
     _logger.println(errorCode, DEC);
     _queue.pop();
+    return;
   }
 }
 
