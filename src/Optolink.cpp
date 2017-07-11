@@ -348,8 +348,6 @@ const bool Optolink::isBusy() const {
 
 //return value and reset comunication to IDLE
 void Optolink::read(uint8_t value[]) {
-  //ESP8266 is little endian so least significant byte first
-  //old solution: value = (_rcvBuffer[10] << 24) | (_rcvBuffer[9] << 16) | (_rcvBuffer[8] << 8) | _rcvBuffer[7];
   if (_action != RETURN) {
     _debugPrinter->println(F("No reading available"));
     return;

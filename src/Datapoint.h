@@ -1,7 +1,23 @@
 #pragma once
 #include <Arduino.h>
-#include "Datatypes.h"
 
+typedef void (*GlobalCallbackFunction)(const char*, const char*, const char*);
+typedef void (*TempCallbackFunction)(const char*, const char*, float);
+typedef void (*StatCallbackFunction)(const char*, const char*, bool);
+typedef void (*CountLCallbackFunction)(const char*, const char*, uint32_t);
+//typedef void (*ModeCallbackFunction)(const char*, const char*, uint8_t);
+//typedef void (*HoursCallbackFunction)(const char*, const char*, uint32_t);
+//typedef void (*HoursLCallbackFunction)(const char*, const char*, uint32_t);
+
+enum DPType {
+  TEMP,
+  STAT,
+  COUNTL
+  //MODE
+  //HOURS
+  //HOURSL
+  //COUNT
+};
 
 class Datapoint {
   public:
@@ -23,6 +39,7 @@ class Datapoint {
     virtual Datapoint& setCallback(CountLCallbackFunction callback) {};
     virtual void transform(uint8_t transformedValue[], float value) {};
     virtual void transform(uint8_t transformedValue[], bool value) {};
+    virtual void transform(uint8_t transformedValue[], uint32_t value) {};
     //virtual void transformValue(uint8_t transformedValue[], bool value) {};  //not implemented in Vitotronic
 
   protected:  //all properties are protected for ease of use in inherited classes
@@ -32,7 +49,6 @@ class Datapoint {
     const uint16_t _address;
     bool _writeable;
 };
-
 
 class TempDP : public Datapoint {
   public:
@@ -45,7 +61,6 @@ class TempDP : public Datapoint {
     TempCallbackFunction _callback;
 };
 
-
 class StatDP : public Datapoint {
   public:
     StatDP(const char* name, const char* group, const uint16_t address, bool isWriteable);
@@ -56,7 +71,6 @@ class StatDP : public Datapoint {
   private:
     StatCallbackFunction _callback;
 };
-
 
 class CountLDP : public Datapoint {
   public:
@@ -80,7 +94,6 @@ class ModeDP : public Datapoint {
     ModeCallbackFunction _callback;
 };
 
-
 class HoursDP : public Datapoint {
   public:
     HoursDP(const char* name, const char* group, const uint16_t address, bool isWriteable);
@@ -90,7 +103,6 @@ class HoursDP : public Datapoint {
   private:
     HoursCallbackFunction _callback;
 };
-
 
 class HoursLDP : public Datapoint {
   public:

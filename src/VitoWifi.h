@@ -44,7 +44,6 @@ and many others
 #include <Arduino.h>
 #include <queue>
 #include "Constants.h"
-#include "Datatypes.h"
 #include "Datapoint.h"
 #include "Optolink.h"
 #include "Helpers/Logger.h"

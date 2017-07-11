@@ -1,5 +1,4 @@
 #include "Datapoint.h"
-#include "Helpers/Helpers.h"
 
 //declare static global callback function as part of the Datapoint base class
 GlobalCallbackFunction Datapoint::_globalCallback = nullptr;
@@ -69,7 +68,7 @@ void TempDP::callback(uint8_t value[]) {
   }
   else if (Datapoint::_globalCallback) {
     char str[6] = {'\0'};
-    //snprintf(str, sizeof str, "%f", floatValue);
+    //snprintf(str, sizeof(str), "%f", floatValue);
     dtostrf(floatValue, 3, 1, str);
     _globalCallback(_name, _group, str);
   }
@@ -86,7 +85,8 @@ void TempDP::transform(uint8_t transformedValue[], float value) {
 
 
 StatDP::StatDP(const char* name, const char* group, const uint16_t address, bool isWriteable):
-  Datapoint(name, group, address, isWriteable)
+  Datapoint(name, group, address, isWriteable),
+  _callback(nullptr)
   {}
 
 
@@ -115,7 +115,8 @@ void StatDP::transform(uint8_t transformedValue[], bool value) {
 
 
 CountLDP::CountLDP(const char* name, const char* group, const uint16_t address, bool isWriteable):
-  Datapoint(name, group, address, isWriteable)
+  Datapoint(name, group, address, isWriteable),
+  _callback(nullptr)
   {}
 
 
@@ -126,17 +127,13 @@ Datapoint& CountLDP::setCallback(CountLCallbackFunction callback) {
 
 
 void CountLDP::callback(uint8_t value[]) {
-  uint32_t uintValue = 0;
-  uintValue = value[0];
-  uintValue = uintValue << 8 && value [1];
-  uintValue = uintValue << 16 && value [2];
-  uintValue = uintValue << 24 && value [3];
+  uint32_t ui32 = value[0] | (value[1] << 8) | (value[2] << 16) | (value[3] << 24);
   if (_callback) {
-    _callback(_name, _group, uintValue);
+    _callback(_name, _group, ui32);
   }
   else if (_globalCallback) {
     char str[11] = {'\0'};
-    uinttochar(str, uintValue);
+    snprintf(str, sizeof(str), "%" PRIu32, ui32);
     _globalCallback(_name, _group, str);
   }
 }
