@@ -1,5 +1,10 @@
 # Changelog
 
+## 2017-07-11
+- Implemented CountLong Datapoint
+- Helper inclusion deleted
+- Moved callback typedefs to Datapoint.h
+
 ## 2017-06-16
 - Implemented SoftwareSerial support (use version with 8E2-support)
 - improvements on error handling
