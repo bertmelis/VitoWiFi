@@ -108,7 +108,7 @@ void StatDP::callback(uint8_t value[]) {
 }
 
 
-void StatDP::transform(uint8_t transformedValue[], bool value) {
+void StatDP::transform(uint8_t transformedValue[], float value) {
   transformedValue[0] = (value) ? 0x01 : 0x00;
   return;
 }
@@ -139,11 +139,12 @@ void CountLDP::callback(uint8_t value[]) {
 }
 
 
-void CountLDP::transform(uint8_t transformedValue[], uint32_t value) {
-  transformedValue[3] = value >> 24;
-  transformedValue[2] = value >> 16;
-  transformedValue[1] = value >> 8;
-  transformedValue[0] = value & 0xFF;
+void CountLDP::transform(uint8_t transformedValue[], float value) {
+  uint32_t _value = (uint32_t)ceil(value);
+  transformedValue[3] = _value >> 24;
+  transformedValue[2] = _value >> 16;
+  transformedValue[1] = _value >> 8;
+  transformedValue[0] = _value & 0xFF;
   return;
 }
 
