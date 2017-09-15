@@ -69,9 +69,14 @@ class VitoWifiClass {
     void readAll();
     void readGroup(const char* group);
     void readDatapoint(const char* name);
-    void writeDatapoint(const char* name, bool value);  //no known DPs use this
-    void writeDatapoint(const char* name, uint8_t value);  //for MODE DPs
-    void writeDatapoint(const char* name, float value);  //for TEMP DPs
+
+    template<typename TArg>
+    void writeDatapoint(const char* name, TArg arg) {
+      static_assert(sizeof(TArg) <= sizeof(float), "writeDatapoint() argument size must be <= 4 bytes");
+		   float _float = (float)arg;
+       size_t length = ceil(sizeof(arg) / 2);
+		   _writeDatapoint(name, _float, length);
+    }
 
     //void enableLed(uint8_t pin, uint8_t on);
 
@@ -80,6 +85,8 @@ class VitoWifiClass {
     void setLoggingPrinter(Print* printer);
 
   private:
+    inline void _readDatapoint(Datapoint* dp);
+    void _writeDatapoint(const char* name, float value, size_t length);
     Datapoint* _getDatapoint(const char* name);
     std::vector<Datapoint*> _datapoints;
     struct Action {

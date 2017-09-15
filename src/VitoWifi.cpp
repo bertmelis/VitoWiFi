@@ -87,11 +87,7 @@ Datapoint* VitoWifiClass::_getDatapoint(const char* name) {
 void VitoWifiClass::readAll() {
   bool foundOne = false;
   for (Datapoint* iDP : _datapoints) {
-    Action action = {iDP, false};
-    _queue.push(action);
-    _logger.print(F("Datapoint "));
-    _logger.print(iDP->getName());
-    _logger.println(F(" READ action added"));
+    _readDatapoint(iDP);
     foundOne = true;
   }
   if (foundOne) return;
@@ -103,11 +99,7 @@ void VitoWifiClass::readGroup(const char* group) {
   bool foundOne = false;
   for (Datapoint* iDP : _datapoints) {
     if (strcmp(group, iDP->getGroup()) == 0) {
-      Action action = {iDP, false};
-      _queue.push(action);
-      _logger.print(F("Datapoint "));
-      _logger.print(iDP->getName());
-      _logger.println(F(" READ action added"));
+      _readDatapoint(iDP);
       foundOne = true;
     }
   }
@@ -118,11 +110,7 @@ void VitoWifiClass::readGroup(const char* group) {
 void VitoWifiClass::readDatapoint(const char* name) {
   for (Datapoint* iDP : _datapoints) {
     if (strcmp(name, iDP->getName()) == 0) {
-      Action action = {iDP, false};
-      _queue.push(action);
-      _logger.print(F("Datapoint "));
-      _logger.print(iDP->getName());
-      _logger.println(F(" READ action added"));
+      _readDatapoint(iDP);
       return;
     }
   }
@@ -130,52 +118,23 @@ void VitoWifiClass::readDatapoint(const char* name) {
 }
 
 
-/* Writing bool is not supported as there's no DP that uses this (known to me)
-void VitoWifiClass::writeDatapoint(const char* name, bool value) {
-  Datapoint* DP = getDatapoint(name);
-  if (DP) {
-    if (DP->getLength() != 1) {
-      _logger.println(F("Wrong \"writeDatapoint\" method, skipping."));
-      return;
-    }
-    Action action;
-    action.DP = DP;
-    action.write = true;
-    action.value[0] = (value) ? 1 : 0;
-    _queue.push(action);
-    return;
-  }
-  _logger.println(F("Datapoint not found, skipping"));
+inline void VitoWifiClass::_readDatapoint(Datapoint* dp) {
+  Action action = {dp, false};
+  _queue.push(action);
+  _logger.print("Datapoint ");
+  _logger.print(dp->getName());
+  _logger.println(" READ action added");
 }
-*/
 
 
-void VitoWifiClass::writeDatapoint(const char* name, uint8_t value) {
+void VitoWifiClass::_writeDatapoint(const char* name, float value, size_t length) {
   Datapoint* DP = _getDatapoint(name);
   if (DP) {
-    if (DP->getLength() != 1) {
-      _logger.println(F("Wrong \"writeDatapoint\" method, skipping"));
+    if (DP->getLength() != length) {
+      _logger.println(F("Value type does not match Datapoint type, skipping"));
       return;
     }
-    Action action;
-    action.DP = DP;
-    action.write = true;
-    action.value[0] = value;
-    _queue.push(action);
-    return;
-  }
-  _logger.println(F("Datapoint not found, skipping"));
-}
-
-
-void VitoWifiClass::writeDatapoint(const char* name, float value) {
-  Datapoint* DP = _getDatapoint(name);
-  if (DP) {
-    if (DP->getLength() != 2) {
-      _logger.println(F("Wrong \"writeDatapoint\" method, skipping"));
-      return;
-    }
-    uint8_t transformedValue[] = {0};
+    uint8_t transformedValue[2] = {0};
     DP->transform(transformedValue, value);
     Action action;
     action.DP = DP;

@@ -2,22 +2,22 @@
 
 
 Optolink::Optolink():
-_serialptr(nullptr),
-_address(0),
-_length(0),
-_value{0},
-_writeMessageType(false),
-_rcvBuffer{0},
-_rcvBufferLen(0),
-_rcvLen(0),
-_debugMessage(true),
-_state(RESET),
-_action(PROCESS),
-_lastMillis(0),
-_numberOfTries(5),
-_errorCode(0),
-_debugPrinter(nullptr)
-{}
+  _serialptr(nullptr),
+  _address(0),
+  _length(0),
+  _value{0},
+  _writeMessageType(false),
+  _rcvBuffer{0},
+  _rcvBufferLen(0),
+  _rcvLen(0),
+  _debugMessage(true),
+  _state(RESET),
+  _action(PROCESS),
+  _lastMillis(0),
+  _numberOfTries(5),
+  _errorCode(0),
+  _debugPrinter(nullptr)
+  {}
 
 
 //begin serial @ 4800 baud, 8 bits, even parity, 2 stop bits
@@ -261,18 +261,17 @@ void Optolink::_receiveHandler() {
   if (_rcvBufferLen == _rcvLen) {  //message complete, check message
     if (_rcvBuffer[1] != (_rcvLen - 3)) {  //check for message length
       _numberOfTries = 0;
-      _errorCode = 1;
-      _debugPrinter->println("ERRORCODE4");
+      _errorCode = 4;
       return;
     }
     if (_rcvBuffer[2] != 0x01) {  //Vitotronic returns an error message, skipping DP
       _numberOfTries = 0;
-      _errorCode = 2;  //Vitotronic error
+      _errorCode = 3;  //Vitotronic error
       return;
     }
     if (!_checkChecksum(_rcvBuffer, _rcvLen)) {  //checksum is wrong, trying again
       _rcvBufferLen = 0;
-      _errorCode = 3;  //checksum error
+      _errorCode = 2;  //checksum error
       memset(_rcvBuffer, 0, 12);
       _state = SYNC;
       return;
@@ -298,7 +297,7 @@ void Optolink::_receiveHandler() {
 //set properties for datapoint and move state to SEND
 bool Optolink::readFromDP(uint16_t address, uint8_t length) {
   if (_action != WAIT) {
-    _debugPrinter->println(F("Optolink available, skipping action."));
+    _debugPrinter->println(F("Optolink not available, skipping action."));
     return false;
   }
   //setup properties for next state in communicationHandler
@@ -317,7 +316,7 @@ bool Optolink::readFromDP(uint16_t address, uint8_t length) {
 //set properties datapoint and move state to SEND
 bool Optolink::writeToDP(uint16_t address, uint8_t length, uint8_t value[]) {
   if (_action != WAIT) {
-    _debugPrinter->println(F("Optolink available, skipping action."));
+    _debugPrinter->println(F("Optolink not available, skipping action."));
     return false;
   }
   //setup variables for next state

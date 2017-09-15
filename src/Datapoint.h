@@ -38,9 +38,6 @@ class Datapoint {
     virtual Datapoint& setCallback(StatCallbackFunction callback) {};
     virtual Datapoint& setCallback(CountLCallbackFunction callback) {};
     virtual void transform(uint8_t transformedValue[], float value) {};
-    virtual void transform(uint8_t transformedValue[], bool value) {};
-    virtual void transform(uint8_t transformedValue[], uint32_t value) {};
-    //virtual void transformValue(uint8_t transformedValue[], bool value) {};  //not implemented in Vitotronic
 
   protected:  //all properties are protected for ease of use in inherited classes
     static GlobalCallbackFunction _globalCallback;
@@ -67,7 +64,7 @@ class StatDP : public Datapoint {
     virtual Datapoint& setCallback(StatCallbackFunction callback);
     virtual const uint8_t getLength() const { return 1; }
     virtual void callback(uint8_t value[]);
-    virtual void transform(uint8_t transformedValue[], bool value);
+    virtual void transform(uint8_t transformedValue[], float value);
   private:
     StatCallbackFunction _callback;
 };
@@ -78,7 +75,7 @@ class CountLDP : public Datapoint {
     virtual Datapoint& setCallback(CountLCallbackFunction callback);
     virtual const uint8_t getLength() const { return 4; }
     virtual void callback(uint8_t value[]);
-    virtual void transform(uint8_t transformedValue[], uint32_t value);
+    virtual void transform(uint8_t transformedValue[], float value);
   private:
     CountLCallbackFunction _callback;
 };
