@@ -10,6 +10,8 @@ cache:
 
 env:
     - PLATFORMIO_CI_SRC=examples/globalCallback/globalCallback.ino
+    - PLATFORMIO_CI_SRC=examples/globalCallback-esp32/globalCallback-esp32.ino PLATFORMIO_CI_EXTRA_ARGS="--board=lolin32"
+    - PLATFORMIO_CI_SRC=examples/globalCallback-SWserial/globalCallback-SWserial.ino PLATFORMIO_CI_EXTRA_ARGS="--lib="/tmp/espsoftwareserial-master" --board=d1_mini"
     - PLATFORMIO_CI_SRC=examples/specificCallback/specificCallback.ino
     - PLATFORMIO_CI_SRC=examples/readDatapoint/readDatapoint.ino
     - PLATFORMIO_CI_SRC=examples/setupMethods/setupMethods.ino
@@ -17,6 +19,8 @@ env:
 
 install:
     - pip install -U platformio
+    - wget https://github.com/bertmelis/espsoftwareserial/archive/master.zip -O /tmp/swserial8E2.zip
+    - unzip /tmp/swserial8E2.zip -d /tmp/
 
 script:
-    - platformio ci --lib="." --board=d1_mini --board=lolin32
+    - if [[ $PLATFORMIO_CI_EXTRA_ARGS ]]; then bash -c 'platformio ci --lib="." $PLATFORMIO_CI_EXTRA_ARGS'; else bash -c 'platformio ci --lib="." --board=d1_mini'; fi

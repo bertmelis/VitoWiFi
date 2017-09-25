@@ -43,24 +43,25 @@ and many others
 #pragma once
 #include <Arduino.h>
 #include <queue>
+#include "Config.h"
 #include "Constants.h"
 #include "Datapoint.h"
 #include "Optolink.h"
 #include "Helpers/Logger.h"
-#ifdef USE_SOFTWARESERIAL
-#include <SoftwareSerial.h>
-#endif
 
 
 class VitoWifiClass {
   public:
     VitoWifiClass();
     ~VitoWifiClass();
-#ifdef USE_SOFTWARESERIAL
-    void setup(uint8_t rxPin, uint8_t txPin);
-#else
+    #ifdef USE_SOFTWARESERIAL
+    void setup(int8_t rxPin, int8_t txPin);
+    #endif
+    #ifdef ARDUINO_ARCH_ESP32
+    void setup(HardwareSerial* serial, int8_t rxPin, int8_t txPin);
+    #endif
     void setup(HardwareSerial* serial);
-#endif
+
     void loop();
     void setGlobalCallback(GlobalCallbackFunction globalCallback);
     Datapoint& addDatapoint(const char* name, const char* group, const uint16_t address, const DPType type, bool isWriteable);
@@ -96,7 +97,5 @@ class VitoWifiClass {
     };
     std::queue<Action> _queue;
     Optolink _optolink;
-    bool _enableLed;
     Logger _logger;
-    char* _errorString;
 } extern VitoWifi;

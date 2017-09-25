@@ -51,7 +51,7 @@ void setup() {
 void loop(){
 
   static unsigned long lastMillis = 0;
-  if (millis() - lastMillis > 60 * 1000UL) {  //read all values every 30 seconds
+  if (millis() - lastMillis > 60 * 1000UL) {  //read all values every 60 seconds
     lastMillis = millis();
     VitoWifi.readAll();
   }

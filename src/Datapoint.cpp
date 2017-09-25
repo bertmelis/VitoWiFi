@@ -102,7 +102,8 @@ void StatDP::callback(uint8_t value[]) {
     _callback(_name, _group, boolValue);
   }
   else if (_globalCallback) {
-    const char* str = (boolValue) ? "1" : "0";  //or "true/false"?
+    char str[2] = {'\0'};
+    snprintf(str, sizeof(str), "d", boolValue);
     _globalCallback(_name, _group, str);
   }
 }
@@ -149,7 +150,7 @@ void CountLDP::transform(uint8_t transformedValue[], float value) {
 }
 
 
-/*
+
 ModeDP::ModeDP(const char* name, const char* group, const uint16_t address, bool isWriteable):
   Datapoint(name, group, address, isWriteable)
   {}
@@ -161,20 +162,25 @@ Datapoint& ModeDP::setCallback(ModeCallbackFunction callback) {
 }
 
 
-void ModeDP::callback(DPValue value) {
-  uint8_t intValue = (value.byte1Value);
+void ModeDP::callback(uint8_t value[]) {
   if (_callback) {
-    _callback(this->getName(), this->getGroup(), intValue);
+    _callback(_name, _group, value[0]);
   }
   else if (_globalCallback) {
-    _globalCallback(getName(), getGroup(), intValue);
-  }
-  else {
-    _debugPrinter->println(F("no callback found"));
+    char str[2] = {'\0'};
+    snprintf(str, sizeof(str), "d", value[0]);
+    _globalCallback(_name, _group, str);
   }
 }
 
 
+void ModeDP::transform(uint8_t transformedValue[], float value) {
+  transformedValue[0] = static_cast<uint8_t>(value);
+  return;
+}
+
+
+/*
 HoursDP::HoursDP(const char* name, const char* group, const uint16_t address, bool isWriteable):
   Datapoint(name, group, address, isWriteable)
   {}

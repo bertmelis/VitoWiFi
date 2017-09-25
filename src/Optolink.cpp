@@ -2,7 +2,7 @@
 
 
 Optolink::Optolink():
-  _serialptr(nullptr),
+  _stream(nullptr),
   _address(0),
   _length(0),
   _value{0},
@@ -22,22 +22,27 @@ Optolink::Optolink():
 
 //begin serial @ 4800 baud, 8 bits, even parity, 2 stop bits
 #ifdef USE_SOFTWARESERIAL
-void Optolink::begin(const uint8_t rx, const uint8_t tx) {
-  _serialptr = new SoftwareSerial((int)rx, (int)tx, false, 64);
-  _serialptr->begin(4800);
-  _serialptr->setParity(PARITY_MODE_EVEN);
-  _serialptr->setStopBits(STOP_BITS_TWO);
+void Optolink::begin(int8_t rx, int8_t tx) {
+  SoftwareSerial* serial = new SoftwareSerial(rx, tx, false, 64);
+  serial->begin(4800);
+  serial->setParity(1);
+  serial->setStopBits(2);
+  _stream = serial;
   //serial->flush();
-  //serial->swap();  //use GPIO15 and GPIO13 for TX/RX
-}
-#else
-void Optolink::begin(HardwareSerial* serial) {
-  _serialptr = serial;
-  _serialptr->begin(4800, SERIAL_8E2);
-  //serial->flush();
-  //serial->swap();  //use GPIO15 and GPIO13 for TX/RX
 }
 #endif
+#ifdef ARDUINO_ARCH_ESP32
+void Optolink::begin(HardwareSerial* serial, int8_t rxPin, int8_t txPin) {
+  serial->begin(4800, SERIAL_8E2, rxPin, txPin);
+  _stream = serial;
+  //serial->flush();
+}
+#endif
+void Optolink::begin(HardwareSerial* serial) {
+  serial->begin(4800, SERIAL_8E2);
+  _stream = serial;
+  //serial->flush();
+}
 
 
 void Optolink::loop() {
@@ -83,7 +88,7 @@ void Optolink::loop() {
 //Set communication with Vitotronic to defined state = reset to KW protocol
 void Optolink::_resetHandler() {
   const uint8_t buff[] = {0x04};
-  _serialptr->write(buff, sizeof(buff));
+  _stream->write(buff, sizeof(buff));
   _lastMillis = millis();
   _state = RESET_ACK;
   if (_debugMessage) {
@@ -94,8 +99,8 @@ void Optolink::_resetHandler() {
 
 
 void Optolink::_resetAckHandler() {
-  if (_serialptr->available()) {
-    if (_serialptr->peek() == 0x05) {  //use peek so connection can be made immediately in next state
+  if (_stream->available()) {
+    if (_stream->peek() == 0x05) {  //use peek so connection can be made immediately in next state
       //received 0x05/enquiry: optolink has been reset
       _state = INIT;
       _debugMessage = true;
@@ -119,11 +124,11 @@ void Optolink::_initHandler() {
     _debugPrinter->println(F("Establishing Optolink connection..."));
     _debugMessage = false;
   }
-  if (_serialptr->available()) {
-    if (_serialptr->read() == 0x05) {
+  if (_stream->available()) {
+    if (_stream->read() == 0x05) {
       //0x05/ENQ received, sending initiator
       const uint8_t buff[] = {0x16, 0x00, 0x00};
-      _serialptr->write(buff, sizeof(buff));
+      _stream->write(buff, sizeof(buff));
       _lastMillis = millis();
       _state = INIT_ACK;
     }
@@ -132,8 +137,8 @@ void Optolink::_initHandler() {
 
 
 void Optolink::_initAckHandler() {
-  if (_serialptr->available()) {
-    if (_serialptr->read() == 0x06) {
+  if (_stream->available()) {
+    if (_stream->read() == 0x06) {
       //ACK received, moving to next state
       _state = IDLE;
       _action = WAIT;
@@ -166,15 +171,15 @@ void Optolink::_idleHandler() {
 //send SYNC (= initiator)
 void Optolink::_syncHandler() {
   const uint8_t buff[] = {0x16, 0x00, 0x00};
-  _serialptr->write(buff, sizeof(buff));
+  _stream->write(buff, sizeof(buff));
   _lastMillis = millis();
   _state = SYNC_ACK;
 }
 
 
 void Optolink::_syncAckHandler() {
-  if (_serialptr->available()) {
-    if (_serialptr->read() == 0x06) {
+  if (_stream->available()) {
+    if (_stream->read() == 0x06) {
       if(_action == PROCESS) _state = SEND;
       else _state = IDLE;
     }
@@ -201,7 +206,7 @@ void Optolink::_sendHandler() {
     //add value to message
     memcpy(&buff[7], _value, 1);
     buff[7 + _length] = _calcChecksum(buff, 7 + _length);
-    _serialptr->write(buff, 8 + _length);
+    _stream->write(buff, 8 + _length);
   }
   else {
     //type is READ
@@ -216,7 +221,7 @@ void Optolink::_sendHandler() {
     buff[7] = _calcChecksum(buff, 8);
     //set length of expected answer
     _rcvLen = 8 + _length;
-    _serialptr->write(buff, 8);
+    _stream->write(buff, 8);
   }
   _rcvBufferLen = 0;
   _lastMillis = millis();
@@ -225,15 +230,19 @@ void Optolink::_sendHandler() {
   if (_writeMessageType) _debugPrinter->print(F("WRITE "));
   else _debugPrinter->print(F("READ"));
   _debugPrinter->print(F(" request on address "));
-  _debugPrinter->print(_address, HEX);
+  uint8_t address[2] = {0};
+  address[0] = _address & 0xFF;
+  address[1] = _address >> 8;
+  _printHex(_debugPrinter, address, 2);
+  //_debugPrinter->print(_address, HEX);
   _debugPrinter->print(F(", length "));
   _debugPrinter->println(_length);
 }
 
 
 void Optolink::_sendAckHandler() {
-  if (_serialptr->available()) {
-    uint8_t buff = _serialptr->read();
+  if (_stream->available()) {
+    uint8_t buff = _stream->read();
     if (buff == 0x06) {  //transmit succesful, moving to next state
       _debugPrinter->println(F("req: ack"));
       _state = RECEIVE;
@@ -253,8 +262,8 @@ void Optolink::_sendAckHandler() {
 
 
 void Optolink::_receiveHandler() {
-  while (_serialptr->available() > 0) {  //while instead of if: read complete RX buffer
-    _rcvBuffer[_rcvBufferLen] = _serialptr->read();
+  while (_stream->available() > 0) {  //while instead of if: read complete RX buffer
+    _rcvBuffer[_rcvBufferLen] = _stream->read();
     if (_rcvBuffer[0] != 0x41) return; //find out why this is needed! I'd expect the rx-buffer to be empty.
     ++_rcvBufferLen;
   }
@@ -389,8 +398,8 @@ inline bool Optolink::_checkChecksum(uint8_t array[], uint8_t length) {
 
 //clear serial input buffer
 inline void Optolink::_clearInputBuffer() {
-  while(_serialptr->available() > 0) {
-    _serialptr->read();
+  while(_stream->available() > 0) {
+    _stream->read();
   }
 }
 
@@ -400,7 +409,7 @@ void Optolink::setDebugPrinter(Print* printer) {
 
 
 //Copied from Arduino.cc forum --> (C) robtillaart
-inline void Optolink::_printHex83(uint8_t array[], uint8_t length) {
+inline void Optolink::_printHex(Print* printer, uint8_t array[], uint8_t length) {
   char tmp[length * 2 + 1];
   byte first;
   uint8_t j = 0;
@@ -416,5 +425,5 @@ inline void Optolink::_printHex83(uint8_t array[], uint8_t length) {
     ++j;
   }
   tmp[length * 2] = 0;
-  _debugPrinter->print(tmp);
+  printer->print(tmp);
 }

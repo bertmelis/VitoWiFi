@@ -1,8 +1,6 @@
 #pragma once
 #include <Arduino.h>
 
-//#define USE_SOFTWARESERIAL
-
 /*
 const char* error0 PROGMEM = "Success";
 const char* error1 PROGMEM = "Connection error";
