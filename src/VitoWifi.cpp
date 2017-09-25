@@ -6,11 +6,7 @@ VitoWifiClass VitoWifi;
 
 VitoWifiClass::VitoWifiClass():
   _optolink(),
-  _enableLed(false),
-  _errorString(),
-  _logger() {
-    _errorString = new char[40];
-}
+  _logger() {}
 
 
 VitoWifiClass::~VitoWifiClass() {
@@ -20,17 +16,23 @@ VitoWifiClass::~VitoWifiClass() {
 
 
 //pass serial to Optolink
-#ifdef USE_SOFTWARESERIAL
-void VitoWifiClass::setup(const uint8_t rxPin, const uint8_t txPin) {
+#ifdef USE_SOFTWARESERIAL  //softwareserial
+void VitoWifiClass::setup(const int8_t rxPin, const int8_t txPin) {
   _optolink.begin(rxPin, txPin);
   _datapoints.shrink_to_fit();
 }
-#else
+#endif
+#ifdef ARDUINO_ARCH_ESP32  //esp32
+void VitoWifiClass::setup(HardwareSerial* serial, int8_t rxPin, int8_t txPin) {
+  _optolink.begin(serial, rxPin, txPin);
+  _datapoints.shrink_to_fit();
+}
+#endif
+//esp8266
 void VitoWifiClass::setup(HardwareSerial* serial) {
   _optolink.begin(serial);
   _datapoints.shrink_to_fit();
 }
-#endif
 
 
 void VitoWifiClass::setGlobalCallback(GlobalCallbackFunction globalCallback) {
@@ -61,6 +63,13 @@ Datapoint& VitoWifiClass::addDatapoint(const char* name, const char* group, cons
       Datapoint* countLDP = new CountLDP(name, group, address, isWriteable);
       if (!countLDP) { abort(); }  //out of memory
       _datapoints.push_back(countLDP);
+      break;
+    }
+    case MODE :
+    {
+      Datapoint* modeDP = new ModeDP(name, group, address, isWriteable);
+      if (!modeDP) { abort(); }  //out of memory
+      _datapoints.push_back(modeDP);
       break;
     }
   }

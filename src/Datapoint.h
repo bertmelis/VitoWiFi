@@ -5,15 +5,15 @@ typedef void (*GlobalCallbackFunction)(const char*, const char*, const char*);
 typedef void (*TempCallbackFunction)(const char*, const char*, float);
 typedef void (*StatCallbackFunction)(const char*, const char*, bool);
 typedef void (*CountLCallbackFunction)(const char*, const char*, uint32_t);
-//typedef void (*ModeCallbackFunction)(const char*, const char*, uint8_t);
+typedef void (*ModeCallbackFunction)(const char*, const char*, uint8_t);
 //typedef void (*HoursCallbackFunction)(const char*, const char*, uint32_t);
 //typedef void (*HoursLCallbackFunction)(const char*, const char*, uint32_t);
 
 enum DPType {
   TEMP,
   STAT,
-  COUNTL
-  //MODE
+  COUNTL,
+  MODE
   //HOURS
   //HOURSL
   //COUNT
@@ -37,6 +37,7 @@ class Datapoint {
     virtual Datapoint& setCallback(TempCallbackFunction callback) {};
     virtual Datapoint& setCallback(StatCallbackFunction callback) {};
     virtual Datapoint& setCallback(CountLCallbackFunction callback) {};
+    virtual Datapoint& setCallback(ModeCallbackFunction callback) {};
     virtual void transform(uint8_t transformedValue[], float value) {};
 
   protected:  //all properties are protected for ease of use in inherited classes
@@ -80,17 +81,19 @@ class CountLDP : public Datapoint {
     CountLCallbackFunction _callback;
 };
 
-/*
+
 class ModeDP : public Datapoint {
   public:
     ModeDP(const char* name, const char* group, const uint16_t address, bool isWriteable);
     Datapoint& setCallback(ModeCallbackFunction callback);
-    virtual void callback(uint8_t value[]);
     virtual const uint8_t getLength() const { return 1; }
+    virtual void callback(uint8_t value[]);
+    virtual void transform(uint8_t transformedValue[], float value);
   private:
     ModeCallbackFunction _callback;
 };
 
+/*
 class HoursDP : public Datapoint {
   public:
     HoursDP(const char* name, const char* group, const uint16_t address, bool isWriteable);

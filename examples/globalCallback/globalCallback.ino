@@ -9,10 +9,6 @@ For each Datapoint, the read value is returned using globalCallbackHandler
 
 #include <VitoWifi.h>
 
-#ifdef ARDUINO_ARCH_ESP32
-  HardwareSerial Serial1(2);
-#endif
-
 
 void globalCallbackHandler(const char* name, const char* group, const char* value) {
   Serial1.print(group);
@@ -37,7 +33,7 @@ void setup() {
 void loop() {
 
   static unsigned long lastMillis = 0;
-  if (millis() - lastMillis > 60 * 1000UL) {  //read all values every 30 seconds
+  if (millis() - lastMillis > 60 * 1000UL) {  //read all values every 60 seconds
     lastMillis = millis();
     VitoWifi.readAll();
   }
