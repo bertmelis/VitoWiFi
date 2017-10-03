@@ -103,7 +103,7 @@ void StatDP::callback(uint8_t value[]) {
   }
   else if (_globalCallback) {
     char str[2] = {'\0'};
-    snprintf(str, sizeof(str), "d", boolValue);
+    snprintf(str, sizeof(str), "%d", boolValue);
     _globalCallback(_name, _group, str);
   }
 }
@@ -168,7 +168,7 @@ void ModeDP::callback(uint8_t value[]) {
   }
   else if (_globalCallback) {
     char str[2] = {'\0'};
-    snprintf(str, sizeof(str), "d", value[0]);
+    snprintf(str, sizeof(str), "%d", value[0]);
     _globalCallback(_name, _group, str);
   }
 }
