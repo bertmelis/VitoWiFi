@@ -8,11 +8,13 @@
 class Optolink {
   public:
     Optolink();
-#ifdef USE_SOFTWARESERIAL
-    void begin(const uint8_t rx, const uint8_t tx);
-#else
-    void begin(HardwareSerial* serial);
-#endif
+    #ifdef USE_SOFTWARESERIAL
+    void begin(int8_t rx, int8_t tx);  //software serial
+    #endif
+    #ifdef ARDUINO_ARCH_ESP32
+    void begin(HardwareSerial* serial, int8_t rxPin, int8_t txPin);  //ESP32
+    #endif
+    void begin(HardwareSerial* serial);  //ESP8266
     void loop();
     const int8_t available() const;
     const bool isBusy() const;
@@ -23,11 +25,7 @@ class Optolink {
     void setDebugPrinter(Print* printer);
 
   private:
-#ifdef USE_SOFTWARESERIAL
-    SoftwareSerial* _serialptr;
-#else
-    HardwareSerial* _serialptr;
-#endif
+    Stream* _stream;
     enum OptolinkState: uint8_t {
       RESET,
       RESET_ACK,
@@ -70,7 +68,7 @@ class Optolink {
     bool _debugMessage;
     inline uint8_t _calcChecksum(uint8_t array[], uint8_t length);
     inline bool _checkChecksum(uint8_t array[], uint8_t length);
-    inline void _printHex83(uint8_t array[], uint8_t length);
+    inline void _printHex(Print* printer, uint8_t array[], uint8_t length);
     inline void _clearInputBuffer();
     Print* _debugPrinter;
 };

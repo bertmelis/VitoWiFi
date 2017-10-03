@@ -3,15 +3,11 @@
 This example defines 3 datapoints of type "TEMP" in a struct array.
 Every minute, the array is iterated.
 
-For each Datapoint, the read value is printed as HEX ni Serial1
+For each Datapoint, the read value is printed as HEX in Serial1
 
 */
 
 #include <Optolink.h>
-
-#ifdef ARDUINO_ARCH_ESP32
-  HardwareSerial Serial1(2);
-#endif
 
 Optolink myOptolink;
 uint32_t lastMillis = 0;
@@ -28,7 +24,7 @@ const Datapoint Datapoints[] =
     0x0810, 2,  //boiler temp
     0x0812, 2   //DHW temp
   };
-  uint8_t numberOfDatapoints = sizeof(Datapoints) / sizeof(*Datapoints);
+uint8_t numberOfDatapoints = sizeof(Datapoints) / sizeof(*Datapoints);
 
 
 void setup(){
