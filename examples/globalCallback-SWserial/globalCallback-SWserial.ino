@@ -7,8 +7,13 @@ For each Datapoint, the read value is returned using globalCallbackHandler
 
 */
 
+
+
 #include <VitoWifi.h>
-#include "config.h"
+
+
+
+
 
 
 void globalCallbackHandler(const char* name, const char* group, const char* value) {
