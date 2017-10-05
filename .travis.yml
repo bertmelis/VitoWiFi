@@ -11,7 +11,7 @@ cache:
 env:
     - PLATFORMIO_CI_SRC=examples/globalCallback/globalCallback.ino
     - PLATFORMIO_CI_SRC=examples/globalCallback-esp32/globalCallback-esp32.ino PLATFORMIO_CI_ALT_BOARD="--board=lolin32"
-    - PLATFORMIO_CI_SRC=examples/globalCallback-SWserial/globalCallback-SWserial.ino
+#    - PLATFORMIO_CI_SRC=examples/globalCallback-SWserial/globalCallback-SWserial.ino
     - PLATFORMIO_CI_SRC=examples/specificCallback/specificCallback.ino
     - PLATFORMIO_CI_SRC=examples/readDatapoint/readDatapoint.ino
     - PLATFORMIO_CI_SRC=examples/setupMethods/setupMethods.ino
@@ -19,8 +19,8 @@ env:
 
 install:
     - pip install -U platformio
-    - wget https://github.com/bertmelis/espsoftwareserial/archive/master.zip -O /tmp/espsoftwareserial-master.zip
-    - unzip /tmp/espsoftwareserial-master.zip -d /tmp/
+#    - wget https://github.com/bertmelis/espsoftwareserial/archive/master.zip -O /tmp/espsoftwareserial-master.zip
+#    - unzip /tmp/espsoftwareserial-master.zip -d /tmp/
 
 script:
-    - if [[ $PLATFORMIO_CI_ALT_BOARD ]]; then bash -c 'platformio ci --lib="." --lib="/tmp/espsoftwareserial-master" $PLATFORMIO_CI_ALT_BOARD'; else bash -c 'platformio ci --lib="." --lib="/tmp/espsoftwareserial-master" --board=d1_mini'; fi
+    - if [[ $PLATFORMIO_CI_ALT_BOARD ]]; then bash -c 'platformio ci --lib="." $PLATFORMIO_CI_ALT_BOARD'; else bash -c 'platformio ci --lib="." --board=d1_mini'; fi
