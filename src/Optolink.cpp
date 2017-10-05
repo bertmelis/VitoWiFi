@@ -227,16 +227,15 @@ void Optolink::_sendHandler() {
   _lastMillis = millis();
   --_numberOfTries;
   _state = SEND_ACK;
-  if (_writeMessageType) _debugPrinter->print(F("WRITE "));
-  else _debugPrinter->print(F("READ"));
-  _debugPrinter->print(F(" request on address "));
-  uint8_t address[2] = {0};
-  address[0] = _address & 0xFF;
-  address[1] = _address >> 8;
-  _printHex(_debugPrinter, address, 2);
-  //_debugPrinter->print(_address, HEX);
-  _debugPrinter->print(F(", length "));
-  _debugPrinter->println(_length);
+  if (_writeMessageType) {
+    _debugPrinter->print(F("WRITE "));
+    _printHex(_debugPrinter, buff, 8);
+  }
+  else {
+    _debugPrinter->print(F("READ "));
+    _printHex(_debugPrinter, buff, 8 + _length);
+  }
+    _debugPrinter->print(F("... "));
 }
 
 
@@ -244,17 +243,17 @@ void Optolink::_sendAckHandler() {
   if (_stream->available()) {
     uint8_t buff = _stream->read();
     if (buff == 0x06) {  //transmit succesful, moving to next state
-      _debugPrinter->println(F("req: ack"));
+      _debugPrinter->println(F("ack"));
       _state = RECEIVE;
     }
     else if (buff == 0x15) {  //transmit negatively acknowledged, return to SYNC and try again
-      _debugPrinter->println(F("req: nack"));
+      _debugPrinter->println(F("nack"));
       _state = SYNC;
       _clearInputBuffer();
     }
   }
   if (millis() - _lastMillis > 2 * 1000UL) {  //if no ACK is coming, return to SYNC and try again
-    _debugPrinter->println(F("req: t/o"));
+    _debugPrinter->println(F("t/o"));
     _state = SYNC;
     _clearInputBuffer();
   }
@@ -268,19 +267,24 @@ void Optolink::_receiveHandler() {
     ++_rcvBufferLen;
   }
   if (_rcvBufferLen == _rcvLen) {  //message complete, check message
+    _debugPrinter->print(F("received: "));
+    _printHex(_debugPrinter, _rcvBuffer, _rcvLen);
     if (_rcvBuffer[1] != (_rcvLen - 3)) {  //check for message length
       _numberOfTries = 0;
       _errorCode = 4;
+      _debugPrinter->println(F("... error4"));
       return;
     }
     if (_rcvBuffer[2] != 0x01) {  //Vitotronic returns an error message, skipping DP
       _numberOfTries = 0;
       _errorCode = 3;  //Vitotronic error
+      _debugPrinter->println(F("... error3"));
       return;
     }
     if (!_checkChecksum(_rcvBuffer, _rcvLen)) {  //checksum is wrong, trying again
       _rcvBufferLen = 0;
       _errorCode = 2;  //checksum error
+      _debugPrinter->println(F("... error2"));
       memset(_rcvBuffer, 0, 12);
       _state = SYNC;
       return;
@@ -291,7 +295,7 @@ void Optolink::_receiveHandler() {
     _state = IDLE;
     _action = RETURN;
     _errorCode = 0;  //succes
-    _debugPrinter->println(F("succes"));
+    _debugPrinter->println(F("... succes"));
     return;
   }
   if (millis() - _lastMillis > 10 * 1000UL) {  //Vitotronic isn't answering, try again
@@ -362,11 +366,17 @@ void Optolink::read(uint8_t value[]) {
   }
   if (_writeMessageType) {  //return original value in case of WRITE command
     memcpy(value, &_value, _length);
+    _debugPrinter->print("value transferred: ");
+    _printHex(_debugPrinter, value, _length);
+    _debugPrinter->println("");
     _action = WAIT;
     return;
   }
   else {
     memcpy(value, &_rcvBuffer[7], _length);
+    _debugPrinter->print("value transferred: ");
+    _printHex(_debugPrinter, value, _length);
+    _debugPrinter->println("");
     _action = WAIT;
     return;  //added for clarity
   }

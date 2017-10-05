@@ -72,7 +72,7 @@ class StatDP : public Datapoint {
 
 class CountLDP : public Datapoint {
   public:
-    CountLDP(const char* name, const char* group, const uint16_t address, bool isWriteable = false);
+    CountLDP(const char* name, const char* group, const uint16_t address, bool isWriteable);
     virtual Datapoint& setCallback(CountLCallbackFunction callback);
     virtual const uint8_t getLength() const { return 4; }
     virtual void callback(uint8_t value[]);

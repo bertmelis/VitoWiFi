@@ -152,7 +152,8 @@ void CountLDP::transform(uint8_t transformedValue[], float value) {
 
 
 ModeDP::ModeDP(const char* name, const char* group, const uint16_t address, bool isWriteable):
-  Datapoint(name, group, address, isWriteable)
+  Datapoint(name, group, address, isWriteable),
+  _callback(nullptr)
   {}
 
 
@@ -168,7 +169,7 @@ void ModeDP::callback(uint8_t value[]) {
   }
   else if (_globalCallback) {
     char str[2] = {'\0'};
-    snprintf(str, sizeof(str), "%d", value[0]);
+    snprintf(str, sizeof(str), "%hhu", value[0]);
     _globalCallback(_name, _group, str);
   }
 }
