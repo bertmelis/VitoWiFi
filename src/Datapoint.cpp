@@ -115,19 +115,19 @@ void StatDP::transform(uint8_t transformedValue[], float value) {
 }
 
 
-CountLDP::CountLDP(const char* name, const char* group, const uint16_t address, bool isWriteable):
+CountDP::CountDP(const char* name, const char* group, const uint16_t address, bool isWriteable):
   Datapoint(name, group, address, isWriteable),
   _callback(nullptr)
   {}
 
 
-Datapoint& CountLDP::setCallback(CountLCallbackFunction callback) {
+Datapoint& CountDP::setCallback(CountCallbackFunction callback) {
   _callback = callback;
   return *this;
 }
 
 
-void CountLDP::callback(uint8_t value[]) {
+void CountDP::callback(uint8_t value[]) {
   uint32_t ui32 = value[0] | (value[1] << 8) | (value[2] << 16) | (value[3] << 24);
   if (_callback) {
     _callback(_name, _group, ui32);
@@ -140,7 +140,7 @@ void CountLDP::callback(uint8_t value[]) {
 }
 
 
-void CountLDP::transform(uint8_t transformedValue[], float value) {
+void CountDP::transform(uint8_t transformedValue[], float value) {
   uint32_t _value = (uint32_t)ceil(value);
   transformedValue[3] = _value >> 24;
   transformedValue[2] = _value >> 16;
@@ -149,6 +149,42 @@ void CountLDP::transform(uint8_t transformedValue[], float value) {
   return;
 }
 
+
+CountSDP::CountSDP(const char* name, const char* group, const uint16_t address, bool isWriteable):
+  Datapoint(name, group, address, isWriteable),
+  _callback(nullptr)
+  {}
+
+
+Datapoint& CountSDP::setCallback(CountSCallbackFunction callback) {
+  _callback = callback;
+  return *this;
+}
+
+
+void CountSDP::callback(uint8_t value[]) {
+  uint16_t retValue = value[1] << 8 | value[0];
+  if (_callback) {
+    _callback(_name, _group, retValue);
+  }
+  else if (Datapoint::_globalCallback) {
+    char str[6] = {'\0'};
+    //snprintf(str, sizeof(str), "%f", floatValue);
+    snprintf(str, sizeof(str), "%hu", retValue);
+    _globalCallback(_name, _group, str);
+  }
+  return;
+}
+
+
+void CountSDP::transform(uint8_t transformedValue[], float value) {
+  uint32_t _value = (uint32_t)ceil(value);
+  transformedValue[3] = _value >> 24;
+  transformedValue[2] = _value >> 16;
+  transformedValue[1] = _value >> 8;
+  transformedValue[0] = _value & 0xFF;
+  return;
+}
 
 
 ModeDP::ModeDP(const char* name, const char* group, const uint16_t address, bool isWriteable):

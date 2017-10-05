@@ -58,11 +58,18 @@ Datapoint& VitoWifiClass::addDatapoint(const char* name, const char* group, cons
       _datapoints.push_back(statDP);
       break;
     }
-    case COUNTL :
+    case COUNT :
     {
-      Datapoint* countLDP = new CountLDP(name, group, address, isWriteable);
+      Datapoint* countLDP = new CountDP(name, group, address, isWriteable);
       if (!countLDP) { abort(); }  //out of memory
       _datapoints.push_back(countLDP);
+      break;
+    }
+    case COUNTS :
+    {
+      Datapoint* countSDP = new CountSDP(name, group, address, isWriteable);
+      if (!countSDP) { abort(); }  //out of memory
+      _datapoints.push_back(countSDP);
       break;
     }
     case MODE :

@@ -4,19 +4,16 @@
 typedef void (*GlobalCallbackFunction)(const char*, const char*, const char*);
 typedef void (*TempCallbackFunction)(const char*, const char*, float);
 typedef void (*StatCallbackFunction)(const char*, const char*, bool);
-typedef void (*CountLCallbackFunction)(const char*, const char*, uint32_t);
+typedef void (*CountCallbackFunction)(const char*, const char*, uint32_t);  //long counter: 4 bytes
+typedef void (*CountSCallbackFunction)(const char*, const char*, uint16_t);  //short counter: 2 bytes
 typedef void (*ModeCallbackFunction)(const char*, const char*, uint8_t);
-//typedef void (*HoursCallbackFunction)(const char*, const char*, uint32_t);
-//typedef void (*HoursLCallbackFunction)(const char*, const char*, uint32_t);
 
 enum DPType {
   TEMP,
   STAT,
-  COUNTL,
+  COUNT,
+  COUNTS,
   MODE
-  //HOURS
-  //HOURSL
-  //COUNT
 };
 
 class Datapoint {
@@ -36,7 +33,8 @@ class Datapoint {
     virtual void setCallback(GlobalCallbackFunction globalCallback) {};
     virtual Datapoint& setCallback(TempCallbackFunction callback) {};
     virtual Datapoint& setCallback(StatCallbackFunction callback) {};
-    virtual Datapoint& setCallback(CountLCallbackFunction callback) {};
+    virtual Datapoint& setCallback(CountCallbackFunction callback) {};
+    virtual Datapoint& setCallback(CountSCallbackFunction callback) {};
     virtual Datapoint& setCallback(ModeCallbackFunction callback) {};
     virtual void transform(uint8_t transformedValue[], float value) {};
 
@@ -70,17 +68,27 @@ class StatDP : public Datapoint {
     StatCallbackFunction _callback;
 };
 
-class CountLDP : public Datapoint {
+class CountDP : public Datapoint {
   public:
-    CountLDP(const char* name, const char* group, const uint16_t address, bool isWriteable);
-    virtual Datapoint& setCallback(CountLCallbackFunction callback);
+    CountDP(const char* name, const char* group, const uint16_t address, bool isWriteable);
+    virtual Datapoint& setCallback(CountCallbackFunction callback);
     virtual const uint8_t getLength() const { return 4; }
     virtual void callback(uint8_t value[]);
     virtual void transform(uint8_t transformedValue[], float value);
   private:
-    CountLCallbackFunction _callback;
+    CountCallbackFunction _callback;
 };
 
+class CountSDP : public Datapoint {
+  public:
+    CountSDP(const char* name, const char* group, const uint16_t address, bool isWriteable);
+    virtual Datapoint& setCallback(CountSCallbackFunction callback);
+    virtual const uint8_t getLength() const { return 2; }
+    virtual void callback(uint8_t value[]);
+    virtual void transform(uint8_t transformedValue[], float value);
+  private:
+    CountSCallbackFunction _callback;
+};
 
 class ModeDP : public Datapoint {
   public:
@@ -92,26 +100,3 @@ class ModeDP : public Datapoint {
   private:
     ModeCallbackFunction _callback;
 };
-
-/*
-class HoursDP : public Datapoint {
-  public:
-    HoursDP(const char* name, const char* group, const uint16_t address, bool isWriteable);
-    Datapoint& setCallback(HoursCallbackFunction callback);
-    virtual void callback(uint8_t value[]);
-    virtual const uint8_t getLength() const { return 2; }
-  private:
-    HoursCallbackFunction _callback;
-};
-
-class HoursLDP : public Datapoint {
-  public:
-    HoursLDP(const char* name, const char* group, const uint16_t address, bool isWriteable);
-    Datapoint& setCallback(HoursLCallbackFunction callback);
-    virtual void callback(uint8_t value[]);
-    virtual const uint8_t getLength() const { return 4; }
-  private:
-    HoursLCallbackFunction _callback;
-};
-
-*/
