@@ -14,7 +14,9 @@ class Optolink {
     #ifdef ARDUINO_ARCH_ESP32
     void begin(HardwareSerial* serial, int8_t rxPin, int8_t txPin);  //ESP32
     #endif
+    #ifdef ESP8266
     void begin(HardwareSerial* serial);  //ESP8266
+    #endif
     void loop();
     const int8_t available() const;
     const bool isBusy() const;

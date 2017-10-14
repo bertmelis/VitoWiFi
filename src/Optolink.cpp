@@ -38,11 +38,13 @@ void Optolink::begin(HardwareSerial* serial, int8_t rxPin, int8_t txPin) {
   //serial->flush();
 }
 #endif
+#ifdef ESP8266
 void Optolink::begin(HardwareSerial* serial) {
   serial->begin(4800, SERIAL_8E2);
   _stream = serial;
   //serial->flush();
 }
+#endif
 
 
 void Optolink::loop() {

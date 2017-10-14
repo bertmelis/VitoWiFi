@@ -28,11 +28,12 @@ void VitoWifiClass::setup(HardwareSerial* serial, int8_t rxPin, int8_t txPin) {
   _datapoints.shrink_to_fit();
 }
 #endif
-//esp8266
+#ifdef ESP8266  //esp8266
 void VitoWifiClass::setup(HardwareSerial* serial) {
   _optolink.begin(serial);
   _datapoints.shrink_to_fit();
 }
+#endif
 
 
 void VitoWifiClass::setGlobalCallback(GlobalCallbackFunction globalCallback) {
