@@ -46,11 +46,24 @@ void Optolink::begin(HardwareSerial* serial) {
 }
 #endif
 
+void Optolink::SetState( OptolinkState state )
+{
+    //_debugPrinter->println(F("Optolink: Setting state = "));
+	//_debugPrinter->println( state, DEC );
+	_state = state;
+}
+
+void Optolink::SetAction( OptolinkAction action )
+{
+    //_debugPrinter->println(F("Optolink: Setting state = "));
+	//_debugPrinter->println( action, DEC );
+	_action = action;
+}
 
 void Optolink::loop() {
   if (_numberOfTries < 1) {
-    _state = IDLE;
-    _action = RETURN_ERROR;
+    SetState( IDLE );
+    SetAction( RETURN_ERROR );
   }
   switch (_state) {
     case RESET:
@@ -92,7 +105,7 @@ void Optolink::_resetHandler() {
   const uint8_t buff[] = {0x04};
   _stream->write(buff, sizeof(buff));
   _lastMillis = millis();
-  _state = RESET_ACK;
+  SetState( RESET_ACK );
   if (_debugMessage) {
     _debugPrinter->println(F("Resetting Optolink..."));
     _debugMessage = false;
@@ -104,7 +117,7 @@ void Optolink::_resetAckHandler() {
   if (_stream->available()) {
     if (_stream->peek() == 0x05) {  //use peek so connection can be made immediately in next state
       //received 0x05/enquiry: optolink has been reset
-      _state = INIT;
+      SetState( INIT );
       _debugMessage = true;
       _debugPrinter->println(F("Optolink reset."));
     }
@@ -114,7 +127,7 @@ void Optolink::_resetAckHandler() {
   }
   else {
     if (millis() - _lastMillis > 500) {  //try again every 0,5sec
-      _state = RESET;
+      SetState( RESET );
     }
   }
 }
@@ -132,7 +145,7 @@ void Optolink::_initHandler() {
       const uint8_t buff[] = {0x16, 0x00, 0x00};
       _stream->write(buff, sizeof(buff));
       _lastMillis = millis();
-      _state = INIT_ACK;
+      SetState( INIT_ACK );
     }
   }
 }
@@ -142,8 +155,8 @@ void Optolink::_initAckHandler() {
   if (_stream->available()) {
     if (_stream->read() == 0x06) {
       //ACK received, moving to next state
-      _state = IDLE;
-      _action = WAIT;
+      SetState( IDLE );
+      SetAction( WAIT );
       _debugMessage = true;
       //debug: done
       _debugPrinter->println(F("Optolink connection established."));
@@ -151,11 +164,11 @@ void Optolink::_initAckHandler() {
     else {
       //return to previous state
       _clearInputBuffer();
-      _state = INIT;
+      SetState( INIT );
     }
   }
   if (millis() - _lastMillis > 10 * 1000UL) {  //if no ACK is coming, reset connection
-    _state = RESET;
+    SetState( RESET );
   }
 }
 
@@ -163,10 +176,13 @@ void Optolink::_initAckHandler() {
 //idle state, waiting for user action
 void Optolink::_idleHandler() {
   if (millis() - _lastMillis > 2 * 60 * 1000UL) {  //send SYNC every 2 minutes to keep communication alive
-    _state = SYNC;
+    SetState( SYNC );
   }
   _clearInputBuffer(); //keep input clean
-  if (_action == PROCESS) _state = SYNC;
+  if (_action == PROCESS) 
+  {
+	  SetState( SYNC );
+  }
 }
 
 
@@ -175,20 +191,29 @@ void Optolink::_syncHandler() {
   const uint8_t buff[] = {0x16, 0x00, 0x00};
   _stream->write(buff, sizeof(buff));
   _lastMillis = millis();
-  _state = SYNC_ACK;
+  SetState( SYNC_ACK );
 }
 
 
 void Optolink::_syncAckHandler() {
   if (_stream->available()) {
     if (_stream->read() == 0x06) {
-      if(_action == PROCESS) _state = SEND;
-      else _state = IDLE;
+      if(_action == PROCESS)
+	  {
+		  SetState( SEND );
+	  }
+      else
+	  {
+		  SetState( IDLE );
+	  }
     }
   }
   if (millis() - _lastMillis > 2 * 1000UL) {  //if no ACK is coming, reset connection
-    _state = RESET;
-    if (_action = PROCESS) --_numberOfTries;
+    SetState( RESET );
+    if (_action == PROCESS)
+	{
+		--_numberOfTries;
+	}
   }
 }
 
@@ -206,9 +231,14 @@ void Optolink::_sendHandler() {
     buff[5] = _address & 0xFF;
     buff[6] = _length;
     //add value to message
-    memcpy(&buff[7], _value, 1);
-    buff[7 + _length] = _calcChecksum(buff, 7 + _length);
+    memcpy(&buff[7], _value, _length);
+    buff[7 + _length] = _calcChecksum(buff, 8 + _length);
     _stream->write(buff, 8 + _length);
+		
+    //The return is always 8 bit long apparently
+	//This is mentioned here: https://openv.wikispaces.com/Protokoll+300
+	//At the bottom of the page (look for: RX: Data: 0x41 0x05 0x01 0x02 0x23 0x23 0x01 0x4f )
+    _rcvLen = 8;
   }
   else {
     //type is READ
@@ -228,16 +258,16 @@ void Optolink::_sendHandler() {
   _rcvBufferLen = 0;
   _lastMillis = millis();
   --_numberOfTries;
-  _state = SEND_ACK;
+  SetState( SEND_ACK );
   if (_writeMessageType) {
     _debugPrinter->print(F("WRITE "));
-    _printHex(_debugPrinter, buff, 8);
+    _printHex(_debugPrinter, buff, 8 + _length);
   }
   else {
     _debugPrinter->print(F("READ "));
-    _printHex(_debugPrinter, buff, 8 + _length);
+    _printHex(_debugPrinter, buff, 8);
   }
-    _debugPrinter->print(F("... "));
+  _debugPrinter->print(F("... "));
 }
 
 
@@ -246,17 +276,19 @@ void Optolink::_sendAckHandler() {
     uint8_t buff = _stream->read();
     if (buff == 0x06) {  //transmit succesful, moving to next state
       _debugPrinter->println(F("ack"));
-      _state = RECEIVE;
+      SetState( RECEIVE );
+	  return;
     }
     else if (buff == 0x15) {  //transmit negatively acknowledged, return to SYNC and try again
       _debugPrinter->println(F("nack"));
-      _state = SYNC;
+      SetState( SYNC );
       _clearInputBuffer();
+	  return;
     }
   }
   if (millis() - _lastMillis > 2 * 1000UL) {  //if no ACK is coming, return to SYNC and try again
     _debugPrinter->println(F("t/o"));
-    _state = SYNC;
+    SetState( SYNC );
     _clearInputBuffer();
   }
 }
@@ -265,46 +297,56 @@ void Optolink::_sendAckHandler() {
 void Optolink::_receiveHandler() {
   while (_stream->available() > 0) {  //while instead of if: read complete RX buffer
     _rcvBuffer[_rcvBufferLen] = _stream->read();
-    if (_rcvBuffer[0] != 0x41) return; //find out why this is needed! I'd expect the rx-buffer to be empty.
     ++_rcvBufferLen;
   }
+  
+  _debugPrinter->print(F("received: "));
+  _printHex(_debugPrinter, _rcvBuffer, _rcvBufferLen);
+  
+  if (_rcvBuffer[0] != 0x41) return; //find out why this is needed! I'd expect the rx-buffer to be empty.
+  
   if (_rcvBufferLen == _rcvLen) {  //message complete, check message
-    _debugPrinter->print(F("received: "));
-    _printHex(_debugPrinter, _rcvBuffer, _rcvLen);
     if (_rcvBuffer[1] != (_rcvLen - 3)) {  //check for message length
       _numberOfTries = 0;
       _errorCode = 4;
-      _debugPrinter->println(F("... error4"));
+      _debugPrinter->println(F("... message length error"));
       return;
     }
     if (_rcvBuffer[2] != 0x01) {  //Vitotronic returns an error message, skipping DP
       _numberOfTries = 0;
       _errorCode = 3;  //Vitotronic error
-      _debugPrinter->println(F("... error3"));
+      _debugPrinter->println(F("... Vitotronic error"));
       return;
     }
     if (!_checkChecksum(_rcvBuffer, _rcvLen)) {  //checksum is wrong, trying again
       _rcvBufferLen = 0;
       _errorCode = 2;  //checksum error
-      _debugPrinter->println(F("... error2"));
+      _debugPrinter->println(F("... checksum error"));
       memset(_rcvBuffer, 0, 12);
-      _state = SYNC;
+      SetState( SYNC );
       return;
     }
     if (_rcvBuffer[3] == 0x01) {
       //message is from READ command, so returning read value
     }
-    _state = IDLE;
-    _action = RETURN;
+    SetState( IDLE );
+    SetAction( RETURN );
     _errorCode = 0;  //succes
     _debugPrinter->println(F("... succes"));
     return;
+  }
+  else
+  {
+    //_debugPrinter->println(F("Recieved answer of unexpected length. Got:"));
+    //_debugPrinter->println(_rcvBufferLen, DEC);
+    //_debugPrinter->println(F("Expected:"));
+    //_debugPrinter->println(_rcvLen, DEC);
   }
   if (millis() - _lastMillis > 10 * 1000UL) {  //Vitotronic isn't answering, try again
     _rcvBufferLen = 0;
     _errorCode = 1;  //Connection error
     memset(_rcvBuffer, 0, 12);
-    _state = SYNC;
+    SetState( SYNC );
   }
 }
 
@@ -322,8 +364,8 @@ bool Optolink::readFromDP(uint16_t address, uint8_t length) {
   _rcvBufferLen = 0;
   _numberOfTries = 5;
   memset(_rcvBuffer, 0, 12);
-  _state = SYNC;  //avoid an extra loop to pass by idleHandler
-  _action = PROCESS;
+  SetState( SYNC );  //avoid an extra loop to pass by idleHandler
+  SetAction( PROCESS );
   return true;
 }
 
@@ -342,8 +384,8 @@ bool Optolink::writeToDP(uint16_t address, uint8_t length, uint8_t value[]) {
   _rcvBufferLen = 0;
   _numberOfTries = 5;
   memset(_rcvBuffer, 0, 12);
-  _state = SYNC;  //avoid an extra loop to pass by idleHandler
-  _action = PROCESS;
+  SetState( SYNC );  //avoid an extra loop to pass by idleHandler
+  SetAction( PROCESS );
   return true;
 }
 
@@ -371,7 +413,7 @@ void Optolink::read(uint8_t value[]) {
     _debugPrinter->print("value transferred: ");
     _printHex(_debugPrinter, value, _length);
     _debugPrinter->println("");
-    _action = WAIT;
+    SetAction( WAIT );
     return;
   }
   else {
@@ -379,14 +421,15 @@ void Optolink::read(uint8_t value[]) {
     _debugPrinter->print("value transferred: ");
     _printHex(_debugPrinter, value, _length);
     _debugPrinter->println("");
-    _action = WAIT;
+    SetAction( WAIT );
     return;  //added for clarity
   }
 }
 
 
 const uint8_t Optolink::readError() {
-  _action = WAIT;
+  SetAction( WAIT );
+  _debugPrinter->println(F("Read error"));
   return _errorCode;
 }
 

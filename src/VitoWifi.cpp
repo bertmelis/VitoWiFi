@@ -85,6 +85,7 @@ Datapoint* VitoWifiClass::_getDatapoint(const char* name) {
 
 
 void VitoWifiClass::readAll() {
+  _logger.println(F("Reading all datapoints"));
   bool foundOne = false;
   for (Datapoint* iDP : _datapoints) {
     _readDatapoint(iDP);
@@ -150,8 +151,14 @@ void VitoWifiClass::_writeDatapoint(const char* name, float value, size_t length
 void VitoWifiClass::loop(){
   _optolink.loop();
   if (!_queue.empty() && !_optolink.isBusy()) {
-    if (_queue.front().write) _optolink.writeToDP(_queue.front().DP->getAddress(), _queue.front().DP->getLength(), _queue.front().value);
-    else _optolink.readFromDP(_queue.front().DP->getAddress(), _queue.front().DP->getLength());
+    if (_queue.front().write) 
+	{
+		_optolink.writeToDP(_queue.front().DP->getAddress(), _queue.front().DP->getLength(), _queue.front().value);
+	}
+    else 
+	{
+		_optolink.readFromDP(_queue.front().DP->getAddress(), _queue.front().DP->getLength());
+	}
     return;
   }
   if (_optolink.available() > 0) {  //trigger callback when ready and remove element from queue

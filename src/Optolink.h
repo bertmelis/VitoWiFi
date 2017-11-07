@@ -73,4 +73,7 @@ class Optolink {
     inline void _printHex(Print* printer, uint8_t array[], uint8_t length);
     inline void _clearInputBuffer();
     Print* _debugPrinter;
+	
+	void SetState( OptolinkState state );
+	void SetAction( OptolinkAction action );
 };

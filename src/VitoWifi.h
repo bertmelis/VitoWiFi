@@ -77,7 +77,7 @@ class VitoWifiClass {
     void writeDatapoint(const char* name, TArg arg) {
       static_assert(sizeof(TArg) <= sizeof(float), "writeDatapoint() argument size must be <= 4 bytes");
 		   float _float = (float)arg;
-       size_t length = ceil(sizeof(arg) / 2);
+		   size_t length = sizeof(arg); //JS: Why was this ceil(sizeof(arg/2)??  Not sure so using _writeDatapoint directly in homieboiler
 		   _writeDatapoint(name, _float, length);
     }
 
@@ -87,9 +87,9 @@ class VitoWifiClass {
     void disableLogger();
     void setLoggingPrinter(Print* printer);
 
+    void _writeDatapoint(const char* name, float value, size_t length);
   private:
     inline void _readDatapoint(Datapoint* dp);
-    void _writeDatapoint(const char* name, float value, size_t length);
     Datapoint* _getDatapoint(const char* name);
     std::vector<Datapoint*> _datapoints;
     struct Action {
