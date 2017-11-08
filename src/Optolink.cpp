@@ -46,20 +46,6 @@ void Optolink::begin(HardwareSerial* serial) {
 }
 #endif
 
-void Optolink::SetState( OptolinkState state )
-{
-    //_debugPrinter->println(F("Optolink: Setting state = "));
-	//_debugPrinter->println( state, DEC );
-	_state = state;
-}
-
-void Optolink::SetAction( OptolinkAction action )
-{
-    //_debugPrinter->println(F("Optolink: Setting state = "));
-	//_debugPrinter->println( action, DEC );
-	_action = action;
-}
-
 void Optolink::loop() {
   if (_numberOfTries < 1) {
     SetState( IDLE );

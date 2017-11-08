@@ -74,6 +74,17 @@ class Optolink {
     inline void _clearInputBuffer();
     Print* _debugPrinter;
 	
-	void SetState( OptolinkState state );
-	void SetAction( OptolinkAction action );
+	inline void SetState( OptolinkState state )
+	{
+		//_debugPrinter->println(F("Optolink: Setting state = "));
+		//_debugPrinter->println( state, DEC );
+		_state = state;
+	}
+
+	inline void SetAction( OptolinkAction action )
+	{
+		//_debugPrinter->println(F("Optolink: Setting state = "));
+		//_debugPrinter->println( action, DEC );
+		_action = action;
+	}
 };
