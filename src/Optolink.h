@@ -73,4 +73,18 @@ class Optolink {
     inline void _printHex(Print* printer, uint8_t array[], uint8_t length);
     inline void _clearInputBuffer();
     Print* _debugPrinter;
+	
+	inline void SetState( OptolinkState state )
+	{
+		//_debugPrinter->println(F("Optolink: Setting state = "));
+		//_debugPrinter->println( state, DEC );
+		_state = state;
+	}
+
+	inline void SetAction( OptolinkAction action )
+	{
+		//_debugPrinter->println(F("Optolink: Setting state = "));
+		//_debugPrinter->println( action, DEC );
+		_action = action;
+	}
 };
