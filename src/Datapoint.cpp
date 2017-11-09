@@ -200,7 +200,7 @@ void ModeDP::callback(uint8_t value[]) {
     _callback(_name, _group, value[0]);
   }
   else if (_globalCallback) {
-    char str[2] = {'\0'};
+    char str[4] = {'\0'};
     snprintf(str, sizeof(str), "%u", value[0]);
     _globalCallback(_name, _group, str);
   }
