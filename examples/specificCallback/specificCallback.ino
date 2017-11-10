@@ -9,6 +9,8 @@ For each Datapoint, the read value is returned using globalCallbackHandler
 
 #include <VitoWifi.h>
 
+VitoWifi_setProtocol(P300);
+
 #ifdef ARDUINO_ARCH_ESP32
   HardwareSerial Serial1(2);
 #endif

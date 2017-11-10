@@ -9,6 +9,7 @@ For each Datapoint, the read value is returned using globalCallbackHandler
 
 #include <VitoWifi.h>
 
+VitoWifi_setProtocol(P300);
 
 void globalCallbackHandler(const char* name, const char* group, const char* value) {
   Serial1.print(group);
