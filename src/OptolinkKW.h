@@ -22,6 +22,7 @@ class OptolinkKW {
     void read(uint8_t value[]);
     const uint8_t readError();
     void setLogger(Print* printer);
+    Logger* getLogger();
 
   private:
     Stream* _stream;

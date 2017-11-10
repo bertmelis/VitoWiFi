@@ -259,6 +259,10 @@ void OptolinkKW::setLogger(Print* printer) {
   _logger.setPrinter(printer);
 }
 
+Logger* OptolinkKW::getLogger() {
+  return &_logger;
+}
+
 
 //Copied from Arduino.cc forum --> (C) robtillaart
 inline void OptolinkKW::_printHex(Print* printer, uint8_t array[], uint8_t length) {

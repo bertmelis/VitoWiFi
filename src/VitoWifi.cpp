@@ -244,26 +244,30 @@ void VitoWifiInterface<OptolinkKW>::loop(){
 template<>
 void VitoWifiInterface<OptolinkP300>::setLogger(Print* printer) {
   _logger.setPrinter(printer);
-  _optolink.setLogger(&_logger);
+  _optolink.setLogger(printer);
 }
 template<>
 void VitoWifiInterface<OptolinkKW>::setLogger(Print* printer) {
   _logger.setPrinter(printer);
-  _optolink.setLogger(&_logger);
+  _optolink.setLogger(printer);
 }
 template<>
 void VitoWifiInterface<OptolinkP300>::enableLogger() {
   _logger.setLogging(true);
+  _optolink.getLogger()->setLogging(true);
 }
 template<>
 void VitoWifiInterface<OptolinkKW>::enableLogger() {
   _logger.setLogging(true);
+  _optolink.getLogger()->setLogging(true);
 }
 template<>
 void VitoWifiInterface<OptolinkP300>::disableLogger() {
   _logger.setLogging(false);
+  _optolink.getLogger()->setLogging(false);
 }
 template<>
 void VitoWifiInterface<OptolinkKW>::disableLogger() {
   _logger.setLogging(false);
+  _optolink.getLogger()->setLogging(false);
 }

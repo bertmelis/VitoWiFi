@@ -438,6 +438,10 @@ void OptolinkP300::setLogger(Print* printer) {
   _logger.setPrinter(printer);
 }
 
+Logger* OptolinkP300::getLogger() {
+  return &_logger;
+}
+
 
 //Copied from Arduino.cc forum --> (C) robtillaart
 inline void OptolinkP300::_printHex(Print* printer, uint8_t array[], uint8_t length) {
