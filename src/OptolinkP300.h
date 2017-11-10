@@ -1,16 +1,12 @@
 #pragma once
 #include <Arduino.h>
 #include "Constants.h"
-#ifdef USE_SOFTWARESERIAL
-#include <SoftwareSerial.h>
-#endif
+#include "Helpers/Logger.h"
 
-class Optolink {
+
+class OptolinkP300 {
   public:
-    Optolink();
-    #ifdef USE_SOFTWARESERIAL
-    void begin(int8_t rx, int8_t tx);  //software serial
-    #endif
+    OptolinkP300();
     #ifdef ARDUINO_ARCH_ESP32
     void begin(HardwareSerial* serial, int8_t rxPin, int8_t txPin);  //ESP32
     #endif
@@ -24,7 +20,7 @@ class Optolink {
     bool writeToDP(uint16_t address, uint8_t length, uint8_t value[]);
     void read(uint8_t value[]);
     const uint8_t readError();
-    void setDebugPrinter(Print* printer);
+    void setLogger(Logger* logger);
 
   private:
     Stream* _stream;
@@ -72,19 +68,16 @@ class Optolink {
     inline bool _checkChecksum(uint8_t array[], uint8_t length);
     inline void _printHex(Print* printer, uint8_t array[], uint8_t length);
     inline void _clearInputBuffer();
-    Print* _debugPrinter;
-	
-	inline void SetState( OptolinkState state )
-	{
-		//_debugPrinter->println(F("Optolink: Setting state = "));
-		//_debugPrinter->println( state, DEC );
-		_state = state;
-	}
+    Logger* _logger;
 
-	inline void SetAction( OptolinkAction action )
-	{
-		//_debugPrinter->println(F("Optolink: Setting state = "));
-		//_debugPrinter->println( action, DEC );
-		_action = action;
-	}
+    inline void SetState(OptolinkState state)	{
+      //_debugPrinter->println(F("Optolink: Setting state = "));
+      //_debugPrinter->println(state, DEC);
+      _state = state;
+    }
+  	inline void SetAction(OptolinkAction action) {
+      //_debugPrinter->println(F("Optolink: Setting state = "));
+      //_debugPrinter->println(action, DEC);
+      _action = action;
+    }
 };

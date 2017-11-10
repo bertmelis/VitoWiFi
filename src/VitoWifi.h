@@ -46,23 +46,15 @@ and many others
 #include "Config.h"
 #include "Constants.h"
 #include "Datapoint.h"
-#include "Optolink.h"
+#include "OptolinkP300.h"
+#include "OptolinkKW.h"
 #include "Helpers/Logger.h"
 
 
-class VitoWifiClass {
+class VitoWifiBase {
   public:
-    VitoWifiClass();
-    ~VitoWifiClass();
-    #ifdef USE_SOFTWARESERIAL
-    void setup(int8_t rxPin, int8_t txPin);
-    #endif
-    #ifdef ARDUINO_ARCH_ESP32
-    void setup(HardwareSerial* serial, int8_t rxPin, int8_t txPin);
-    #endif
-    #ifdef ESP8266
-    void setup(HardwareSerial* serial);
-    #endif
+    VitoWifiBase();
+    ~VitoWifiBase();
 
     void loop();
     void setGlobalCallback(GlobalCallbackFunction globalCallback);
@@ -80,15 +72,9 @@ class VitoWifiClass {
 		   size_t length = sizeof(arg); //JS: Why was this ceil(sizeof(arg/2)??  Not sure so using _writeDatapoint directly in homieboiler
 		   _writeDatapoint(name, _float, length);
     }
-
-    //void enableLed(uint8_t pin, uint8_t on);
-
-    void enableLogger();
-    void disableLogger();
-    void setLoggingPrinter(Print* printer);
-
     void _writeDatapoint(const char* name, float value, size_t length);
-  private:
+
+  protected:
     inline void _readDatapoint(Datapoint* dp);
     Datapoint* _getDatapoint(const char* name);
     std::vector<Datapoint*> _datapoints;
@@ -98,6 +84,32 @@ class VitoWifiClass {
       uint8_t value[4];
     };
     std::queue<Action> _queue;
-    Optolink _optolink;
     Logger _logger;
-} extern VitoWifi;
+};
+
+
+template <class P>
+class VitoWifiInterface: public VitoWifiBase {
+  public:
+    VitoWifiInterface(){};
+    ~VitoWifiInterface(){};
+    #ifdef ARDUINO_ARCH_ESP32
+    void setup(HardwareSerial* serial, int8_t rxPin, int8_t txPin);
+    #endif
+    #ifdef ESP8266
+    void setup(HardwareSerial* serial);
+    #endif
+    void loop();
+
+    void enableLogger();
+    void disableLogger();
+    void setLogger(Print* printer);
+
+  private:
+    P _optolink;
+};
+
+
+#define P300 OptolinkP300
+#define KW   OptolinkKW
+#define VitoWifi_setProtocol(protocol) VitoWifiInterface<protocol> VitoWifi
