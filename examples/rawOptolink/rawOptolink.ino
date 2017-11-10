@@ -32,7 +32,7 @@ void setup(){
 
   //Start Viessmann communication on Serial (aka UART0)
   myOptolink.begin(&Serial);
-  myOptolink.setDebugPrinter(&Serial1);
+  myOptolink.setLogger(&Serial1);
 }
 
 
