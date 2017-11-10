@@ -25,7 +25,7 @@ void setup() {
 
   //setup VitoWifi using a global callback handler
   VitoWifi.enableLogger();
-  VitoWifi.setLoggingPrinter(&Serial1);
+  VitoWifi.setLogger(&Serial1);
 
   VitoWifi.addDatapoint("outsidetemp", "boiler", 0x5525, TEMP);
   VitoWifi.addDatapoint("boilertemp",  "boiler", 0x0810, TEMP);

@@ -9,7 +9,7 @@ For each Datapoint, the read value is printed as HEX in Serial1
 
 #include <OptolinkP300.h>
 
-Optolink myOptolink;
+OptolinkP300 myOptolink;
 uint32_t lastMillis = 0;
 bool getValues = false;
 uint8_t currentIndex = 0;
