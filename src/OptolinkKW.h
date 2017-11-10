@@ -21,7 +21,7 @@ class OptolinkKW {
     bool writeToDP(uint16_t address, uint8_t length, uint8_t value[]);
     void read(uint8_t value[]);
     const uint8_t readError();
-    void setLogger(Logger* logger);
+    void setLogger(Print* printer);
 
   private:
     Stream* _stream;
@@ -56,5 +56,5 @@ class OptolinkKW {
     bool _debugMessage;
     inline void _printHex(Print* printer, uint8_t array[], uint8_t length);
     inline void _clearInputBuffer();
-    Logger* _logger;
+    Logger _logger;
 };

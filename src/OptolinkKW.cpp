@@ -15,7 +15,8 @@ OptolinkKW::OptolinkKW():
   _action(WAIT),
   _lastMillis(0),
   _numberOfTries(5),
-  _errorCode(0)
+  _errorCode(0),
+  _logger()
   {}
 
 
@@ -66,7 +67,7 @@ void OptolinkKW::_initHandler() {
     if(_stream->peek() == 0x05) {
       _state = IDLE;
       _idleHandler();
-      _logger->println("INIT done.");
+      _logger.println("INIT done.");
     }
     else _stream->read();
   }
@@ -85,13 +86,13 @@ void OptolinkKW::_idleHandler() {
   if (_stream->available()) {
     if (_stream->read() == 0x05) {
       _lastMillis = millis();
-      _logger->println("0x05 received");
+      _logger.println("0x05 received");
       if (_action == PROCESS) {
         _state = SYNC;
         _syncHandler();
       }
     }
-    else _logger->println("something wrong received");
+    else _logger.println("something wrong received");
   }
   else if (_action == PROCESS && (millis() - _lastMillis < 10UL)) {  // don't wait for 0x05 sync signal, send directly after last request
     _state = SEND;
@@ -141,12 +142,12 @@ void OptolinkKW::_sendHandler() {
   _rcvBufferLen = 0;
   --_numberOfTries;
   _state = RECEIVE;
-  if (_writeMessageType) _logger->print(F("WRITE "));
-  else _logger->print(F("READ"));
-  _logger->print(F(" request on address "));
-  _printHex(_logger, &buff[1], 2);
-  _logger->print(F(", length "));
-  _logger->println(_length);
+  if (_writeMessageType) _logger.print(F("WRITE "));
+  else _logger.print(F("READ"));
+  _logger.print(F(" request on address "));
+  _printHex(&_logger, &buff[1], 2);
+  _logger.print(F(", length "));
+  _logger.println(_length);
 }
 
 
@@ -160,7 +161,7 @@ void OptolinkKW::_receiveHandler() {
     _action = RETURN;
     _lastMillis = millis();
     _errorCode = 0;  //succes
-    _logger->println(F("succes"));
+    _logger.println(F("succes"));
     return;
   }
   else if (millis() - _lastMillis > 10 * 1000UL) {  //Vitotronic isn't answering, try again
@@ -176,7 +177,7 @@ void OptolinkKW::_receiveHandler() {
 //set properties for datapoint and move state to SEND
 bool OptolinkKW::readFromDP(uint16_t address, uint8_t length) {
   if (_action != WAIT) {
-    _logger->println(F("Optolink not available, skipping action."));
+    _logger.println(F("Optolink not available, skipping action."));
     return false;
   }
   //setup properties for next state in communicationHandler
@@ -194,7 +195,7 @@ bool OptolinkKW::readFromDP(uint16_t address, uint8_t length) {
 //set properties datapoint and move state to SEND
 bool OptolinkKW::writeToDP(uint16_t address, uint8_t length, uint8_t value[]) {
   if (_action != WAIT) {
-    _logger->println(F("Optolink not available, skipping action."));
+    _logger.println(F("Optolink not available, skipping action."));
     return false;
   }
   //setup variables for next state
@@ -225,7 +226,7 @@ const bool OptolinkKW::isBusy() const {
 //return value and reset comunication to IDLE
 void OptolinkKW::read(uint8_t value[]) {
   if (_action != RETURN) {
-    _logger->println(F("No reading available"));
+    _logger.println(F("No reading available"));
     return;
   }
   if (_writeMessageType) {  //return original value in case of WRITE command
@@ -254,8 +255,8 @@ inline void OptolinkKW::_clearInputBuffer() {
   }
 }
 
-void OptolinkKW::setLogger(Logger* logger) {
-  _logger = logger;
+void OptolinkKW::setLogger(Print* printer) {
+  _logger.setPrinter(printer);
 }
 
 

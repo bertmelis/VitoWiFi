@@ -20,7 +20,7 @@ class OptolinkP300 {
     bool writeToDP(uint16_t address, uint8_t length, uint8_t value[]);
     void read(uint8_t value[]);
     const uint8_t readError();
-    void setLogger(Logger* logger);
+    void setLogger(Print* printer);
 
   private:
     Stream* _stream;
@@ -68,7 +68,7 @@ class OptolinkP300 {
     inline bool _checkChecksum(uint8_t array[], uint8_t length);
     inline void _printHex(Print* printer, uint8_t array[], uint8_t length);
     inline void _clearInputBuffer();
-    Logger* _logger;
+    Logger _logger;
 
     inline void SetState(OptolinkState state)	{
       //_debugPrinter->println(F("Optolink: Setting state = "));
