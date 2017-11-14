@@ -7,9 +7,9 @@ For each Datapoint, the read value is printed as HEX in Serial1
 
 */
 
-#include <Optolink.h>
+#include <OptolinkP300.h>
 
-Optolink myOptolink;
+OptolinkP300 myOptolink;
 uint32_t lastMillis = 0;
 bool getValues = false;
 uint8_t currentIndex = 0;
@@ -32,7 +32,7 @@ void setup(){
 
   //Start Viessmann communication on Serial (aka UART0)
   myOptolink.begin(&Serial);
-  myOptolink.setDebugPrinter(&Serial1);
+  myOptolink.setLogger(&Serial1);
 }
 
 
