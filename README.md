@@ -5,10 +5,6 @@ Arduino Library for ESP8266 to communicate with Viessmann boilers using a (DIY) 
 
 Based on the fantastic work on http://openv.wikispaces.com. Check out this site for a simple hardware implementations
 
-**WARNING: This code compiles and works**
-**However, this is only a testing release**
-**Writing to Vitotronic is not tested**
-
 **This library is non-blocking**
 This also means that the use of blocking code is not supported.
 Since we're talking serial @4800 baud, we would be wasting precious processing time while reading and writing to the optolink. Furthermore this library is useable in async frameworks such as the marvellous <a href="https://github.com/marvinroger/homie-esp8266">Homie for ESP8266</a> framework.
@@ -17,12 +13,11 @@ Since we're talking serial @4800 baud, we would be wasting precious processing t
 ## Prerequisites
 - Platformio or Arduino for ESP8266
 - a (DIY) serial optocoupler to connect your ESP8266 to your Viessmann boiler
-- As this is an implementation of the P300 (aka VS2) protocol, your boiler must be compatible with this protocol.
+- As this is an implementation of the P300 (aka VS2) and KW protocol, your boiler must be compatible with these protocols.
 
 ## Usage
-~~See [usage](https://github.com/bertmelis/VitoWifi/blob/master/USAGE.md) for more details or explore the examples.~~  
-A working example using Homie and my [WifiPrinter](https://github.com/bertmelis/WifiPrinter) can be found on my [Github page](https://github.com/bertmelis/homie-boiler).  
-In the meantime: look into the examples to explore the functionality, documentation is on it's way!
+A working example using [Homie](https://github.com/marvinroger/homie-esp8266) and my [WifiPrinter](https://github.com/bertmelis/WifiPrinter) can be found on my [Github page](https://github.com/bertmelis/homie-boiler).  
+Look into the examples to explore the functionality, documentation is on it's way!
 
 ## TO DO
 - improve/implement error handling
@@ -39,4 +34,6 @@ An ESP8266 has built-in serial/UART communication and is obviously connectable v
 - Hex print: 2011, robtillaart @ Arduino.cc forum
 - Logger/Blinker: MIT 2015, marvinroger @ Github
 - Serial Protocol @ openv.wikispaces.com
+- @tolw for impleenting the writing
+- @Empor-co for testing the KW-protocol
 - and many others for code and inspiration
