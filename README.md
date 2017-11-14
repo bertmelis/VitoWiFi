@@ -3,7 +3,7 @@
 
 Arduino Library for ESP8266 to communicate with Viessmann boilers using a (DIY) serial optolink.
 
-Based on the fantastic work on http://openv.wikispaces.com. Check out this site for a simple hardware implementations
+Based on the fantastic work on https://github.com/openv/openv/wiki. Check out this wiki for a simple hardware implementations
 
 **This library is non-blocking**
 This also means that the use of blocking code is not supported.
@@ -34,6 +34,6 @@ An ESP8266 has built-in serial/UART communication and is obviously connectable v
 - Hex print: 2011, robtillaart @ Arduino.cc forum
 - Logger/Blinker: MIT 2015, marvinroger @ Github
 - Serial Protocol @ openv.wikispaces.com
-- @tolw for impleenting the writing
-- @Empor-co for testing the KW-protocol
+- [tolw](https://github.com/tolw) for impleenting the writing
+- [Empor-co](https://github.com/Empor-co) for testing the KW-protocol
 - and many others for code and inspiration
