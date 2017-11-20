@@ -38,9 +38,9 @@ Not on the pictures:
 
 #### Installation
 
-On Arduino IDE: link
+On Arduino IDE: [link](https://www.arduino.cc/en/Guide/Libraries#toc4)
 
-On Platformio: the library is registered in the library manager
+On Platformio: the library is registered in the [library manager](http://platformio.org/lib/show/1939/VitoWifi)
 
 #### Minimal sketch
 
