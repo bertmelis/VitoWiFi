@@ -53,7 +53,6 @@ VitoWifi_setProtocol(P300);  //P300 or KW, mind the underscore!
 unsigned long lastMillis = 0;
 
 void handleValue(const char* name, const char* group, const char* value) {
-  /*
   /* this function can do something with
   //   name
   //   group
@@ -63,7 +62,6 @@ void handleValue(const char* name, const char* group, const char* value) {
   //       yourPrinter.print(" is ");
   //       yourPrinter.println(value);
   // This prints "Value for boilertemp is 48" on yourPrinter.
-  */
   */
 }
 
@@ -90,7 +88,7 @@ For the available datapoints for your Viessmann system, please head over to the 
 A more useful example is my [Homie-boiler](https://github.com/bertmelis/homie-boiler).
 
 #### Advanced usage
-The complete overview of available methods and properties can be found [here](ADVANCED.md).
+The complete overview of available methods and properties can be found [here](REFERENCE.md).
 
 
 ## Limitations and bugs
