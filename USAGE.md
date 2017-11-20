@@ -20,7 +20,8 @@ The circuitry for the link is very simple and can be made on a perfboard.
 * front<br />
 ![Optolink front](/doc/front.jpg?raw=true "Optolink front")
 * back<br />
-![Optolink back](/doc/back.jpg
+![Optolink back](/doc/back.jpg?raw=true "Optolink back")
+* installation<br />
 ![Optolink installation](/doc/installation.jpg?raw=true "Optolink installation")
 
 Not on the pictures:  
