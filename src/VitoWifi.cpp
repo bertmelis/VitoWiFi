@@ -157,6 +157,10 @@ void VitoWifiBase::_writeDatapoint(const char* name, float value, size_t length)
       _logger.println(F("Value type does not match Datapoint type, skipping"));
       return;
     }
+	if (!DP->isWriteable()) {
+      _logger.println(F("Datapoint is not writeable, skipping"));
+      return;
+	}
     uint8_t transformedValue[2] = {0};
     DP->transform(transformedValue, value);
     Action action;
