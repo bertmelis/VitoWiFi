@@ -20,9 +20,9 @@ The circuitry for the link is very simple and can be made on a perfboard.
 * front<br />
 ![Optolink front](/doc/front.png?raw=true "Optolink front")
 * back<br />
-![Optolink back](/doc/circuit.png?raw=true "Optolink back")
+![Optolink back](/doc/back.png?raw=true "Optolink back")
 * installation<br />
-![Optolink installation](/doc/circuit.png?raw=true "Optolink installation")
+![Optolink installation](/doc/installation.png?raw=true "Optolink installation")
 
 Not on the pictures:  
 * The board is placed into a housing with a bit of foam to avoid "optical shortcuts". A hole is drilled in the housing at the led and at the transistor. Keep in mind that, when installed, the led (violet) is at the left and the transistor (black) is at the right side.
