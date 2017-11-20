@@ -5,6 +5,9 @@ Arduino Library for ESP8266 to communicate with Viessmann boilers using a (DIY) 
 
 Based on the fantastic work on https://github.com/openv/openv/wiki. Check out this wiki for a simple hardware implementations
 
+* usage: see [USAGE](USAGE.md)
+* reference: see [REFERENCE](REFERENCE.md)
+
 **This library is non-blocking**
 This also means that the use of blocking code is not supported.
 Since we're talking serial @4800 baud, we would be wasting precious processing time while reading and writing to the optolink. Furthermore this library is useable in async frameworks such as the marvellous <a href="https://github.com/marvinroger/homie-esp8266">Homie for ESP8266</a> framework.
@@ -17,13 +20,13 @@ Since we're talking serial @4800 baud, we would be wasting precious processing t
 
 ## Usage
 A working example using [Homie](https://github.com/marvinroger/homie-esp8266) and my [WifiPrinter](https://github.com/bertmelis/WifiPrinter) can be found on my [Github page](https://github.com/bertmelis/homie-boiler).  
-Look into the examples to explore the functionality, documentation is on it's way!
+Look into the examples to explore the functionality.
+
+See [USAGE](USAGE.md) for a more in detail explenation or look directly into the [REFERENCE](REFERENCE.md).
 
 ## TO DO
 - improve/implement error handling
-- integrate missing datapoint types
-- update USAGE.md
-
+- integrate missing datapoint types and rearrange
 
 ## HISTORY
 I was using the original openv/vcontrold code from wikispaces on a Raspberry Pi V1. However, this setup was a bit overkill: such a powerful device doing only serial communication at 4800 baud. So I wanted to optimise this situation.

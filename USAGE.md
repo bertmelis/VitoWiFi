@@ -16,13 +16,13 @@ The most expensive but easiest method is to use a development board like an Wemo
 The circuitry for the link is very simple and can be made on a perfboard.
 
 * circuit<br />
-![Optolink circuit](/DOCS/circuit.png?raw=true "Optolink circuit")
+![Optolink circuit](/doc/circuit.png?raw=true "Optolink circuit")
 * front<br />
-![Optolink front](/DOCS/front.png?raw=true "Optolink front")
+![Optolink front](/doc/front.jpg?raw=true "Optolink front")
 * back<br />
-![Optolink back](/DOCS/circuit.png?raw=true "Optolink back")
+![Optolink back](/doc/back.jpg?raw=true "Optolink back")
 * installation<br />
-![Optolink installation](/DOCS/circuit.png?raw=true "Optolink installation")
+![Optolink installation](/doc/installation.jpg?raw=true "Optolink installation")
 
 Not on the pictures:  
 * The board is placed into a housing with a bit of foam to avoid "optical shortcuts". A hole is drilled in the housing at the led and at the transistor. Keep in mind that, when installed, the led (violet) is at the left and the transistor (black) is at the right side.
@@ -38,9 +38,9 @@ Not on the pictures:
 
 #### Installation
 
-On Arduino IDE: link
+On Arduino IDE: [link](https://www.arduino.cc/en/Guide/Libraries#toc4)
 
-On Platformio: the library is registered in the library manager
+On Platformio: the library is registered in the [library manager](http://platformio.org/lib/show/1939/VitoWifi)
 
 #### Minimal sketch
 
@@ -53,7 +53,6 @@ VitoWifi_setProtocol(P300);  //P300 or KW, mind the underscore!
 unsigned long lastMillis = 0;
 
 void handleValue(const char* name, const char* group, const char* value) {
-  /*
   /* this function can do something with
   //   name
   //   group
@@ -63,7 +62,6 @@ void handleValue(const char* name, const char* group, const char* value) {
   //       yourPrinter.print(" is ");
   //       yourPrinter.println(value);
   // This prints "Value for boilertemp is 48" on yourPrinter.
-  */
   */
 }
 
@@ -90,7 +88,7 @@ For the available datapoints for your Viessmann system, please head over to the 
 A more useful example is my [Homie-boiler](https://github.com/bertmelis/homie-boiler).
 
 #### Advanced usage
-The complete overview of available methods and properties can be found [here](ADVANCED.md).
+The complete overview of available methods and properties can be found [here](REFERENCE.md).
 
 
 ## Limitations and bugs
