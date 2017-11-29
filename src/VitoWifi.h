@@ -68,7 +68,7 @@ class VitoWifiBase {
   template<typename TArg>
   void writeDatapoint(const char* name, TArg arg) {
     static_assert(sizeof(TArg) <= sizeof(float), "writeDatapoint() argument size must be <= 4 bytes");
-    float _float = static_cast<float>arg;
+    float _float = static_cast<float>(arg);
     size_t length = sizeof(arg);  // JS: Why was this ceil(sizeof(arg/2)??  Not sure so using _writeDatapoint directly in homieboiler
     _writeDatapoint(name, _float, length);
   }
