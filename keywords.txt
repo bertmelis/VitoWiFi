@@ -18,11 +18,9 @@ readAll	KEYWORD2
 readGroup	KEYWORD2
 readDatapoint	KEYWORD2
 writeDatapoint	KEYWORD2
-enableLed	KEYWORD2
-setLedPin	KEYWORD2
 enableLogger	KEYWORD2
 disableLogger	KEYWORD2
-setLoggingPrinter	KEYWORD2
+setLogger	KEYWORD2
 #getLogger	KEYWORD2
 
 
@@ -37,7 +35,7 @@ setCallback	KEYWORD2
 #Transformation
 TEMP	LITERAL2
 STAT	LITERAL2
-#MODE	LITERAL2
+MODE	LITERAL2
 #HOURS	LITERAL2
 #HOURSL	LITERAL2
-#COUNT	LITERAL2
+COUNT	LITERAL2
