@@ -177,10 +177,10 @@ void VitoWifiBase::_writeDatapoint(const char* name, float value, size_t length)
       _logger.println(F("Value type does not match Datapoint type, skipping"));
       return;
     }
-	if (!DP->isWriteable()) {
+  if (!DP->isWriteable()) {
       _logger.println(F("Datapoint is not writeable, skipping"));
       return;
-	}
+  }
     uint8_t transformedValue[2] = {0};
     DP->transform(transformedValue, value);
     Action action;
@@ -199,13 +199,13 @@ void VitoWifiInterface<OptolinkP300>::loop() {
   _optolink.loop();
   if (!_queue.empty() && !_optolink.isBusy()) {
     if (_queue.front().write) {
-		  _optolink.writeToDP(_queue.front().DP->getAddress(), _queue.front().DP->getLength(), _queue.front().value);
-	  } else {
-		  _optolink.readFromDP(_queue.front().DP->getAddress(), _queue.front().DP->getLength());
-	  }
+      _optolink.writeToDP(_queue.front().DP->getAddress(), _queue.front().DP->getLength(), _queue.front().value);
+    } else {
+      _optolink.readFromDP(_queue.front().DP->getAddress(), _queue.front().DP->getLength());
+    }
     return;
   }
-  if (_optolink.available() > 0) {  //trigger callback when ready and remove element from queue
+  if (_optolink.available() > 0) {  // trigger callback when ready and remove element from queue
     _logger.print(F("Datapoint "));
     _logger.print(_queue.front().DP->getName());
     _logger.println(F(" action successful"));
@@ -215,7 +215,7 @@ void VitoWifiInterface<OptolinkP300>::loop() {
     _queue.pop();
     return;
   }
-  if (_optolink.available() < 0) {  //display error message and remove element from queue
+  if (_optolink.available() < 0) {  // display error message and remove element from queue
     _logger.print(F("Datapoint "));
     _logger.print(_queue.front().DP->getName());
     _logger.print(F(" action unsuccessful - CODE:"));
@@ -230,13 +230,13 @@ void VitoWifiInterface<OptolinkKW>::loop() {
   _optolink.loop();
   if (!_queue.empty() && !_optolink.isBusy()) {
     if (_queue.front().write) {
-		  _optolink.writeToDP(_queue.front().DP->getAddress(), _queue.front().DP->getLength(), _queue.front().value);
-	  } else {
-		  _optolink.readFromDP(_queue.front().DP->getAddress(), _queue.front().DP->getLength());
-	  }
+      _optolink.writeToDP(_queue.front().DP->getAddress(), _queue.front().DP->getLength(), _queue.front().value);
+    } else {
+      _optolink.readFromDP(_queue.front().DP->getAddress(), _queue.front().DP->getLength());
+    }
     return;
   }
-  if (_optolink.available() > 0) {  //trigger callback when ready and remove element from queue
+  if (_optolink.available() > 0) {  // trigger callback when ready and remove element from queue
     _logger.print(F("Datapoint "));
     _logger.print(_queue.front().DP->getName());
     _logger.println(F(" action successful"));
@@ -246,7 +246,7 @@ void VitoWifiInterface<OptolinkKW>::loop() {
     _queue.pop();
     return;
   }
-  if (_optolink.available() < 0) {  //display error message and remove element from queue
+  if (_optolink.available() < 0) {  // display error message and remove element from queue
     _logger.print(F("Datapoint "));
     _logger.print(_queue.front().DP->getName());
     _logger.print(F(" action unsuccessful - CODE:"));
@@ -258,7 +258,7 @@ void VitoWifiInterface<OptolinkKW>::loop() {
 }
 
 
-//Logger stuff, taken from Marvin ROGER's Homie for ESP8266
+// Logger stuff, taken from Marvin ROGER's Homie for ESP8266
 template<>
 void VitoWifiInterface<OptolinkP300>::setLogger(Print* printer) {
   _logger.setPrinter(printer);

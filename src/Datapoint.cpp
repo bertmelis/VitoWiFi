@@ -25,7 +25,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "Datapoint.h"
 
-//declare static global callback function as part of the Datapoint base class
+// declare static global callback function as part of the Datapoint base class
 GlobalCallbackFunction Datapoint::_globalCallback = nullptr;
 
 
@@ -38,7 +38,7 @@ Datapoint::Datapoint(const char* name, const char* group, const uint16_t address
 
 
 Datapoint::~Datapoint() {
-  abort();  //destruction is not supported
+  abort();  // destruction is not supported
 }
 
 
@@ -87,7 +87,7 @@ Datapoint& TempDP::setCallback(TempCallbackFunction callback) {
 
 void TempDP::callback(uint8_t value[]) {
   int16_t tmp = value[1] << 8 | value[0];
-  float floatValue = (float)(tmp) / 10.0;
+  float floatValue = static_cast<float>(tmp) / 10.0;
   if (_callback) {
     _callback(_name, _group, floatValue);
   } else if (Datapoint::_globalCallback) {
@@ -99,7 +99,7 @@ void TempDP::callback(uint8_t value[]) {
 }
 
 
-void TempDP::transform(uint8_t transformedValue[], float value) {
+void TempDP::parse(uint8_t transformedValue[], float value) {
   int16_t tmp = floor((value * 10) + 0.5);
   transformedValue[1] = tmp >> 8;
   transformedValue[0] = tmp & 0xFF;
@@ -131,7 +131,7 @@ void StatDP::callback(uint8_t value[]) {
 }
 
 
-void StatDP::transform(uint8_t transformedValue[], float value) {
+void StatDP::parse(uint8_t transformedValue[], float value) {
   transformedValue[0] = (value) ? 0x01 : 0x00;
   return;
 }
@@ -161,7 +161,7 @@ void CountDP::callback(uint8_t value[]) {
 }
 
 
-void CountDP::transform(uint8_t transformedValue[], float value) {
+void CountDP::parse(uint8_t transformedValue[], float value) {
   uint32_t _value = (uint32_t)ceil(value);
   transformedValue[3] = _value >> 24;
   transformedValue[2] = _value >> 16;
@@ -196,7 +196,7 @@ void CountSDP::callback(uint8_t value[]) {
 }
 
 
-void CountSDP::transform(uint8_t transformedValue[], float value) {
+void CountSDP::parse(uint8_t transformedValue[], float value) {
   uint16_t _value = (uint16_t)ceil(value);
   transformedValue[1] = _value >> 8;
   transformedValue[0] = _value & 0xFF;
@@ -220,15 +220,15 @@ void ModeDP::callback(uint8_t value[]) {
   if (_callback) {
     _callback(_name, _group, value[0]);
   } else if (_globalCallback) {
-    char str[4] = {'\0'};  //4 instead of 2 to allow reuse DP for setting temp to 1-byte-temp-dp
-                           //to do: add and rearrange DPs
+    char str[4] = {'\0'};  // 4 instead of 2 to allow reuse DP for setting temp to 1-byte-temp-dp
+                           // TODO(@bertmelis): add and rearrange DPs
     snprintf(str, sizeof(str), "%u", value[0]);
     _globalCallback(_name, _group, str);
   }
 }
 
 
-void ModeDP::transform(uint8_t transformedValue[], float value) {
+void ModeDP::parse(uint8_t transformedValue[], float value) {
   transformedValue[0] = static_cast<uint8_t>(value);
   return;
 }

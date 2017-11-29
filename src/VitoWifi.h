@@ -42,6 +42,7 @@ and many others
 
 #pragma once
 #include <Arduino.h>
+#include <vector>
 #include <queue>
 #include "Constants.h"
 #include "Datapoint.h"
@@ -58,7 +59,7 @@ class VitoWifiBase {
   void loop();
   void setGlobalCallback(GlobalCallbackFunction globalCallback);
   Datapoint& addDatapoint(const char* name, const char* group, const uint16_t address, const DPType type, bool isWriteable);
-  Datapoint& addDatapoint(const char* name,const char* group, const uint16_t address, const DPType type);
+  Datapoint& addDatapoint(const char* name, const char* group, const uint16_t address, const DPType type);
 
   void readAll();
   void readGroup(const char* group);
@@ -66,15 +67,14 @@ class VitoWifiBase {
 
   template<typename TArg>
   void writeDatapoint(const char* name, TArg arg) {
-    static_assert(sizeof(TArg) <= sizeof(float),
-      "writeDatapoint() argument size must be <= 4 bytes");
-    float _float = (float)arg;
-	  size_t length = sizeof(arg); //JS: Why was this ceil(sizeof(arg/2)??  Not sure so using _writeDatapoint directly in homieboiler
-	 _writeDatapoint(name, _float, length);
+    static_assert(sizeof(TArg) <= sizeof(float), "writeDatapoint() argument size must be <= 4 bytes");
+    float _float = static_cast<float>arg;
+    size_t length = sizeof(arg);  // JS: Why was this ceil(sizeof(arg/2)??  Not sure so using _writeDatapoint directly in homieboiler
+    _writeDatapoint(name, _float, length);
   }
   void _writeDatapoint(const char* name, float value, size_t length);
 
-protected:
+ protected:
   inline void _readDatapoint(Datapoint* dp);
   Datapoint* _getDatapoint(const char* name);
   std::vector<Datapoint*> _datapoints;
@@ -90,9 +90,9 @@ protected:
 
 template <class P>
 class VitoWifiInterface: public VitoWifiBase {
-  public:
-    VitoWifiInterface(){};
-    ~VitoWifiInterface(){};
+ public:
+    VitoWifiInterface() {}
+    ~VitoWifiInterface() {}
     #ifdef ARDUINO_ARCH_ESP32
     void setup(HardwareSerial* serial, int8_t rxPin, int8_t txPin);
     #endif
@@ -105,7 +105,7 @@ class VitoWifiInterface: public VitoWifiBase {
     void disableLogger();
     void setLogger(Print* printer);
 
-  private:
+ private:
     P _optolink;
 };
 
