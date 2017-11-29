@@ -43,7 +43,6 @@ and many others
 #pragma once
 #include <Arduino.h>
 #include <queue>
-#include "Config.h"
 #include "Constants.h"
 #include "Datapoint.h"
 #include "OptolinkP300.h"
@@ -52,39 +51,40 @@ and many others
 
 
 class VitoWifiBase {
-  public:
-    VitoWifiBase();
-    ~VitoWifiBase();
+ public:
+  VitoWifiBase();
+  ~VitoWifiBase();
 
-    void loop();
-    void setGlobalCallback(GlobalCallbackFunction globalCallback);
-    Datapoint& addDatapoint(const char* name, const char* group, const uint16_t address, const DPType type, bool isWriteable);
-    Datapoint& addDatapoint(const char* name, const char* group, const uint16_t address, const DPType type);
+  void loop();
+  void setGlobalCallback(GlobalCallbackFunction globalCallback);
+  Datapoint& addDatapoint(const char* name, const char* group, const uint16_t address, const DPType type, bool isWriteable);
+  Datapoint& addDatapoint(const char* name,const char* group, const uint16_t address, const DPType type);
 
-    void readAll();
-    void readGroup(const char* group);
-    void readDatapoint(const char* name);
+  void readAll();
+  void readGroup(const char* group);
+  void readDatapoint(const char* name);
 
-    template<typename TArg>
-    void writeDatapoint(const char* name, TArg arg) {
-      static_assert(sizeof(TArg) <= sizeof(float), "writeDatapoint() argument size must be <= 4 bytes");
-		   float _float = (float)arg;
-		   size_t length = sizeof(arg); //JS: Why was this ceil(sizeof(arg/2)??  Not sure so using _writeDatapoint directly in homieboiler
-		   _writeDatapoint(name, _float, length);
-    }
-    void _writeDatapoint(const char* name, float value, size_t length);
+  template<typename TArg>
+  void writeDatapoint(const char* name, TArg arg) {
+    static_assert(sizeof(TArg) <= sizeof(float),
+      "writeDatapoint() argument size must be <= 4 bytes");
+    float _float = (float)arg;
+	  size_t length = sizeof(arg); //JS: Why was this ceil(sizeof(arg/2)??  Not sure so using _writeDatapoint directly in homieboiler
+	 _writeDatapoint(name, _float, length);
+  }
+  void _writeDatapoint(const char* name, float value, size_t length);
 
-  protected:
-    inline void _readDatapoint(Datapoint* dp);
-    Datapoint* _getDatapoint(const char* name);
-    std::vector<Datapoint*> _datapoints;
-    struct Action {
-      Datapoint* DP;
-      bool write;
-      uint8_t value[4];
-    };
-    std::queue<Action> _queue;
-    Logger _logger;
+protected:
+  inline void _readDatapoint(Datapoint* dp);
+  Datapoint* _getDatapoint(const char* name);
+  std::vector<Datapoint*> _datapoints;
+  struct Action {
+    Datapoint* DP;
+    bool write;
+    uint8_t value[4];
+  };
+  std::queue<Action> _queue;
+  Logger _logger;
 };
 
 

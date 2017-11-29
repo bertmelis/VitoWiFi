@@ -1,3 +1,28 @@
+/*
+
+Copyright 2017 Bert Melis
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be included
+in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+*/
+
 #include "OptolinkKW.h"
 
 
@@ -40,22 +65,11 @@ void OptolinkKW::loop() {
   if (_numberOfTries < 1) {
     _state = IDLE;
     _action = RETURN_ERROR;
-  }
-  else if (_state == INIT) {
+  } else if (_state == INIT) {
     _initHandler();
-  }
-  else if (_state == IDLE) {
+  } else if (_state == IDLE) {
     _idleHandler();
-  }
-  /*
-  else if (_state == SYNC) {
-    _syncHandler();
-  }
-  else if (_state == SEND) {
-    _sendHandler();
-  }
-  */
-  else if (_state == RECEIVE) {
+  } else if (_state == RECEIVE) {
     _receiveHandler();
   }
 }
@@ -64,14 +78,12 @@ void OptolinkKW::loop() {
 // reset new devices to KW state by sending 0x04.
 void OptolinkKW::_initHandler() {
   if (_stream->available()) {
-    if(_stream->peek() == 0x05) {
+    if (_stream->peek() == 0x05) {
       _state = IDLE;
       _idleHandler();
       _logger.println("INIT done.");
-    }
-    else _stream->read();
-  }
-  else {
+    } else _stream->read(); // NOLINT
+  } else {
     if (millis() - _lastMillis > 1000UL) {
       _lastMillis = millis();
       const uint8_t buff[] = {0x04};
@@ -93,12 +105,10 @@ void OptolinkKW::_idleHandler() {
       }
     }
     else _logger.println("something wrong received");
-  }
-  else if (_action == PROCESS && (millis() - _lastMillis < 10UL)) {  // don't wait for 0x05 sync signal, send directly after last request
+  } else if (_action == PROCESS && (millis() - _lastMillis < 10UL)) {  // don't wait for 0x05 sync signal, send directly after last request
     _state = SEND;
     _sendHandler();
-  }
-  else if (millis() - _lastMillis > 10 * 1000UL) {
+  } else if (millis() - _lastMillis > 10 * 1000UL) {
     _state = IDLE;
     _errorCode = 1;
     --_numberOfTries;
@@ -126,8 +136,7 @@ void OptolinkKW::_sendHandler() {
     //add value to message
     memcpy(&buff[4], _value, _length);
     _stream->write(buff, 4 + _length);
-  }
-  else {
+  } else {
     //type is READ
     //has fixed length of 8 chars
     buff[0] = 0xF7;
@@ -163,8 +172,7 @@ void OptolinkKW::_receiveHandler() {
     _errorCode = 0;  //succes
     _logger.println(F("succes"));
     return;
-  }
-  else if (millis() - _lastMillis > 10 * 1000UL) {  //Vitotronic isn't answering, try again
+  } else if (millis() - _lastMillis > 10 * 1000UL) {  //Vitotronic isn't answering, try again
     _rcvBufferLen = 0;
     _errorCode = 1;  //Connection error
     memset(_rcvBuffer, 0, 2);
@@ -233,8 +241,7 @@ void OptolinkKW::read(uint8_t value[]) {
     memcpy(value, &_value, _length);
     _action = WAIT;
     return;
-  }
-  else {
+  } else {
     memcpy(value, &_rcvBuffer, _length);
     _action = WAIT;
     return;  //added for clarity
@@ -250,7 +257,7 @@ const uint8_t OptolinkKW::readError() {
 
 //clear serial input buffer
 inline void OptolinkKW::_clearInputBuffer() {
-  while(_stream->available() > 0) {
+  while (_stream->available() > 0) {
     _stream->read();
   }
 }
@@ -272,7 +279,7 @@ inline void OptolinkKW::_printHex(Print* printer, uint8_t array[], uint8_t lengt
   for (uint8_t i = 0; i < length; ++i) {
     first = (array[i] >> 4) | 48;
     if (first > 57) tmp[j] = first + (byte)39;
-    else tmp[j] = first ;
+    else tmp[j] = first;
     ++j;
 
     first = (array[i] & 0x0F) | 48;

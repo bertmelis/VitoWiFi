@@ -1,3 +1,28 @@
+/*
+
+Copyright 2017 Bert Melis
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be included
+in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+*/
+
 #include "OptolinkP300.h"
 
 
@@ -96,12 +121,10 @@ void OptolinkP300::_resetAckHandler() {
       SetState( INIT );
       _debugMessage = true;
       _logger.println(F("Optolink reset."));
-    }
-    else {
+    } else {
       _clearInputBuffer();
     }
-  }
-  else {
+  } else {
     if (millis() - _lastMillis > 500) {  //try again every 0,5sec
       SetState( RESET );
     }
@@ -136,8 +159,7 @@ void OptolinkP300::_initAckHandler() {
       _debugMessage = true;
       //debug: done
       _logger.println(F("Optolink connection established."));
-    }
-    else {
+    } else {
       //return to previous state
       _clearInputBuffer();
       SetState( INIT );
@@ -174,22 +196,18 @@ void OptolinkP300::_syncHandler() {
 void OptolinkP300::_syncAckHandler() {
   if (_stream->available()) {
     if (_stream->read() == 0x06) {
-      if(_action == PROCESS)
-	  {
-		  SetState( SEND );
-	  }
-      else
-	  {
-		  SetState( IDLE );
-	  }
+      if (_action == PROCESS) {
+		    SetState( SEND );
+	    } else {
+		    SetState( IDLE );
+	    }
     }
   }
   if (millis() - _lastMillis > 2 * 1000UL) {  //if no ACK is coming, reset connection
     SetState( RESET );
-    if (_action == PROCESS)
-	{
-		--_numberOfTries;
-	}
+    if (_action == PROCESS) {
+		  --_numberOfTries;
+	  }
   }
 }
 
@@ -215,8 +233,7 @@ void OptolinkP300::_sendHandler() {
 	//This is mentioned here: https://openv.wikispaces.com/Protokoll+300
 	//At the bottom of the page (look for: RX: Data: 0x41 0x05 0x01 0x02 0x23 0x23 0x01 0x4f )
     _rcvLen = 8;
-  }
-  else {
+  } else {
     //type is READ
     //has fixed length of 8 chars
     buff[0] = 0x41;
@@ -238,8 +255,7 @@ void OptolinkP300::_sendHandler() {
   if (_writeMessageType) {
     _logger.print(F("WRITE "));
     _printHex(&_logger, buff, 8 + _length);
-  }
-  else {
+  } else {
     _logger.print(F("READ "));
     _printHex(&_logger, buff, 8);
   }
@@ -254,12 +270,11 @@ void OptolinkP300::_sendAckHandler() {
       _logger.println(F("ack"));
       SetState( RECEIVE );
 	  return;
-    }
-    else if (buff == 0x15) {  //transmit negatively acknowledged, return to SYNC and try again
+    } else if (buff == 0x15) {  //transmit negatively acknowledged, return to SYNC and try again
       _logger.println(F("nack"));
       SetState( SYNC );
       _clearInputBuffer();
-	  return;
+	    return;
     }
   }
   if (millis() - _lastMillis > 2 * 1000UL) {  //if no ACK is coming, return to SYNC and try again
@@ -391,8 +406,7 @@ void OptolinkP300::read(uint8_t value[]) {
     _logger.println("");
     SetAction( WAIT );
     return;
-  }
-  else {
+  } else {
     memcpy(value, &_rcvBuffer[7], _length);
     _logger.print("value transferred: ");
     _printHex(&_logger, value, _length);
@@ -413,7 +427,7 @@ const uint8_t OptolinkP300::readError() {
 //calculate Checksum
 inline uint8_t OptolinkP300::_calcChecksum(uint8_t array[], uint8_t length) {
   uint8_t sum = 0;
-  for (uint8_t i = 1; i < length - 1 ; ++i){  //start with second byte and en before checksum
+  for (uint8_t i = 1; i < length - 1 ; ++i) {  // start with second byte and en before checksum
     sum += array[i];
   }
   return sum;
@@ -429,7 +443,7 @@ inline bool OptolinkP300::_checkChecksum(uint8_t array[], uint8_t length) {
 
 //clear serial input buffer
 inline void OptolinkP300::_clearInputBuffer() {
-  while(_stream->available() > 0) {
+  while (_stream->available() > 0) {
     _stream->read();
   }
 }
@@ -451,7 +465,7 @@ inline void OptolinkP300::_printHex(Print* printer, uint8_t array[], uint8_t len
   for (uint8_t i = 0; i < length; ++i) {
     first = (array[i] >> 4) | 48;
     if (first > 57) tmp[j] = first + (byte)39;
-    else tmp[j] = first ;
+    else tmp[j] = first;
     ++j;
 
     first = (array[i] & 0x0F) | 48;
