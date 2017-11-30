@@ -21,21 +21,12 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-*/
-/*
-VitoWifi - Library serial communication with Viessmann heating systems
-using the P300 protocol.
-for Arduino - ESP8266
-
-Created by: Bert Melis, 2017
-Licence: MIT
-
 Using portions or complete code from:
 Hex print: 2011, robtillaart @ Arduino.cc forum
 Logger: MIT 2015, marvinroger @ Github
 Blinker: MIT 2015, marvinroger @ Github
 
-BIG thanks to openv.wikispaces.com
+BIG thanks to https://github.com/openv/openv
 and many others
 
 */
