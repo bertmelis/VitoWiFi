@@ -21,29 +21,20 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-*/
-/*
-VitoWifi - Library serial communication with Viessmann heating systems
-using the P300 protocol.
-for Arduino - ESP8266
-
-Created by: Bert Melis, 2017
-Licence: MIT
-
 Using portions or complete code from:
 Hex print: 2011, robtillaart @ Arduino.cc forum
 Logger: MIT 2015, marvinroger @ Github
 Blinker: MIT 2015, marvinroger @ Github
 
-BIG thanks to openv.wikispaces.com
+BIG thanks to https://github.com/openv/openv
 and many others
 
 */
 
 #pragma once
 #include <Arduino.h>
+#include <vector>
 #include <queue>
-#include "Config.h"
 #include "Constants.h"
 #include "Datapoint.h"
 #include "OptolinkP300.h"
@@ -52,47 +43,47 @@ and many others
 
 
 class VitoWifiBase {
-  public:
-    VitoWifiBase();
-    ~VitoWifiBase();
+ public:
+  VitoWifiBase();
+  ~VitoWifiBase();
 
-    void loop();
-    void setGlobalCallback(GlobalCallbackFunction globalCallback);
-    Datapoint& addDatapoint(const char* name, const char* group, const uint16_t address, const DPType type, bool isWriteable);
-    Datapoint& addDatapoint(const char* name, const char* group, const uint16_t address, const DPType type);
+  void loop();
+  void setGlobalCallback(GlobalCallbackFunction globalCallback);
+  Datapoint& addDatapoint(const char* name, const char* group, const uint16_t address, const DPType type, bool isWriteable);
+  Datapoint& addDatapoint(const char* name, const char* group, const uint16_t address, const DPType type);
 
-    void readAll();
-    void readGroup(const char* group);
-    void readDatapoint(const char* name);
+  void readAll();
+  void readGroup(const char* group);
+  void readDatapoint(const char* name);
 
-    template<typename TArg>
-    void writeDatapoint(const char* name, TArg arg) {
-      static_assert(sizeof(TArg) <= sizeof(float), "writeDatapoint() argument size must be <= 4 bytes");
-		   float _float = (float)arg;
-		   size_t length = sizeof(arg); //JS: Why was this ceil(sizeof(arg/2)??  Not sure so using _writeDatapoint directly in homieboiler
-		   _writeDatapoint(name, _float, length);
-    }
-    void _writeDatapoint(const char* name, float value, size_t length);
+  template<typename TArg>
+  void writeDatapoint(const char* name, TArg arg) {
+    static_assert(sizeof(TArg) <= sizeof(float), "writeDatapoint() argument size must be <= 4 bytes");
+    float _float = static_cast<float>(arg);
+    size_t length = sizeof(arg);  // JS: Why was this ceil(sizeof(arg/2)??  Not sure so using _writeDatapoint directly in homieboiler
+    _writeDatapoint(name, _float, length);
+  }
+  void _writeDatapoint(const char* name, float value, size_t length);
 
-  protected:
-    inline void _readDatapoint(Datapoint* dp);
-    Datapoint* _getDatapoint(const char* name);
-    std::vector<Datapoint*> _datapoints;
-    struct Action {
-      Datapoint* DP;
-      bool write;
-      uint8_t value[4];
-    };
-    std::queue<Action> _queue;
-    Logger _logger;
+ protected:
+  inline void _readDatapoint(Datapoint* dp);
+  Datapoint* _getDatapoint(const char* name);
+  std::vector<Datapoint*> _datapoints;
+  struct Action {
+    Datapoint* DP;
+    bool write;
+    uint8_t value[4];
+  };
+  std::queue<Action> _queue;
+  Logger _logger;
 };
 
 
 template <class P>
 class VitoWifiInterface: public VitoWifiBase {
-  public:
-    VitoWifiInterface(){};
-    ~VitoWifiInterface(){};
+ public:
+    VitoWifiInterface() {}
+    ~VitoWifiInterface() {}
     #ifdef ARDUINO_ARCH_ESP32
     void setup(HardwareSerial* serial, int8_t rxPin, int8_t txPin);
     #endif
@@ -105,7 +96,7 @@ class VitoWifiInterface: public VitoWifiBase {
     void disableLogger();
     void setLogger(Print* printer);
 
-  private:
+ private:
     P _optolink;
 };
 
