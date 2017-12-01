@@ -21,105 +21,86 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-
-
-VitoWifi - Library serial communication with Viessmann heating systems
-using the P300 protocol.
-for Arduino - ESP8266
-
-Created by: Bert Melis, 2017
-Licence: MIT
-
 Using portions or complete code from:
 Hex print: 2011, robtillaart @ Arduino.cc forum
 Logger: MIT 2015, marvinroger @ Github
+Blinker: MIT 2015, marvinroger @ Github
 
-BIG thanks to openv.wikispaces.com
+BIG thanks to https://github.com/openv/openv
 and many others
 
 */
 
 #pragma once
-
 #include <Arduino.h>
-#include "Logger.h"
-#include "Helpers.h"
+#include <vector>
+#include <queue>
+#include "Constants.h"
+#include "Datapoint.h"
+#include "OptolinkP300.h"
+#include "OptolinkKW.h"
+#include "Helpers/Logger.h"
 
-class VitoWifi{
-  public:
-    //setup and general methods
-	  VitoWifi();
-	  ~VitoWifi();
-    void begin(HardwareSerial& serial);
-	  void begin(HardwareSerial* serial);
+
+class VitoWifiBase {
+ public:
+  VitoWifiBase();
+  ~VitoWifiBase();
+
+  void loop();
+  void setGlobalCallback(GlobalCallbackFunction globalCallback);
+  Datapoint& addDatapoint(const char* name, const char* group, const uint16_t address, const DPType type, bool isWriteable);
+  Datapoint& addDatapoint(const char* name, const char* group, const uint16_t address, const DPType type);
+
+  void readAll();
+  void readGroup(const char* group);
+  void readDatapoint(const char* name);
+
+  template<typename TArg>
+  void writeDatapoint(const char* name, TArg arg) {
+    static_assert(sizeof(TArg) <= sizeof(float), "writeDatapoint() argument size must be <= 4 bytes");
+    float _float = static_cast<float>(arg);
+    size_t length = sizeof(arg);  // JS: Why was this ceil(sizeof(arg/2)??  Not sure so using _writeDatapoint directly in homieboiler
+    _writeDatapoint(name, _float, length);
+  }
+  void _writeDatapoint(const char* name, float value, size_t length);
+
+ protected:
+  inline void _readDatapoint(Datapoint* dp);
+  Datapoint* _getDatapoint(const char* name);
+  std::vector<Datapoint*> _datapoints;
+  struct Action {
+    Datapoint* DP;
+    bool write;
+    uint8_t value[4];
+  };
+  std::queue<Action> _queue;
+  Logger _logger;
+};
+
+
+template <class P>
+class VitoWifiInterface: public VitoWifiBase {
+ public:
+    VitoWifiInterface() {}
+    ~VitoWifiInterface() {}
+    #ifdef ARDUINO_ARCH_ESP32
+    void setup(HardwareSerial* serial, int8_t rxPin, int8_t txPin);
+    #endif
+    #ifdef ESP8266
+    void setup(HardwareSerial* serial);
+    #endif
     void loop();
 
-    //communication methods
-    void sendDP(const Datapoint& DP); //to read a value
-    void sendDP(const Datapoint& DP, uint32_t value); //to write a value
-    bool available() const; //check if action is completed eg. an answer is available
-    float read(); //read the answer and return as float
-    float read(char* buffer, uint8_t max_buffer_size = 8); //read the answer into your buffer
+    void enableLogger();
+    void disableLogger();
+    void setLogger(Print* printer);
 
-    //debugging methods
-    void setLoggingPrinter(Print* printer);
-    Logger& getLogger();
-    void enableLogger(bool enable);
-
-  private:
-    Logger _logger;
-    HardwareSerial* _serial;
-    uint8_t _sndBuffer[12];
-    uint8_t _sndLen;
-    uint8_t _rcvBuffer[12];
-    uint8_t _rcvBufferLen;
-    uint8_t _rcvLen;
-    uint8_t _valBuffer[4];
-    Datapoint _DP;
-
-    enum VitoWifiState: uint8_t {
-      RESET,
-      RESET_ACK,
-      INIT,
-      INIT_ACK,
-      IDLE,
-      SYNC,
-      SYNC_ACK,
-      SEND,
-      SEND_ACK,
-      RECEIVE,
-      RETURN
-    } _state;
-
-    union ReturnType{
-      int32_t byte4Value;
-      int16_t byte2Value;
-      int8_t byte1Value;
-      ReturnType() {
-        this->byte4Value = 0;
-        }
-    } _returnValue;
-    uint32_t _timeoutTimer;
-    uint32_t _lastMillis;
-    uint8_t _errorCount;
-    bool _sendMessage;
-    void _resetHandler();
-    void _resetAckHandler();
-    void _initHandler();
-    void _initAckHandler();
-    void _idleHandler();
-    void _syncHandler();
-    void _syncAckHandler();
-    void _sendHandler();
-    void _sendAckHandler();
-    void _receiveHandler();
-    void _returnHandler();
-
-    bool _debugMessage;
-    bool _decodeMessage();
-    uint8_t _calcChecksum(uint8_t* message, uint8_t lenght);
-    bool _checkChecksum(uint8_t* message, uint8_t lenght);
-    void _printHex83(uint8_t* data, uint8_t length);
-    void _clearInputBuffer();
-
+ private:
+    P _optolink;
 };
+
+
+#define P300 OptolinkP300
+#define KW   OptolinkKW
+#define VitoWifi_setProtocol(protocol) VitoWifiInterface<protocol> VitoWifi

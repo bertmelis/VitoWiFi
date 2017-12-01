@@ -3,10 +3,10 @@
 
 Arduino Library for ESP8266 to communicate with Viessmann boilers using a (DIY) serial optolink.
 
-Based on the fantastic work on http://openv.wikispaces.com. Check out this site for a simple hardware implementations
+Based on the fantastic work on https://github.com/openv/openv/wiki. Check out this wiki for a simple hardware implementations
 
-**WARNING: This code compiles and works**
-**However, this is only a testing release**
+* usage: see [USAGE](USAGE.md)
+* reference: see [REFERENCE](REFERENCE.md)
 
 **This library is non-blocking**
 This also means that the use of blocking code is not supported.
@@ -16,18 +16,17 @@ Since we're talking serial @4800 baud, we would be wasting precious processing t
 ## Prerequisites
 - Platformio or Arduino for ESP8266
 - a (DIY) serial optocoupler to connect your ESP8266 to your Viessmann boiler
-- As this is an implementation of the P300 (aka VS2) protocol, your boiler must be compatible with this protocol.
+- As this is an implementation of the P300 (aka VS2) and KW protocol, your boiler must be compatible with these protocols.
 
 ## Usage
-See [usage](https://github.com/bertmelis/VitoWifi/blob/master/USAGE.md) for more details or explore the examples.
-A working example using Homie and my [WifiPrinter](https://github.com/bertmelis/WifiPrinter) can be found on my [Github page](https://github.com/bertmelis/homie-boiler).
+A working example using [Homie](https://github.com/marvinroger/homie-esp8266) and my [WifiPrinter](https://github.com/bertmelis/WifiPrinter) can be found on my [Github page](https://github.com/bertmelis/homie-boiler).  
+Look into the examples to explore the functionality.
+
+See [USAGE](USAGE.md) for a more in detail explenation or look directly into the [REFERENCE](REFERENCE.md).
 
 ## TO DO
-- improve reliability
-- add transformation functions for returned values
-- ~~communication is really slow. After initializing, it is quite fast however.
-Maybe I could reset the connection after every TX/RX.~~ Done!
-
+- improve/implement error handling
+- integrate missing datapoint types and rearrange
 
 ## HISTORY
 I was using the original openv/vcontrold code from wikispaces on a Raspberry Pi V1. However, this setup was a bit overkill: such a powerful device doing only serial communication at 4800 baud. So I wanted to optimise this situation.
@@ -36,6 +35,8 @@ An ESP8266 has built-in serial/UART communication and is obviously connectable v
 
 ## Credits go to
 - Hex print: 2011, robtillaart @ Arduino.cc forum
-- Logger: MIT 2015, marvinroger @ Github
+- Logger/Blinker: MIT 2015, marvinroger @ Github
 - Serial Protocol @ openv.wikispaces.com
+- [tolw](https://github.com/tolw) for impleenting the writing
+- [Empor-co](https://github.com/Empor-co) for testing the KW-protocol
 - and many others for code and inspiration

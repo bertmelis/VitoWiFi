@@ -1,8 +1,8 @@
 {
   "name": "VitoWifi",
-  "version": "0.1.0",
-  "keywords": "iot, home, automation, esp8266, async, Viessmann, serial, optolink",
-  "description": "Communicate with Viessmann boilers using the optolink for ESP8266",
+  "version": "0.10.0",
+  "keywords": "iot, home, automation, esp8266, esp32, async, Viessmann, serial, optolink",
+  "description": "Communicate with Viessmann boilers using the optolink for ESP8266 and ESP32",
   "homepage": "https://github.com/bertmelis/VitoWifi",
   "license": "MIT",
   "authors":
@@ -18,14 +18,5 @@
     "branch": "master"
   },
   "frameworks": "arduino",
-  "platforms": "espressif8266",
-  "export": {
-    "include": [
-      "LICENSE",
-      "keywords.txt",
-      "src/*",
-      "examples/*"
-    ]
-  },
-  "examples": "examples/*.ino"
+  "platforms": ["espressif8266", "espressif8266_stage", "espressif32", "espressif32_stage"]
 }
