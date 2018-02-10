@@ -28,16 +28,15 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "Constants.h"
 #include "Helpers/Logger.h"
 
-
 class OptolinkKW {
  public:
   OptolinkKW();
-  #ifdef ARDUINO_ARCH_ESP32
+#ifdef ARDUINO_ARCH_ESP32
   void begin(HardwareSerial* serial, int8_t rxPin, int8_t txPin);
-  #endif
-  #ifdef ESP8266
+#endif
+#ifdef ESP8266
   void begin(HardwareSerial* serial);
-  #endif
+#endif
   void loop();
   const int8_t available() const;
   const bool isBusy() const;
@@ -50,19 +49,8 @@ class OptolinkKW {
 
  private:
   Stream* _stream;
-  enum OptolinkState: uint8_t {
-    INIT,  // to reset devices compatible with P300
-    IDLE,
-    SYNC,
-    SEND,
-    RECEIVE
-  } _state;
-  enum OptolinkAction: uint8_t {
-    WAIT,
-    PROCESS,
-    RETURN,
-    RETURN_ERROR
-  } _action;
+  enum OptolinkState : uint8_t { INIT, IDLE, SYNC, SEND, RECEIVE } _state;  // include INIT to reset devices compatible with P300
+  enum OptolinkAction : uint8_t { WAIT, PROCESS, RETURN, RETURN_ERROR } _action;
   uint16_t _address;
   uint8_t _length;
   bool _writeMessageType;

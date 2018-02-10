@@ -18,6 +18,10 @@ Since we're talking serial @4800 baud, we would be wasting precious processing t
 - a (DIY) serial optocoupler to connect your ESP8266 to your Viessmann boiler
 - As this is an implementation of the P300 (aka VS2) and KW protocol, your boiler must be compatible with these protocols.
 
+## Installation
+- For Arduino IDE: see [the Arduino Guide](https://www.arduino.cc/en/Guide/Libraries#toc4)
+- For Platformio: see the [Platfomio lib page for VitoWifi](http://platformio.org/lib/show/1939/VitoWifi)
+
 ## Usage
 A working example using [Homie](https://github.com/marvinroger/homie-esp8266) and my [WifiPrinter](https://github.com/bertmelis/WifiPrinter) can be found on my [Github page](https://github.com/bertmelis/homie-boiler).  
 Look into the examples to explore the functionality.
