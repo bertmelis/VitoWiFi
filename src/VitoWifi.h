@@ -33,14 +33,13 @@ and many others
 
 #pragma once
 #include <Arduino.h>
-#include <vector>
 #include <queue>
+#include <vector>
 #include "Constants.h"
 #include "Datapoint.h"
-#include "OptolinkP300.h"
-#include "OptolinkKW.h"
 #include "Helpers/Logger.h"
-
+#include "OptolinkKW.h"
+#include "OptolinkP300.h"
 
 class VitoWifiBase {
  public:
@@ -56,7 +55,7 @@ class VitoWifiBase {
   void readGroup(const char* group);
   void readDatapoint(const char* name);
 
-  template<typename TArg>
+  template <typename TArg>
   void writeDatapoint(const char* name, TArg arg) {
     static_assert(sizeof(TArg) <= sizeof(float), "writeDatapoint() argument size must be <= 4 bytes");
     float _float = static_cast<float>(arg);
@@ -78,29 +77,27 @@ class VitoWifiBase {
   Logger _logger;
 };
 
-
 template <class P>
-class VitoWifiInterface: public VitoWifiBase {
+class VitoWifiInterface : public VitoWifiBase {
  public:
-    VitoWifiInterface() {}
-    ~VitoWifiInterface() {}
-    #ifdef ARDUINO_ARCH_ESP32
-    void setup(HardwareSerial* serial, int8_t rxPin, int8_t txPin);
-    #endif
-    #ifdef ESP8266
-    void setup(HardwareSerial* serial);
-    #endif
-    void loop();
+  VitoWifiInterface() {}
+  ~VitoWifiInterface() {}
+#ifdef ARDUINO_ARCH_ESP32
+  void setup(HardwareSerial* serial, int8_t rxPin, int8_t txPin);
+#endif
+#ifdef ESP8266
+  void setup(HardwareSerial* serial);
+#endif
+  void loop();
 
-    void enableLogger();
-    void disableLogger();
-    void setLogger(Print* printer);
+  void enableLogger();
+  void disableLogger();
+  void setLogger(Print* printer);
 
  private:
-    P _optolink;
+  P _optolink;
 };
 
-
 #define P300 OptolinkP300
-#define KW   OptolinkKW
+#define KW OptolinkKW
 #define VitoWifi_setProtocol(protocol) VitoWifiInterface<protocol> VitoWifi

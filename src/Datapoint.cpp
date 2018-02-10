@@ -28,62 +28,31 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // declare static global callback function as part of the Datapoint base class
 GlobalCallbackFunction Datapoint::_globalCallback = nullptr;
 
-
-Datapoint::Datapoint(const char* name, const char* group, const uint16_t address, bool isWriteable):
+Datapoint::Datapoint(const char* name, const char* group, const uint16_t address, bool isWriteable) :
   _name(name),
   _group(group),
   _address(address),
-  _writeable(isWriteable)
-  {}
-
+  _writeable(isWriteable) {}
 
 Datapoint::~Datapoint() {
   abort();  // destruction is not supported
 }
-
-
-const char* Datapoint::getName() const {
-  return _name;
-}
-
-
-const char* Datapoint::getGroup() const {
-  return _group;
-}
-
-
-const uint16_t Datapoint::getAddress() const {
-  return _address;
-}
-
-
-const bool Datapoint::isWriteable() const {
-  return _writeable;
-}
-
 
 Datapoint& Datapoint::setWriteable() {
   _writeable = true;
   return *this;
 }
 
+void Datapoint::setGlobalCallback(GlobalCallbackFunction globalCallback) { _globalCallback = globalCallback; }
 
-void Datapoint::setGlobalCallback(GlobalCallbackFunction globalCallback) {
-  _globalCallback = globalCallback;
-}
-
-
-TempDP::TempDP(const char* name, const char* group, const uint16_t address, bool isWriteable):
+TempDP::TempDP(const char* name, const char* group, const uint16_t address, bool isWriteable) :
   Datapoint(name, group, address, isWriteable),
-  _callback(nullptr)
-  {}
-
+  _callback(nullptr) {}
 
 Datapoint& TempDP::setCallback(TempCallbackFunction callback) {
   _callback = callback;
   return *this;
 }
-
 
 void TempDP::callback(uint8_t value[]) {
   int16_t tmp = value[1] << 8 | value[0];
@@ -98,7 +67,6 @@ void TempDP::callback(uint8_t value[]) {
   return;
 }
 
-
 void TempDP::parse(uint8_t transformedValue[], float value) {
   int16_t tmp = floor((value * 10) + 0.5);
   transformedValue[1] = tmp >> 8;
@@ -106,18 +74,14 @@ void TempDP::parse(uint8_t transformedValue[], float value) {
   return;
 }
 
-
-StatDP::StatDP(const char* name, const char* group, const uint16_t address, bool isWriteable):
+StatDP::StatDP(const char* name, const char* group, const uint16_t address, bool isWriteable) :
   Datapoint(name, group, address, isWriteable),
-  _callback(nullptr)
-  {}
-
+  _callback(nullptr) {}
 
 Datapoint& StatDP::setCallback(StatCallbackFunction callback) {
   _callback = callback;
   return *this;
 }
-
 
 void StatDP::callback(uint8_t value[]) {
   bool boolValue = (value[0]) ? true : false;
@@ -130,24 +94,19 @@ void StatDP::callback(uint8_t value[]) {
   }
 }
 
-
 void StatDP::parse(uint8_t transformedValue[], float value) {
   transformedValue[0] = (value) ? 0x01 : 0x00;
   return;
 }
 
-
-CountDP::CountDP(const char* name, const char* group, const uint16_t address, bool isWriteable):
+CountDP::CountDP(const char* name, const char* group, const uint16_t address, bool isWriteable) :
   Datapoint(name, group, address, isWriteable),
-  _callback(nullptr)
-  {}
-
+  _callback(nullptr) {}
 
 Datapoint& CountDP::setCallback(CountCallbackFunction callback) {
   _callback = callback;
   return *this;
 }
-
 
 void CountDP::callback(uint8_t value[]) {
   uint32_t ui32 = value[0] | (value[1] << 8) | (value[2] << 16) | (value[3] << 24);
@@ -160,7 +119,6 @@ void CountDP::callback(uint8_t value[]) {
   }
 }
 
-
 void CountDP::parse(uint8_t transformedValue[], float value) {
   uint32_t _value = (uint32_t)ceil(value);
   transformedValue[3] = _value >> 24;
@@ -170,18 +128,14 @@ void CountDP::parse(uint8_t transformedValue[], float value) {
   return;
 }
 
-
-CountSDP::CountSDP(const char* name, const char* group, const uint16_t address, bool isWriteable):
+CountSDP::CountSDP(const char* name, const char* group, const uint16_t address, bool isWriteable) :
   Datapoint(name, group, address, isWriteable),
-  _callback(nullptr)
-  {}
-
+  _callback(nullptr) {}
 
 Datapoint& CountSDP::setCallback(CountSCallbackFunction callback) {
   _callback = callback;
   return *this;
 }
-
 
 void CountSDP::callback(uint8_t value[]) {
   uint16_t retValue = value[1] << 8 | value[0];
@@ -195,7 +149,6 @@ void CountSDP::callback(uint8_t value[]) {
   return;
 }
 
-
 void CountSDP::parse(uint8_t transformedValue[], float value) {
   uint16_t _value = (uint16_t)ceil(value);
   transformedValue[1] = _value >> 8;
@@ -203,18 +156,14 @@ void CountSDP::parse(uint8_t transformedValue[], float value) {
   return;
 }
 
-
-ModeDP::ModeDP(const char* name, const char* group, const uint16_t address, bool isWriteable):
+ModeDP::ModeDP(const char* name, const char* group, const uint16_t address, bool isWriteable) :
   Datapoint(name, group, address, isWriteable),
-  _callback(nullptr)
-  {}
-
+  _callback(nullptr) {}
 
 Datapoint& ModeDP::setCallback(ModeCallbackFunction callback) {
   _callback = callback;
   return *this;
 }
-
 
 void ModeDP::callback(uint8_t value[]) {
   if (_callback) {
@@ -226,7 +175,6 @@ void ModeDP::callback(uint8_t value[]) {
     _globalCallback(_name, _group, str);
   }
 }
-
 
 void ModeDP::parse(uint8_t transformedValue[], float value) {
   transformedValue[0] = static_cast<uint8_t>(value);

@@ -25,59 +25,55 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "VitoWifi.h"
 
-VitoWifiBase::VitoWifiBase():
-  _logger() {}
-
+VitoWifiBase::VitoWifiBase() : _logger() {}
 
 VitoWifiBase::~VitoWifiBase() {
   _logger.println(F("Destructing of VitoWifi is unsupported"));
   abort();
 }
 
-template<>
+template <>
 VitoWifiInterface<OptolinkP300>::VitoWifiInterface() {
   _logger.setLogging(false);
   _optolink.setLogger(&_logger);
 }
-template<>
+template <>
 VitoWifiInterface<OptolinkKW>::VitoWifiInterface() {
   _logger.setLogging(false);
   _optolink.setLogger(&_logger);
 }
 
-
 // For P300 Protocol
 #ifdef ARDUINO_ARCH_ESP32
-template<>
+template <>
 void VitoWifiInterface<OptolinkP300>::setup(HardwareSerial* serial, int8_t rxPin, int8_t txPin) {
   _optolink.begin(serial, rxPin, txPin);
   _datapoints.shrink_to_fit();
 }
 #endif
 #ifdef ESP8266
-template<>
+template <>
 void VitoWifiInterface<OptolinkP300>::setup(HardwareSerial* serial) {
   _optolink.begin(serial);
   _datapoints.shrink_to_fit();
 }
 #endif
+
 // For KW Protocol
 #ifdef ARDUINO_ARCH_ESP32
-template<>
+template <>
 void VitoWifiInterface<OptolinkKW>::setup(HardwareSerial* serial, int8_t rxPin, int8_t txPin) {
   _optolink.begin(serial, rxPin, txPin);
   _datapoints.shrink_to_fit();
 }
 #endif
 #ifdef ESP8266
-template<>
+template <>
 void VitoWifiInterface<OptolinkKW>::setup(HardwareSerial* serial) {
   _optolink.begin(serial);
   _datapoints.shrink_to_fit();
 }
 #endif
-
-
 
 void VitoWifiBase::setGlobalCallback(GlobalCallbackFunction globalCallback) {
   if (_datapoints.size()) {
@@ -85,46 +81,39 @@ void VitoWifiBase::setGlobalCallback(GlobalCallbackFunction globalCallback) {
   }
 }
 
-
 Datapoint& VitoWifiBase::addDatapoint(const char* name, const char* group, const uint16_t address, const DPType type, bool isWriteable) {
   Datapoint* DP;
   switch (type) {
-    case TEMP :
+    case TEMP:
       DP = new TempDP(name, group, address, isWriteable);
       break;
-    case STAT :
+    case STAT:
       DP = new StatDP(name, group, address, isWriteable);
       break;
-    case COUNT :
+    case COUNT:
       DP = new CountDP(name, group, address, isWriteable);
       break;
-    case COUNTS :
+    case COUNTS:
       DP = new CountSDP(name, group, address, isWriteable);
       break;
-    case MODE :
+    case MODE:
       DP = new ModeDP(name, group, address, isWriteable);
       break;
-    }
+  }
   if (!DP) abort();  // out of memory?
   _datapoints.push_back(DP);
   return *_datapoints.back();
 }
 
-
-Datapoint& VitoWifiBase::addDatapoint(const char* name, const char* group, const uint16_t address, const DPType type) {
-  return addDatapoint(name, group, address, type, false);
-}
-
+Datapoint& VitoWifiBase::addDatapoint(const char* name, const char* group, const uint16_t address, const DPType type) { return addDatapoint(name, group, address, type, false); }
 
 Datapoint* VitoWifiBase::_getDatapoint(const char* name) {
   Datapoint* DP = nullptr;
   for (std::vector<Datapoint*>::iterator it = _datapoints.begin(); it != _datapoints.end(); ++it) {
-    if (strcmp(name, (*it)->getName()) == 0)
-      DP = *it;
+    if (strcmp(name, (*it)->getName()) == 0) DP = *it;
   }
   return DP;
 }
-
 
 void VitoWifiBase::readAll() {
   _logger.println(F("Reading all datapoints"));
@@ -137,7 +126,6 @@ void VitoWifiBase::readAll() {
   _logger.println(F("No datapoints available, skipping"));
 }
 
-
 void VitoWifiBase::readGroup(const char* group) {
   bool foundOne = false;
   for (Datapoint* iDP : _datapoints) {
@@ -149,7 +137,6 @@ void VitoWifiBase::readGroup(const char* group) {
   if (!foundOne) _logger.println(F("Group not found, skipping"));
 }
 
-
 void VitoWifiBase::readDatapoint(const char* name) {
   for (Datapoint* iDP : _datapoints) {
     if (strcmp(name, iDP->getName()) == 0) {
@@ -160,7 +147,6 @@ void VitoWifiBase::readDatapoint(const char* name) {
   _logger.println(F("Datapoint not found, skipping"));
 }
 
-
 inline void VitoWifiBase::_readDatapoint(Datapoint* dp) {
   Action action = {dp, false};
   _queue.push(action);
@@ -169,7 +155,6 @@ inline void VitoWifiBase::_readDatapoint(Datapoint* dp) {
   _logger.println(" READ action added");
 }
 
-
 void VitoWifiBase::_writeDatapoint(const char* name, float value, size_t length) {
   Datapoint* DP = _getDatapoint(name);
   if (DP) {
@@ -177,10 +162,10 @@ void VitoWifiBase::_writeDatapoint(const char* name, float value, size_t length)
       _logger.println(F("Value type does not match Datapoint type, skipping"));
       return;
     }
-  if (!DP->isWriteable()) {
+    if (!DP->isWriteable()) {
       _logger.println(F("Datapoint is not writeable, skipping"));
       return;
-  }
+    }
     uint8_t transformedValue[2] = {0};
     DP->parse(transformedValue, value);
     Action action;
@@ -193,8 +178,7 @@ void VitoWifiBase::_writeDatapoint(const char* name, float value, size_t length)
   _logger.println(F("Datapoint not found, skipping"));
 }
 
-
-template<>
+template <>
 void VitoWifiInterface<OptolinkP300>::loop() {
   _optolink.loop();
   if (!_queue.empty() && !_optolink.isBusy()) {
@@ -225,7 +209,7 @@ void VitoWifiInterface<OptolinkP300>::loop() {
     return;
   }
 }
-template<>
+template <>
 void VitoWifiInterface<OptolinkKW>::loop() {
   _optolink.loop();
   if (!_queue.empty() && !_optolink.isBusy()) {
@@ -257,34 +241,33 @@ void VitoWifiInterface<OptolinkKW>::loop() {
   }
 }
 
-
 // Logger stuff, taken from Marvin ROGER's Homie for ESP8266
-template<>
+template <>
 void VitoWifiInterface<OptolinkP300>::setLogger(Print* printer) {
   _logger.setPrinter(printer);
   _optolink.setLogger(printer);
 }
-template<>
+template <>
 void VitoWifiInterface<OptolinkKW>::setLogger(Print* printer) {
   _logger.setPrinter(printer);
   _optolink.setLogger(printer);
 }
-template<>
+template <>
 void VitoWifiInterface<OptolinkP300>::enableLogger() {
   _logger.setLogging(true);
   _optolink.getLogger()->setLogging(true);
 }
-template<>
+template <>
 void VitoWifiInterface<OptolinkKW>::enableLogger() {
   _logger.setLogging(true);
   _optolink.getLogger()->setLogging(true);
 }
-template<>
+template <>
 void VitoWifiInterface<OptolinkP300>::disableLogger() {
   _logger.setLogging(false);
   _optolink.getLogger()->setLogging(false);
 }
-template<>
+template <>
 void VitoWifiInterface<OptolinkKW>::disableLogger() {
   _logger.setLogging(false);
   _optolink.getLogger()->setLogging(false);

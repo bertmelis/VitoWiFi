@@ -13,7 +13,6 @@ VitoWifi_setProtocol(P300);
 
 HardwareSerial Serial1(1);
 
-
 void globalCallbackHandler(const char* name, const char* group, const char* value) {
   Serial.print(group);
   Serial.print(" - ");
@@ -22,11 +21,10 @@ void globalCallbackHandler(const char* name, const char* group, const char* valu
   Serial.println(value);
 }
 
-
 void setup() {
-  //setup VitoWifi using a global callback handler
+  // setup VitoWifi using a global callback handler
   VitoWifi.addDatapoint("outsidetemp", "boiler", 0x5525, TEMP);
-  VitoWifi.addDatapoint("boilertemp",  "boiler", 0x0810, TEMP);
+  VitoWifi.addDatapoint("boilertemp", "boiler", 0x0810, TEMP);
   VitoWifi.setGlobalCallback(globalCallbackHandler);
   VitoWifi.setLogger(&Serial);
   VitoWifi.enableLogger();
@@ -37,11 +35,10 @@ void setup() {
 }
 
 void loop() {
-
   static unsigned long lastMillis = 0;
-  if (millis() - lastMillis > 60 * 1000UL) {  //read all values every 60 seconds
+  if (millis() - lastMillis > 60 * 1000UL) {  // read all values every 60 seconds
     lastMillis = millis();
-	Serial.println(F("reading datapoints"));
+    Serial.println(F("reading datapoints"));
     VitoWifi.readAll();
   }
 

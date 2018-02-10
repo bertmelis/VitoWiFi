@@ -25,25 +25,22 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "OptolinkKW.h"
 
-
-OptolinkKW::OptolinkKW():
-  _stream(nullptr),
-  _address(0),
-  _length(0),
-  _value{0},
-  _writeMessageType(false),
-  _rcvBuffer{0},
-  _rcvBufferLen(0),
-  _rcvLen(0),
-  _debugMessage(true),
-  _state(INIT),
-  _action(WAIT),
-  _lastMillis(0),
-  _numberOfTries(5),
-  _errorCode(0),
-  _logger()
-  {}
-
+OptolinkKW::OptolinkKW() :
+    _stream(nullptr),
+    _address(0),
+    _length(0),
+    _value{0},
+    _writeMessageType(false),
+    _rcvBuffer{0},
+    _rcvBufferLen(0),
+    _rcvLen(0),
+    _debugMessage(true),
+    _state(INIT),
+    _action(WAIT),
+    _lastMillis(0),
+    _numberOfTries(5),
+    _errorCode(0),
+    _logger() {}
 
 #ifdef ARDUINO_ARCH_ESP32
 void OptolinkKW::begin(HardwareSerial* serial, int8_t rxPin, int8_t txPin) {
@@ -60,7 +57,6 @@ void OptolinkKW::begin(HardwareSerial* serial) {
 }
 #endif
 
-
 void OptolinkKW::loop() {
   if (_numberOfTries < 1) {
     _state = IDLE;
@@ -74,7 +70,6 @@ void OptolinkKW::loop() {
   }
 }
 
-
 // reset new devices to KW state by sending 0x04.
 void OptolinkKW::_initHandler() {
   if (_stream->available()) {
@@ -82,7 +77,9 @@ void OptolinkKW::_initHandler() {
       _state = IDLE;
       _idleHandler();
       _logger.println("INIT done.");
-    } else { _stream->read(); }
+    } else {
+      _stream->read();
+    }
   } else {
     if (millis() - _lastMillis > 1000UL) {
       _lastMillis = millis();
@@ -91,7 +88,6 @@ void OptolinkKW::_initHandler() {
     }
   }
 }
-
 
 // idle state, waiting for sync from Vito
 void OptolinkKW::_idleHandler() {
@@ -103,7 +99,9 @@ void OptolinkKW::_idleHandler() {
         _state = SYNC;
         _syncHandler();
       }
-    } else { _logger.println("something wrong received"); }
+    } else {
+      _logger.println("something wrong received");
+    }
   } else if (_action == PROCESS && (millis() - _lastMillis < 10UL)) {  // don't wait for 0x05 sync signal, send directly after last request
     _state = SEND;
     _sendHandler();
@@ -113,7 +111,6 @@ void OptolinkKW::_idleHandler() {
     --_numberOfTries;
   }
 }
-
 
 void OptolinkKW::_syncHandler() {
   const uint8_t buff[1] = {0x01};
@@ -149,7 +146,8 @@ void OptolinkKW::_sendHandler() {
   _rcvBufferLen = 0;
   --_numberOfTries;
   _state = RECEIVE;
-  if (_writeMessageType) _logger.print(F("WRITE "));
+  if (_writeMessageType)
+    _logger.print(F("WRITE "));
   else
     _logger.print(F("READ"));
   _logger.print(F(" request on address "));
@@ -157,7 +155,6 @@ void OptolinkKW::_sendHandler() {
   _logger.print(F(", length "));
   _logger.println(_length);
 }
-
 
 void OptolinkKW::_receiveHandler() {
   while (_stream->available() > 0) {  // while instead of if: read complete RX buffer
@@ -174,12 +171,11 @@ void OptolinkKW::_receiveHandler() {
   } else if (millis() - _lastMillis > 10 * 1000UL) {  // Vitotronic isn't answering, try again
     _rcvBufferLen = 0;
     _errorCode = 1;  // Connection error
-    memset(_rcvBuffer, 0, 2);
+    memset(_rcvBuffer, 0, 4);
     _state = IDLE;
     _action = RETURN_ERROR;
   }
 }
-
 
 // set properties for datapoint and move state to SEND
 bool OptolinkKW::readFromDP(uint16_t address, uint8_t length) {
@@ -193,11 +189,10 @@ bool OptolinkKW::readFromDP(uint16_t address, uint8_t length) {
   _writeMessageType = false;
   _rcvBufferLen = 0;
   _numberOfTries = 5;
-  memset(_rcvBuffer, 0, 2);
+  memset(_rcvBuffer, 0, 4);
   _action = PROCESS;
   return true;
 }
-
 
 // set properties datapoint and move state to SEND
 bool OptolinkKW::writeToDP(uint16_t address, uint8_t length, uint8_t value[]) {
@@ -212,25 +207,26 @@ bool OptolinkKW::writeToDP(uint16_t address, uint8_t length, uint8_t value[]) {
   _writeMessageType = true;
   _rcvBufferLen = 0;
   _numberOfTries = 5;
-  memset(_rcvBuffer, 0, 2);
+  memset(_rcvBuffer, 0, 4);
   _action = PROCESS;
   return true;
 }
 
-
 const int8_t OptolinkKW::available() const {
-  if (_action == RETURN_ERROR) return -1;
-  else if (_action == RETURN) return 1;
+  if (_action == RETURN_ERROR)
+    return -1;
+  else if (_action == RETURN)
+    return 1;
   else
     return 0;
 }
 
 const bool OptolinkKW::isBusy() const {
-  if (_action == WAIT) return false;
+  if (_action == WAIT)
+    return false;
   else
     return true;
 }
-
 
 // return value and reset comunication to IDLE
 void OptolinkKW::read(uint8_t value[]) {
@@ -249,12 +245,10 @@ void OptolinkKW::read(uint8_t value[]) {
   }
 }
 
-
 const uint8_t OptolinkKW::readError() {
   _action = WAIT;
   return _errorCode;
 }
-
 
 // clear serial input buffer
 inline void OptolinkKW::_clearInputBuffer() {
@@ -263,29 +257,26 @@ inline void OptolinkKW::_clearInputBuffer() {
   }
 }
 
-void OptolinkKW::setLogger(Print* printer) {
-  _logger.setPrinter(printer);
-}
+void OptolinkKW::setLogger(Print* printer) { _logger.setPrinter(printer); }
 
-Logger* OptolinkKW::getLogger() {
-  return &_logger;
-}
-
+Logger* OptolinkKW::getLogger() { return &_logger; }
 
 // Copied from Arduino.cc forum --> (C) robtillaart
 inline void OptolinkKW::_printHex(Print* printer, uint8_t array[], uint8_t length) {
-  char tmp[length * 2 + 1];  //NOLINT
+  char tmp[length * 2 + 1];  // NOLINT
   byte first;
   uint8_t j = 0;
   for (uint8_t i = 0; i < length; ++i) {
     first = (array[i] >> 4) | 48;
-    if (first > 57) tmp[j] = first + (byte)39;
+    if (first > 57)
+      tmp[j] = first + (byte)39;
     else
       tmp[j] = first;
     ++j;
 
     first = (array[i] & 0x0F) | 48;
-    if (first > 57) tmp[j] = first + (byte)39;
+    if (first > 57)
+      tmp[j] = first + (byte)39;
     else
       tmp[j] = first;
     ++j;
