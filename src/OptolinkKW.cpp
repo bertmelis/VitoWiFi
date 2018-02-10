@@ -171,7 +171,7 @@ void OptolinkKW::_receiveHandler() {
   } else if (millis() - _lastMillis > 10 * 1000UL) {  // Vitotronic isn't answering, try again
     _rcvBufferLen = 0;
     _errorCode = 1;  // Connection error
-    memset(_rcvBuffer, 0, 2);
+    memset(_rcvBuffer, 0, 4);
     _state = IDLE;
     _action = RETURN_ERROR;
   }
@@ -189,7 +189,7 @@ bool OptolinkKW::readFromDP(uint16_t address, uint8_t length) {
   _writeMessageType = false;
   _rcvBufferLen = 0;
   _numberOfTries = 5;
-  memset(_rcvBuffer, 0, 2);
+  memset(_rcvBuffer, 0, 4);
   _action = PROCESS;
   return true;
 }
@@ -207,7 +207,7 @@ bool OptolinkKW::writeToDP(uint16_t address, uint8_t length, uint8_t value[]) {
   _writeMessageType = true;
   _rcvBufferLen = 0;
   _numberOfTries = 5;
-  memset(_rcvBuffer, 0, 2);
+  memset(_rcvBuffer, 0, 4);
   _action = PROCESS;
   return true;
 }

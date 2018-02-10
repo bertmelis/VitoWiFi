@@ -54,8 +54,8 @@ class OptolinkKW {
   uint16_t _address;
   uint8_t _length;
   bool _writeMessageType;
-  uint8_t _value[2];
-  uint8_t _rcvBuffer[2];
+  uint8_t _value[4];
+  uint8_t _rcvBuffer[4];
   uint8_t _rcvBufferLen;
   uint8_t _rcvLen;
   uint32_t _lastMillis;
