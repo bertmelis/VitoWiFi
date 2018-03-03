@@ -71,7 +71,6 @@ class OptolinkP300 {
   void _receiveHandler();
   void _receiveAckHandler();
   void _returnHandler();
-  bool _debugMessage;
   inline uint8_t _calcChecksum(uint8_t array[], uint8_t length);
   inline bool _checkChecksum(uint8_t array[], uint8_t length);
   inline void _printHex(Print* printer, uint8_t array[], uint8_t length);
@@ -79,13 +78,13 @@ class OptolinkP300 {
   Logger _logger;
 
   inline void setState(OptolinkState state) {
-    // _debugPrinter->println(F("Optolink: Setting state = "));
-    // _debugPrinter->println(state, DEC);
+    // _logger->print(F("Optolink state: "));
+    // _logger->println(state, DEC);
     _state = state;
   }
   inline void setAction(OptolinkAction action) {
-    // _debugPrinter->println(F("Optolink: Setting state = "));
-    // _debugPrinter->println(action, DEC);
+    // _logger->print(F("Optolink action: "));
+    // _logger->println(action, DEC);
     _action = action;
   }
 };
