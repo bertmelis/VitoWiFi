@@ -116,25 +116,17 @@ Datapoint* VitoWifiBase::_getDatapoint(const char* name) {
 }
 
 void VitoWifiBase::readAll() {
-  _logger.println(F("Reading all datapoints"));
-  bool foundOne = false;
   for (Datapoint* iDP : _datapoints) {
     _readDatapoint(iDP);
-    foundOne = true;
   }
-  if (foundOne) return;
-  _logger.println(F("No datapoints available, skipping"));
 }
 
 void VitoWifiBase::readGroup(const char* group) {
-  bool foundOne = false;
   for (Datapoint* iDP : _datapoints) {
     if (strcmp(group, iDP->getGroup()) == 0) {
       _readDatapoint(iDP);
-      foundOne = true;
     }
   }
-  if (!foundOne) _logger.println(F("Group not found, skipping"));
 }
 
 void VitoWifiBase::readDatapoint(const char* name) {
@@ -144,26 +136,24 @@ void VitoWifiBase::readDatapoint(const char* name) {
       return;
     }
   }
-  _logger.println(F("Datapoint not found, skipping"));
 }
 
 inline void VitoWifiBase::_readDatapoint(Datapoint* dp) {
   Action action = {dp, false};
   _queue.push(action);
-  _logger.print("Datapoint ");
-  _logger.print(dp->getName());
-  _logger.println(" READ action added");
+  _logger.print("READ ");
+  _logger.println(dp->getName());
 }
 
 void VitoWifiBase::_writeDatapoint(const char* name, float value, size_t length) {
   Datapoint* DP = _getDatapoint(name);
   if (DP) {
     if (DP->getLength() != length) {
-      _logger.println(F("Value type does not match Datapoint type, skipping"));
+      _logger.println(F("Value does not match DP, skipping"));
       return;
     }
     if (!DP->isWriteable()) {
-      _logger.println(F("Datapoint is not writeable, skipping"));
+      _logger.println(F("DP is readonly, skipping"));
       return;
     }
     uint8_t transformedValue[2] = {0};
@@ -175,7 +165,6 @@ void VitoWifiBase::_writeDatapoint(const char* name, float value, size_t length)
     _queue.push(action);
     return;
   }
-  _logger.println(F("Datapoint not found, skipping"));
 }
 
 template <>
@@ -190,9 +179,9 @@ void VitoWifiInterface<OptolinkP300>::loop() {
     return;
   }
   if (_optolink.available() > 0) {  // trigger callback when ready and remove element from queue
-    _logger.print(F("Datapoint "));
+    _logger.print(F("DP "));
     _logger.print(_queue.front().DP->getName());
-    _logger.println(F(" action successful"));
+    _logger.println(F(" succes"));
     uint8_t value[4] = {0};
     _optolink.read(value);
     _queue.front().DP->callback(value);
@@ -200,9 +189,9 @@ void VitoWifiInterface<OptolinkP300>::loop() {
     return;
   }
   if (_optolink.available() < 0) {  // display error message and remove element from queue
-    _logger.print(F("Datapoint "));
+    _logger.print(F("DP "));
     _logger.print(_queue.front().DP->getName());
-    _logger.print(F(" action unsuccessful - CODE:"));
+    _logger.print(F(" error: "));
     uint8_t errorCode = _optolink.readError();
     _logger.println(errorCode, DEC);
     _queue.pop();
@@ -221,9 +210,9 @@ void VitoWifiInterface<OptolinkKW>::loop() {
     return;
   }
   if (_optolink.available() > 0) {  // trigger callback when ready and remove element from queue
-    _logger.print(F("Datapoint "));
+    _logger.print(F("DP "));
     _logger.print(_queue.front().DP->getName());
-    _logger.println(F(" action successful"));
+    _logger.println(F(" succes"));
     uint8_t value[4] = {0};
     _optolink.read(value);
     _queue.front().DP->callback(value);
@@ -231,9 +220,9 @@ void VitoWifiInterface<OptolinkKW>::loop() {
     return;
   }
   if (_optolink.available() < 0) {  // display error message and remove element from queue
-    _logger.print(F("Datapoint "));
+    _logger.print(F("DP "));
     _logger.print(_queue.front().DP->getName());
-    _logger.print(F(" action unsuccessful - CODE:"));
+    _logger.print(F(" error: "));
     uint8_t errorCode = _optolink.readError();
     _logger.println(errorCode, DEC);
     _queue.pop();
