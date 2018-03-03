@@ -79,12 +79,6 @@ void OptolinkP300::loop() {
     case IDLE:
       _idleHandler();
       break;
-    case SYNC:
-      _syncHandler();
-      break;
-    case SYNC_ACK:
-      _syncAckHandler();
-      break;
     case SEND:
       _sendHandler();
       break;
@@ -93,6 +87,9 @@ void OptolinkP300::loop() {
       break;
     case RECEIVE:
       _receiveHandler();
+      break;
+    case RECEIVE_ACK:
+      _receiveAckHandler();
       break;
   }
 }
@@ -165,38 +162,12 @@ void OptolinkP300::_initAckHandler() {
 
 // idle state, waiting for user action
 void OptolinkP300::_idleHandler() {
-  if (millis() - _lastMillis > 2 * 60 * 1000UL) {  // send SYNC every 2 minutes to keep communication alive
-    setState(SYNC);
+  if (millis() - _lastMillis > 2 * 60 * 1000UL) {  // send INIT every 2 minutes to keep communication alive
+    setState(INIT);
   }
   _clearInputBuffer();  // keep input clean
   if (_action == PROCESS) {
-    setState(SYNC);
-  }
-}
-
-// send SYNC (= initiator)
-void OptolinkP300::_syncHandler() {
-  const uint8_t buff[] = {0x16, 0x00, 0x00};
-  _stream->write(buff, sizeof(buff));
-  _lastMillis = millis();
-  setState(SYNC_ACK);
-}
-
-void OptolinkP300::_syncAckHandler() {
-  if (_stream->available()) {
-    if (_stream->read() == 0x06) {
-      if (_action == PROCESS) {
-        setState(SEND);
-      } else {
-        setState(IDLE);
-      }
-    }
-  }
-  if (millis() - _lastMillis > 2 * 1000UL) {  // if no ACK is coming, reset connection
-    setState(RESET);
-    if (_action == PROCESS) {
-      --_numberOfTries;
-    }
+    setState(SEND);
   }
 }
 
@@ -256,16 +227,16 @@ void OptolinkP300::_sendAckHandler() {
       _logger.println(F("ack"));
       setState(RECEIVE);
       return;
-    } else if (buff == 0x15) {  // transmit negatively acknowledged, return to SYNC and try again
+    } else if (buff == 0x15) {  // transmit negatively acknowledged, return to INIT and try again
       _logger.println(F("nack"));
-      setState(SYNC);
+      setState(INIT);
       _clearInputBuffer();
       return;
     }
   }
-  if (millis() - _lastMillis > 2 * 1000UL) {  // if no ACK is coming, return to SYNC and try again
+  if (millis() - _lastMillis > 2 * 1000UL) {  // if no ACK is coming, return to INIT and try again
     _logger.println(F("t/o"));
-    setState(SYNC);
+    setState(INIT);
     _clearInputBuffer();
   }
 }
@@ -299,13 +270,13 @@ void OptolinkP300::_receiveHandler() {
       _errorCode = 2;  // checksum error
       _logger.println(F("... checksum error"));
       memset(_rcvBuffer, 0, 12);
-      setState(SYNC);
+      setState(INIT);
       return;
     }
     if (_rcvBuffer[3] == 0x01) {
       // message is from READ command, so returning read value
     }
-    setState(IDLE);
+    setState(RECEIVE_ACK);
     setAction(RETURN);
     _errorCode = 0;
     _logger.println(F("... success"));
@@ -320,8 +291,15 @@ void OptolinkP300::_receiveHandler() {
     _rcvBufferLen = 0;
     _errorCode = 1;  // Connection error
     memset(_rcvBuffer, 0, 12);
-    setState(SYNC);
   }
+}
+
+//send Ack on message receive succes
+void OptolinkP300::_receiveAckHandler() {
+  const uint8_t buff = 0x06;
+  _stream->write(buff, sizeof(buff));
+  _lastMillis = millis();
+  setState(INIT);
 }
 
 // set properties for datapoint and move state to SEND
@@ -337,7 +315,7 @@ bool OptolinkP300::readFromDP(uint16_t address, uint8_t length) {
   _rcvBufferLen = 0;
   _numberOfTries = 5;
   memset(_rcvBuffer, 0, 12);
-  setState(SYNC);  // avoid an extra loop to pass by idleHandler
+  setState(SEND);
   setAction(PROCESS);
   return true;
 }
@@ -356,7 +334,7 @@ bool OptolinkP300::writeToDP(uint16_t address, uint8_t length, uint8_t value[]) 
   _rcvBufferLen = 0;
   _numberOfTries = 5;
   memset(_rcvBuffer, 0, 12);
-  setState(SYNC);  // avoid an extra loop to pass by idleHandler
+  setState(SEND);
   setAction(PROCESS);
   return true;
 }

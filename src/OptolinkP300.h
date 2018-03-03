@@ -49,7 +49,7 @@ class OptolinkP300 {
 
  private:
   Stream* _stream;
-  enum OptolinkState : uint8_t { RESET, RESET_ACK, INIT, INIT_ACK, IDLE, SYNC, SYNC_ACK, SEND, SEND_ACK, RECEIVE } _state;
+  enum OptolinkState : uint8_t { RESET, RESET_ACK, INIT, INIT_ACK, IDLE, SEND, SEND_ACK, RECEIVE, RECEIVE_ACK } _state;
   enum OptolinkAction : uint8_t { WAIT, PROCESS, RETURN, RETURN_ERROR } _action;
   uint16_t _address;
   uint8_t _length;
@@ -66,11 +66,10 @@ class OptolinkP300 {
   void _initHandler();
   void _initAckHandler();
   void _idleHandler();
-  void _syncHandler();
-  void _syncAckHandler();
   void _sendHandler();
   void _sendAckHandler();
   void _receiveHandler();
+  void _receiveAckHandler();
   void _returnHandler();
   bool _debugMessage;
   inline uint8_t _calcChecksum(uint8_t array[], uint8_t length);
