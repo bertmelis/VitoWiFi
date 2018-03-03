@@ -294,9 +294,9 @@ void OptolinkP300::_receiveHandler() {
   }
 }
 
-//send Ack on message receive succes
+// send Ack on message receive succes
 void OptolinkP300::_receiveAckHandler() {
-  const uint8_t buff = 0x06;
+  const uint8_t buff[] = {0x06};
   _stream->write(buff, sizeof(buff));
   _lastMillis = millis();
   setState(INIT);
