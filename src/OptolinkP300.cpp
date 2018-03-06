@@ -199,11 +199,12 @@ void OptolinkP300::_sendHandler() {
   if (_writeMessageType) {
     _logger.print(F("WRITE "));
     _printHex(&_logger, buff, 8 + _length);
+    _logger.println();
   } else {
     _logger.print(F("READ "));
     _printHex(&_logger, buff, 8);
+     _logger.println();
   }
-  _logger.print(F("... "));
 }
 
 void OptolinkP300::_sendAckHandler() {
@@ -232,13 +233,11 @@ void OptolinkP300::_receiveHandler() {
     _rcvBuffer[_rcvBufferLen] = _stream->read();
     ++_rcvBufferLen;
   }
-
-  _logger.print(F("received: "));
-  _printHex(&_logger, _rcvBuffer, _rcvBufferLen);
-
   if (_rcvBuffer[0] != 0x41) return;  // TODO(@bertmelis): find out why this is needed! I'd expect the rx-buffer to be empty.
-
   if (_rcvBufferLen == _rcvLen) {          // message complete, check message
+    _logger.print(F("RCV "));
+    _printHex(&_logger, _rcvBuffer, _rcvBufferLen);
+    _logger.println();
     if (_rcvBuffer[1] != (_rcvLen - 3)) {  // check for message length
       _numberOfTries = 0;
       _errorCode = 4;
@@ -247,7 +246,7 @@ void OptolinkP300::_receiveHandler() {
     if (_rcvBuffer[2] != 0x01) {  // Vitotronic returns an error message, skipping DP
       _numberOfTries = 0;
       _errorCode = 3;  // Vitotronic error
-
+      _logger.println(F("nack, comm error"));
       return;
     }
     if (!_checkChecksum(_rcvBuffer, _rcvLen)) {  // checksum is wrong, trying again
@@ -255,6 +254,7 @@ void OptolinkP300::_receiveHandler() {
       _errorCode = 2;  // checksum error
       memset(_rcvBuffer, 0, 12);
       setState(INIT);
+      _logger.println(F("nack, checksum"));
       return;
     }
     if (_rcvBuffer[3] == 0x01) {
@@ -263,17 +263,17 @@ void OptolinkP300::_receiveHandler() {
     setState(RECEIVE_ACK);
     setAction(RETURN);
     _errorCode = 0;
+    _logger.println(F("ack"));
     return;
   } else {
-    // _logger.println(F("Recieved answer of unexpected length. Got:"));
-    // _logger.println(_rcvBufferLen, DEC);
-    // _logger.println(F("Expected:"));
-    // _logger.println(_rcvLen, DEC);
+    // wrong message length
   }
   if (millis() - _lastMillis > 10 * 1000UL) {  // Vitotronic isn't answering, try again
     _rcvBufferLen = 0;
     _errorCode = 1;  // Connection error
     memset(_rcvBuffer, 0, 12);
+    _setState(INIT);
+    _logger.println(F("nack, timeout"));
   }
 }
 
