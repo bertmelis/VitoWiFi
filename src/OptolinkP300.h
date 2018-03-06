@@ -77,12 +77,12 @@ class OptolinkP300 {
   inline void _clearInputBuffer();
   Logger _logger;
 
-  inline void setState(OptolinkState state) {
+  inline void _setState(OptolinkState state) {
     // _logger->print(F("Optolink state: "));
     // _logger->println(state, DEC);
     _state = state;
   }
-  inline void setAction(OptolinkAction action) {
+  inline void _setAction(OptolinkAction action) {
     // _logger->print(F("Optolink action: "));
     // _logger->println(action, DEC);
     _action = action;
