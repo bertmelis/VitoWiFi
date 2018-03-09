@@ -124,17 +124,18 @@ void OptolinkKW::_sendHandler() {
   uint8_t buff[6];
   if (_writeMessageType) {
     // type is WRITE
-    // has length of 8 chars + length of value
+    // has length of 4 chars + length of value
     buff[0] = 0xF4;
     buff[1] = (_address >> 8) & 0xFF;
     buff[2] = _address & 0xFF;
     buff[3] = _length;
     // add value to message
     memcpy(&buff[4], _value, _length);
+    _rcvLen = 1;  // expected length is only ACK (0x00)
     _stream->write(buff, 4 + _length);
   } else {
     // type is READ
-    // has fixed length of 8 chars
+    // has fixed length of 4 chars
     buff[0] = 0xF7;
     buff[1] = (_address >> 8) & 0xFF;
     buff[2] = _address & 0xFF;
@@ -161,14 +162,14 @@ void OptolinkKW::_receiveHandler() {
     _rcvBuffer[_rcvBufferLen] = _stream->read();
     ++_rcvBufferLen;
   }
-  if (_rcvBufferLen == _rcvLen) {  // message complete, check message
+  if (_rcvBufferLen == _rcvLen) {  // message complete, TODO: check message (eg 0x00 for READ messages)
     _state = IDLE;
     _action = RETURN;
     _lastMillis = millis();
     _errorCode = 0;  // succes
     _logger.println(F("succes"));
     return;
-  } else if (millis() - _lastMillis > 10 * 1000UL) {  // Vitotronic isn't answering, try again
+  } else if (millis() - _lastMillis > 2 * 1000UL) {  // Vitotronic isn't answering, try again
     _rcvBufferLen = 0;
     _errorCode = 1;  // Connection error
     memset(_rcvBuffer, 0, 4);
