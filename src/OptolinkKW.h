@@ -70,4 +70,15 @@ class OptolinkKW {
   inline void _printHex(Print* printer, uint8_t array[], uint8_t length);
   inline void _clearInputBuffer();
   Logger _logger;
+
+  inline void _setState(OptolinkState state) {
+    // _logger->print(F("Optolink state: "));
+    // _logger->println(state, DEC);
+    _state = state;
+  }
+  inline void _setAction(OptolinkAction action) {
+    // _logger->print(F("Optolink action: "));
+    // _logger->println(action, DEC);
+    _action = action;
+  }
 };

@@ -32,7 +32,7 @@ typedef void (*StatCallbackFunction)(const char*, const char*, bool);
 typedef void (*CountCallbackFunction)(const char*, const char*, uint32_t);   // long counter: 4 bytes
 typedef void (*CountSCallbackFunction)(const char*, const char*, uint16_t);  // short counter: 2 bytes
 typedef void (*ModeCallbackFunction)(const char*, const char*, uint8_t);
-using TempSCallbackFunction = ModeCallbackFunction;  // 1 byte temperature, unsigned
+typedef ModeCallbackFunction TempSCallbackFunction;  // 1 byte temperature, unsigned
 
 enum DPType { TEMP, TEMPS, STAT, COUNT, COUNTS, MODE };
 

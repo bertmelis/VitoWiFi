@@ -343,12 +343,10 @@ void OptolinkP300::read(uint8_t value[]) {
   }
   if (_writeMessageType) {  // return original value in case of WRITE command
     memcpy(value, &_value, _length);
-    _logger.println("");
     _setAction(WAIT);
     return;
   } else {
     memcpy(value, &_rcvBuffer[7], _length);
-    _logger.println("");
     _setAction(WAIT);
     return;
   }
