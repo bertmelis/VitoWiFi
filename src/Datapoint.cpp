@@ -43,7 +43,10 @@ Datapoint& Datapoint::setWriteable() {
   return *this;
 }
 
-void Datapoint::setGlobalCallback(GlobalCallbackFunction globalCallback) { _globalCallback = globalCallback; }
+Datapoint& Datapoint::setGlobalCallback(GlobalCallbackFunction globalCallback) {
+  _globalCallback = globalCallback;
+  return *this;
+}
 
 TempDP::TempDP(const char* name, const char* group, const uint16_t address, bool isWriteable) :
   Datapoint(name, group, address, isWriteable),
