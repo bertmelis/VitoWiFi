@@ -50,12 +50,12 @@ class Datapoint {
   // virtual methods, see inherited classes for implementation
   virtual const uint8_t getLength() const = 0;
   virtual void callback(uint8_t value[]) = 0;
-  virtual Datapoint& setCallback(GlobalCallbackFunction globalCallback) { return *this; };
-  virtual Datapoint& setCallback(TempCallbackFunction callback) { return *this; };
-  virtual Datapoint& setCallback(StatCallbackFunction callback) { return *this; };
-  virtual Datapoint& setCallback(CountCallbackFunction callback) { return *this; };
-  virtual Datapoint& setCallback(CountSCallbackFunction callback) { return *this; };
-  virtual Datapoint& setCallback(ModeCallbackFunction callback) { return *this; };
+  virtual Datapoint& setCallback(GlobalCallbackFunction globalCallback) { return *this; }
+  virtual Datapoint& setCallback(TempCallbackFunction callback) { return *this; }
+  virtual Datapoint& setCallback(StatCallbackFunction callback) { return *this; }
+  virtual Datapoint& setCallback(CountCallbackFunction callback) { return *this; }
+  virtual Datapoint& setCallback(CountSCallbackFunction callback) { return *this; }
+  virtual Datapoint& setCallback(ModeCallbackFunction callback) { return *this; }
   virtual void parse(uint8_t transformedValue[], float value) {}
 
  protected:  // all properties are protected for ease of use in inherited classes

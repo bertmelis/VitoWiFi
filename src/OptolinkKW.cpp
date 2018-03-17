@@ -27,12 +27,12 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 OptolinkKW::OptolinkKW() :
     _stream(nullptr),
-	_state(INIT),
+    _state(INIT),
     _action(WAIT),
     _address(0),
     _length(0),
     _writeMessageType(false),
-	_value{0},
+    _value{0},
     _rcvBuffer{0},
     _rcvBufferLen(0),
     _rcvLen(0),
