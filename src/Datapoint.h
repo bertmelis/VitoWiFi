@@ -32,8 +32,9 @@ typedef void (*StatCallbackFunction)(const char*, const char*, bool);
 typedef void (*CountCallbackFunction)(const char*, const char*, uint32_t);   // long counter: 4 bytes
 typedef void (*CountSCallbackFunction)(const char*, const char*, uint16_t);  // short counter: 2 bytes
 typedef void (*ModeCallbackFunction)(const char*, const char*, uint8_t);
+typedef ModeCallbackFunction TempSCallbackFunction;  // 1 byte temperature, unsigned
 
-enum DPType { TEMP, STAT, COUNT, COUNTS, MODE };
+enum DPType { TEMP, TEMPS, STAT, COUNT, COUNTS, MODE };
 
 class Datapoint {
  public:
@@ -44,17 +45,17 @@ class Datapoint {
   const uint16_t getAddress() const { return _address; }
   const bool isWriteable() const { return _writeable; }
   Datapoint& setWriteable();
-  void setGlobalCallback(GlobalCallbackFunction globalCallback);
+  Datapoint& setGlobalCallback(GlobalCallbackFunction globalCallback);
 
   // virtual methods, see inherited classes for implementation
   virtual const uint8_t getLength() const = 0;
   virtual void callback(uint8_t value[]) = 0;
-  virtual void setCallback(GlobalCallbackFunction globalCallback) {}
-  virtual Datapoint& setCallback(TempCallbackFunction callback) {}
-  virtual Datapoint& setCallback(StatCallbackFunction callback) {}
-  virtual Datapoint& setCallback(CountCallbackFunction callback) {}
-  virtual Datapoint& setCallback(CountSCallbackFunction callback) {}
-  virtual Datapoint& setCallback(ModeCallbackFunction callback) {}
+  virtual Datapoint& setCallback(GlobalCallbackFunction globalCallback) { return *this; }
+  virtual Datapoint& setCallback(TempCallbackFunction callback) { return *this; }
+  virtual Datapoint& setCallback(StatCallbackFunction callback) { return *this; }
+  virtual Datapoint& setCallback(CountCallbackFunction callback) { return *this; }
+  virtual Datapoint& setCallback(CountSCallbackFunction callback) { return *this; }
+  virtual Datapoint& setCallback(ModeCallbackFunction callback) { return *this; }
   virtual void parse(uint8_t transformedValue[], float value) {}
 
  protected:  // all properties are protected for ease of use in inherited classes
@@ -75,6 +76,18 @@ class TempDP : public Datapoint {
 
  private:
   TempCallbackFunction _callback;
+};
+
+class TempSDP : public Datapoint {
+ public:
+  TempSDP(const char* name, const char* group, const uint16_t address, bool isWriteable);
+  virtual Datapoint& setCallback(TempSCallbackFunction callback);
+  virtual const uint8_t getLength() const { return 1; }
+  virtual void callback(uint8_t value[]);
+  virtual void parse(uint8_t transformedValue[], float value);
+
+ private:
+  TempSCallbackFunction _callback;
 };
 
 class StatDP : public Datapoint {
@@ -116,7 +129,7 @@ class CountSDP : public Datapoint {
 class ModeDP : public Datapoint {
  public:
   ModeDP(const char* name, const char* group, const uint16_t address, bool isWriteable);
-  Datapoint& setCallback(ModeCallbackFunction callback);
+  virtual Datapoint& setCallback(ModeCallbackFunction callback);
   virtual const uint8_t getLength() const { return 1; }
   virtual void callback(uint8_t value[]);
   virtual void parse(uint8_t transformedValue[], float value);

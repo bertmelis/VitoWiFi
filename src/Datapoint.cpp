@@ -43,7 +43,10 @@ Datapoint& Datapoint::setWriteable() {
   return *this;
 }
 
-void Datapoint::setGlobalCallback(GlobalCallbackFunction globalCallback) { _globalCallback = globalCallback; }
+Datapoint& Datapoint::setGlobalCallback(GlobalCallbackFunction globalCallback) {
+  _globalCallback = globalCallback;
+  return *this;
+}
 
 TempDP::TempDP(const char* name, const char* group, const uint16_t address, bool isWriteable) :
   Datapoint(name, group, address, isWriteable),
@@ -71,6 +74,31 @@ void TempDP::parse(uint8_t transformedValue[], float value) {
   int16_t tmp = floor((value * 10) + 0.5);
   transformedValue[1] = tmp >> 8;
   transformedValue[0] = tmp & 0xFF;
+  return;
+}
+
+TempSDP::TempSDP(const char* name, const char* group, const uint16_t address, bool isWriteable) :
+  Datapoint(name, group, address, isWriteable),
+  _callback(nullptr) {}
+
+Datapoint& TempSDP::setCallback(TempSCallbackFunction callback) {
+  _callback = callback;
+  return *this;
+}
+
+void TempSDP::callback(uint8_t value[]) {
+  if (_callback) {
+    _callback(_name, _group, value[0]);
+  } else if (Datapoint::_globalCallback) {
+    char str[4] = {'\0'};
+    snprintf(str, sizeof(str), "%u", value[0]);
+    _globalCallback(_name, _group, str);
+  }
+  return;
+}
+
+void TempSDP::parse(uint8_t transformedValue[], float value) {
+  transformedValue[0] = static_cast<uint8_t>(value);
   return;
 }
 

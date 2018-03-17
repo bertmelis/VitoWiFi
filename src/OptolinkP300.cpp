@@ -27,15 +27,15 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 OptolinkP300::OptolinkP300() :
     _stream(nullptr),
+    _state(RESET),
+    _action(PROCESS),
     _address(0),
     _length(0),
-    _value{0},
     _writeMessageType(false),
+    _value{0},
     _rcvBuffer{0},
     _rcvBufferLen(0),
     _rcvLen(0),
-    _state(RESET),
-    _action(PROCESS),
     _lastMillis(0),
     _numberOfTries(5),
     _errorCode(0),
@@ -343,12 +343,10 @@ void OptolinkP300::read(uint8_t value[]) {
   }
   if (_writeMessageType) {  // return original value in case of WRITE command
     memcpy(value, &_value, _length);
-    _logger.println("");
     _setAction(WAIT);
     return;
   } else {
     memcpy(value, &_rcvBuffer[7], _length);
-    _logger.println("");
     _setAction(WAIT);
     return;
   }

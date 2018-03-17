@@ -87,6 +87,9 @@ Datapoint& VitoWifiBase::addDatapoint(const char* name, const char* group, const
     case TEMP:
       DP = new TempDP(name, group, address, isWriteable);
       break;
+    case TEMPS:
+      DP = new TempSDP(name, group, address, isWriteable);
+      break;
     case STAT:
       DP = new StatDP(name, group, address, isWriteable);
       break;
