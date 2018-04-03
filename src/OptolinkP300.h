@@ -26,7 +26,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #pragma once
 #include <Arduino.h>
 #include "Constants.h"
-#include "Helpers/Logger.h"
 
 class OptolinkP300 {
  public:
@@ -45,7 +44,6 @@ class OptolinkP300 {
   void read(uint8_t value[]);
   const uint8_t readError();
   void setLogger(Print* printer);
-  Logger* getLogger();
 
  private:
   Stream* _stream;
@@ -75,16 +73,23 @@ class OptolinkP300 {
   inline bool _checkChecksum(uint8_t array[], uint8_t length);
   inline void _printHex(Print* printer, uint8_t array[], uint8_t length);
   inline void _clearInputBuffer();
-  Logger _logger;
+  Print* _printer;
 
   inline void _setState(OptolinkState state) {
-    // _logger->print(F("Optolink state: "));
-    // _logger->println(state, DEC);
+    /*
+    if (_printer) {
+      _printer->print(F("Optolink state: "));
+      _printer->println(state, DEC);
+    }
+    */
     _state = state;
   }
   inline void _setAction(OptolinkAction action) {
-    // _logger->print(F("Optolink action: "));
-    // _logger->println(action, DEC);
+    /*
+    if (_printer) {
+      _printer->print(F("Optolink action: "));
+      _printer->println(action, DEC);
+    */
     _action = action;
   }
 };

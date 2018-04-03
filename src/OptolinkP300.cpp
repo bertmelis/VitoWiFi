@@ -39,7 +39,7 @@ OptolinkP300::OptolinkP300() :
     _lastMillis(0),
     _numberOfTries(5),
     _errorCode(0),
-    _logger() {}
+    _printer(nullptr) {}
 
 // begin serial @ 4800 baud, 8 bits, even parity, 2 stop bits
 #ifdef ARDUINO_ARCH_ESP32
@@ -197,13 +197,17 @@ void OptolinkP300::_sendHandler() {
   --_numberOfTries;
   _setState(SEND_ACK);
   if (_writeMessageType) {
-    _logger.print(F("WRITE "));
-    _printHex(&_logger, buff, 8 + _length);
-    _logger.println();
+    if (_printer) {
+      _printer->print(F("WRITE "));
+      _printHex(_printer, buff, 8 + _length);
+      _printer->println();
+    }
   } else {
-    _logger.print(F("READ "));
-    _printHex(&_logger, buff, 8);
-     _logger.println();
+    if (_printer) {
+      _printer->print(F("READ "));
+      _printHex(_printer, buff, 8);
+      _printer->println();
+    }
   }
 }
 
@@ -211,18 +215,21 @@ void OptolinkP300::_sendAckHandler() {
   if (_stream->available()) {
     uint8_t buff = _stream->read();
     if (buff == 0x06) {  // transmit succesful, moving to next state
-      _logger.println(F("ack"));
+      if (_printer)
+        _printer->println(F("ack"));
       _setState(RECEIVE);
       return;
     } else if (buff == 0x15) {  // transmit negatively acknowledged, return to INIT and try again
-      _logger.println(F("nack"));
+      if (_printer)
+        _printer->println(F("nack"));
       _setState(INIT);
       _clearInputBuffer();
       return;
     }
   }
   if (millis() - _lastMillis > 2 * 1000UL) {  // if no ACK is coming, return to INIT and try again
-    _logger.println(F("t/o"));
+    if (_printer)
+      _printer->println(F("t/o"));
     _setState(INIT);
     _clearInputBuffer();
   }
@@ -235,9 +242,11 @@ void OptolinkP300::_receiveHandler() {
   }
   if (_rcvBuffer[0] != 0x41) return;  // TODO(@bertmelis): find out why this is needed! I'd expect the rx-buffer to be empty.
   if (_rcvBufferLen == _rcvLen) {          // message complete, check message
-    _logger.print(F("RCV "));
-    _printHex(&_logger, _rcvBuffer, _rcvBufferLen);
-    _logger.println();
+    if (_printer) {
+      _printer->print(F("RCV "));
+      _printHex(_printer, _rcvBuffer, _rcvBufferLen);
+      _printer->println();
+    }
     if (_rcvBuffer[1] != (_rcvLen - 3)) {  // check for message length
       _numberOfTries = 0;
       _errorCode = 4;
@@ -246,7 +255,8 @@ void OptolinkP300::_receiveHandler() {
     if (_rcvBuffer[2] != 0x01) {  // Vitotronic returns an error message, skipping DP
       _numberOfTries = 0;
       _errorCode = 3;  // Vitotronic error
-      _logger.println(F("nack, comm error"));
+      if (_printer)
+        _printer->println(F("nack, comm error"));
       return;
     }
     if (!_checkChecksum(_rcvBuffer, _rcvLen)) {  // checksum is wrong, trying again
@@ -254,7 +264,8 @@ void OptolinkP300::_receiveHandler() {
       _errorCode = 2;  // checksum error
       memset(_rcvBuffer, 0, 12);
       _setState(INIT);
-      _logger.println(F("nack, checksum"));
+      if (_printer)
+        _printer->println(F("nack, checksum"));
       return;
     }
     if (_rcvBuffer[3] == 0x01) {
@@ -263,7 +274,8 @@ void OptolinkP300::_receiveHandler() {
     _setState(RECEIVE_ACK);
     _setAction(RETURN);
     _errorCode = 0;
-    _logger.println(F("ack"));
+    if (_printer)
+      _printer->println(F("ack"));
     return;
   } else {
     // wrong message length
@@ -273,7 +285,8 @@ void OptolinkP300::_receiveHandler() {
     _errorCode = 1;  // Connection error
     memset(_rcvBuffer, 0, 12);
     _setState(INIT);
-    _logger.println(F("nack, timeout"));
+    if (_printer)
+      _printer->println(F("nack, timeout"));
   }
 }
 
@@ -378,9 +391,9 @@ inline void OptolinkP300::_clearInputBuffer() {
   }
 }
 
-void OptolinkP300::setLogger(Print* printer) { _logger.setPrinter(printer); }
-
-Logger* OptolinkP300::getLogger() { return &_logger; }
+void OptolinkP300::setLogger(Print* printer) {
+  _printer = printer;
+}
 
 // Copied from Arduino.cc forum --> (C) robtillaart
 inline void OptolinkP300::_printHex(Print* printer, uint8_t array[], uint8_t length) {
