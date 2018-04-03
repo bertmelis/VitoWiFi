@@ -39,7 +39,7 @@ OptolinkKW::OptolinkKW() :
     _lastMillis(0),
     _numberOfTries(5),
     _errorCode(0),
-    _logger() {}
+    _printer(nullptr) {}
 
 #ifdef ARDUINO_ARCH_ESP32
 void OptolinkKW::begin(HardwareSerial* serial, int8_t rxPin, int8_t txPin) {
@@ -75,7 +75,8 @@ void OptolinkKW::_initHandler() {
     if (_stream->peek() == 0x05) {
       _setState(IDLE);
       _idleHandler();
-      _logger.println("INIT done.");
+      if (_printer)
+        _printer->println("INIT done.");
     } else {
       _stream->read();
     }
@@ -145,12 +146,16 @@ void OptolinkKW::_sendHandler() {
   _rcvBufferLen = 0;
   --_numberOfTries;
   _setState(RECEIVE);
-  if (_writeMessageType)
-    _logger.print(F("WRITE "));
-  else
-    _logger.print(F("READ "));
-  _printHex(&_logger, &buff[1], 2);
-  _logger.println();
+  if (_writeMessageType) {
+    if (_printer)
+      _printer->print(F("WRITE "));
+  } else {
+    if (_printer) {
+      _printer->print(F("READ "));
+      _printHex(_printer, &buff[1], 2);
+      _printer->println();
+    }
+  }
 }
 
 void OptolinkKW::_receiveHandler() {
@@ -163,7 +168,8 @@ void OptolinkKW::_receiveHandler() {
     _setAction(RETURN);
     _lastMillis = millis();
     _errorCode = 0;  // succes
-    _logger.println(F("ack"));
+    if (_printer)
+      _printer->println(F("ack"));
     return;
   } else if (millis() - _lastMillis > 2 * 1000UL) {  // Vitotronic isn't answering, try again
     _rcvBufferLen = 0;
@@ -171,7 +177,8 @@ void OptolinkKW::_receiveHandler() {
     memset(_rcvBuffer, 0, 4);
     _setState(IDLE);
     _setAction(RETURN_ERROR);
-    _logger.println(F("nack"));
+    if (_printer)
+      _printer->println(F("nack"));
   }
 }
 
@@ -252,9 +259,9 @@ inline void OptolinkKW::_clearInputBuffer() {
   }
 }
 
-void OptolinkKW::setLogger(Print* printer) { _logger.setPrinter(printer); }
-
-Logger* OptolinkKW::getLogger() { return &_logger; }
+void OptolinkKW::setLogger(Print* printer) {
+  _printer = printer;
+}
 
 // Copied from Arduino.cc forum --> (C) robtillaart
 inline void OptolinkKW::_printHex(Print* printer, uint8_t array[], uint8_t length) {

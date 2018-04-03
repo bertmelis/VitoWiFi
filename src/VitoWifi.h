@@ -23,8 +23,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 Using portions or complete code from:
 Hex print: 2011, robtillaart @ Arduino.cc forum
-Logger: MIT 2015, marvinroger @ Github
-Blinker: MIT 2015, marvinroger @ Github
 
 BIG thanks to https://github.com/openv/openv
 and many others
@@ -37,7 +35,6 @@ and many others
 #include <vector>
 #include "Constants.h"
 #include "Datapoint.h"
-#include "Helpers/Logger.h"
 #include "OptolinkKW.h"
 #include "OptolinkP300.h"
 
@@ -74,7 +71,8 @@ class VitoWifiBase {
     uint8_t value[4];
   };
   std::queue<Action> _queue;
-  Logger _logger;
+  bool _enablePrinter;
+  Print* _printer;
 };
 
 template <class P>

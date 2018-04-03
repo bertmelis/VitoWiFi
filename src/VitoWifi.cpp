@@ -25,23 +25,20 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "VitoWifi.h"
 
-VitoWifiBase::VitoWifiBase() : _logger() {}
+VitoWifiBase::VitoWifiBase() :
+  _enablePrinter(false),
+  _printer(nullptr) {}
 
 VitoWifiBase::~VitoWifiBase() {
-  _logger.println(F("Destructing of VitoWifi is unsupported"));
+  if (_enablePrinter && _printer)
+    _printer->println(F("Destructing of VitoWifi is unsupported"));
   abort();
 }
 
 template <>
-VitoWifiInterface<OptolinkP300>::VitoWifiInterface() {
-  _logger.setLogging(false);
-  _optolink.setLogger(&_logger);
-}
+VitoWifiInterface<OptolinkP300>::VitoWifiInterface() {}
 template <>
-VitoWifiInterface<OptolinkKW>::VitoWifiInterface() {
-  _logger.setLogging(false);
-  _optolink.setLogger(&_logger);
-}
+VitoWifiInterface<OptolinkKW>::VitoWifiInterface() {}
 
 // For P300 Protocol
 #ifdef ARDUINO_ARCH_ESP32
@@ -144,19 +141,23 @@ void VitoWifiBase::readDatapoint(const char* name) {
 inline void VitoWifiBase::_readDatapoint(Datapoint* dp) {
   Action action = {dp, false};
   _queue.push(action);
-  _logger.print("READ ");
-  _logger.println(dp->getName());
+  if (_enablePrinter && _printer) {
+    _printer->print("READ ");
+    _printer->println(dp->getName());
+  }
 }
 
 void VitoWifiBase::_writeDatapoint(const char* name, float value, size_t length) {
   Datapoint* DP = _getDatapoint(name);
   if (DP) {
     if (DP->getLength() != length) {
-      _logger.println(F("Value does not match DP, skipping"));
+      if (_enablePrinter && _printer)
+        _printer->println(F("Value does not match DP, skipping"));
       return;
     }
     if (!DP->isWriteable()) {
-      _logger.println(F("DP is readonly, skipping"));
+      if (_enablePrinter && _printer)
+        _printer->println(F("DP is readonly, skipping"));
       return;
     }
     uint8_t transformedValue[2] = {0};
@@ -182,9 +183,11 @@ void VitoWifiInterface<OptolinkP300>::loop() {
     return;
   }
   if (_optolink.available() > 0) {  // trigger callback when ready and remove element from queue
-    _logger.print(F("DP "));
-    _logger.print(_queue.front().DP->getName());
-    _logger.println(F(" succes"));
+    if (_enablePrinter && _printer) {
+      _printer->print(F("DP "));
+      _printer->print(_queue.front().DP->getName());
+      _printer->println(F(" succes"));
+    }
     uint8_t value[4] = {0};
     _optolink.read(value);
     _queue.front().DP->callback(value);
@@ -192,11 +195,13 @@ void VitoWifiInterface<OptolinkP300>::loop() {
     return;
   }
   if (_optolink.available() < 0) {  // display error message and remove element from queue
-    _logger.print(F("DP "));
-    _logger.print(_queue.front().DP->getName());
-    _logger.print(F(" error: "));
     uint8_t errorCode = _optolink.readError();
-    _logger.println(errorCode, DEC);
+    if (_enablePrinter && _printer) {
+      _printer->print(F("DP "));
+      _printer->print(_queue.front().DP->getName());
+      _printer->print(F(" error: "));
+      _printer->println(errorCode, DEC);
+    }
     _queue.pop();
     return;
   }
@@ -213,9 +218,11 @@ void VitoWifiInterface<OptolinkKW>::loop() {
     return;
   }
   if (_optolink.available() > 0) {  // trigger callback when ready and remove element from queue
-    _logger.print(F("DP "));
-    _logger.print(_queue.front().DP->getName());
-    _logger.println(F(" succes"));
+    if (_enablePrinter && _printer) {
+      _printer->print(F("DP "));
+      _printer->print(_queue.front().DP->getName());
+      _printer->println(F(" succes"));
+    }
     uint8_t value[4] = {0};
     _optolink.read(value);
     _queue.front().DP->callback(value);
@@ -223,44 +230,45 @@ void VitoWifiInterface<OptolinkKW>::loop() {
     return;
   }
   if (_optolink.available() < 0) {  // display error message and remove element from queue
-    _logger.print(F("DP "));
-    _logger.print(_queue.front().DP->getName());
-    _logger.print(F(" error: "));
     uint8_t errorCode = _optolink.readError();
-    _logger.println(errorCode, DEC);
+    if (_enablePrinter && _printer) {
+      _printer->print(F("DP "));
+      _printer->print(_queue.front().DP->getName());
+      _printer->print(F(" error: "));
+      _printer->println(errorCode, DEC);
+    }
     _queue.pop();
     return;
   }
 }
 
-// Logger stuff, taken from Marvin ROGER's Homie for ESP8266
 template <>
 void VitoWifiInterface<OptolinkP300>::setLogger(Print* printer) {
-  _logger.setPrinter(printer);
-  _optolink.setLogger(printer);
+  _printer = printer;
+  _optolink.setLogger(_printer);
 }
 template <>
 void VitoWifiInterface<OptolinkKW>::setLogger(Print* printer) {
-  _logger.setPrinter(printer);
-  _optolink.setLogger(printer);
+  _printer = printer;
+  _optolink.setLogger(_printer);
 }
 template <>
 void VitoWifiInterface<OptolinkP300>::enableLogger() {
-  _logger.setLogging(true);
-  _optolink.getLogger()->setLogging(true);
+  _enablePrinter = true;
+  _optolink.setLogger(_printer);
 }
 template <>
 void VitoWifiInterface<OptolinkKW>::enableLogger() {
-  _logger.setLogging(true);
-  _optolink.getLogger()->setLogging(true);
+  _enablePrinter = true;
+  _optolink.setLogger(_printer);
 }
 template <>
 void VitoWifiInterface<OptolinkP300>::disableLogger() {
-  _logger.setLogging(false);
-  _optolink.getLogger()->setLogging(false);
+  _enablePrinter = false;
+  _optolink.setLogger(nullptr);
 }
 template <>
 void VitoWifiInterface<OptolinkKW>::disableLogger() {
-  _logger.setLogging(false);
-  _optolink.getLogger()->setLogging(false);
+  _enablePrinter = false;
+  _optolink.setLogger(nullptr);
 }
