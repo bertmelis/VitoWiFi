@@ -208,3 +208,31 @@ void ModeDP::parse(uint8_t transformedValue[], float value) {
   transformedValue[0] = static_cast<uint8_t>(value);
   return;
 }
+
+COPDP::COPDP(const char* name, const char* group, const uint16_t address, bool isWriteable) :
+  Datapoint(name, group, address, isWriteable),
+  _callback(nullptr) {}
+
+Datapoint& COPDP::setCallback(TempCallbackFunction callback) {
+  _callback = callback;
+  return *this;
+}
+
+void COPDP::callback(uint8_t value[]) {
+  uint8_t tmp = value[0];
+  float floatValue = static_cast<float>(tmp) / 10.0;
+  if (_callback) {
+    _callback(_name, _group, floatValue);
+  } else if (Datapoint::_globalCallback) {
+    char str[6] = {'\0'};
+    dtostrf(floatValue, 3, 1, str);
+    _globalCallback(_name, _group, str);
+  }
+  return;
+}
+
+void COPDP::parse(uint8_t transformedValue[], float value) {
+  uint8_t tmp = floor((value * 10) + 0.5);
+  transformedValue[0] = tmp;
+  return;
+}
