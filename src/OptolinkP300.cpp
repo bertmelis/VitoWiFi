@@ -37,7 +37,6 @@ OptolinkP300::OptolinkP300() :
     _rcvBufferLen(0),
     _rcvLen(0),
     _lastMillis(0),
-    _numberOfTries(5),
     _errorCode(0),
     _printer(nullptr) {}
 
@@ -58,10 +57,6 @@ void OptolinkP300::begin(HardwareSerial* serial) {
 #endif
 
 void OptolinkP300::loop() {
-  if (_numberOfTries < 1) {
-    _setState(IDLE);
-    _setAction(RETURN_ERROR);
-  }
   switch (_state) {
     case RESET:
       _resetHandler();
@@ -91,6 +86,13 @@ void OptolinkP300::loop() {
       _receiveAckHandler();
       break;
   }
+}
+
+const bool OptolinkP300::connected() const {
+  if (_state == INIT || _state == INIT_ACK)
+    return false;
+  else
+    return true;
 }
 
 // Set communication with Vitotronic to defined state = reset to KW protocol
@@ -143,12 +145,14 @@ void OptolinkP300::_initAckHandler() {
   }
   if (millis() - _lastMillis > 10 * 1000UL) {  // if no ACK is coming, reset connection
     _setState(RESET);
+    _errorCode = 1;
+    _setAction(RETURN_ERROR);
   }
 }
 
 // idle state, waiting for user action
 void OptolinkP300::_idleHandler() {
-  if (millis() - _lastMillis > 2 * 60 * 1000UL) {  // send INIT every 2 minutes to keep communication alive
+  if (millis() - _lastMillis > 1 * 60 * 1000UL) {  // send INIT every 1 minute to keep communication alive
     _setState(INIT);
   }
   _clearInputBuffer();  // keep input clean
@@ -174,9 +178,7 @@ void OptolinkP300::_sendHandler() {
     buff[7 + _length] = _calcChecksum(buff, 8 + _length);
     _stream->write(buff, 8 + _length);
 
-    // The return is always 8 byte long apparently
-    // This is mentioned here: https://openv.wikispaces.com/Protokoll+300
-    // At the bottom of the page (look for: RX: Data: 0x41 0x05 0x01 0x02 0x23 0x23 0x01 0x4f )
+    // Written payload is not returned, the return length is always 8 bytes long
     _rcvLen = 8;
   } else {
     // type is READ
@@ -194,7 +196,6 @@ void OptolinkP300::_sendHandler() {
   }
   _rcvBufferLen = 0;
   _lastMillis = millis();
-  --_numberOfTries;
   _setState(SEND_ACK);
   if (_writeMessageType) {
     if (_printer) {
@@ -219,17 +220,21 @@ void OptolinkP300::_sendAckHandler() {
         _printer->println(F("ack"));
       _setState(RECEIVE);
       return;
-    } else if (buff == 0x15) {  // transmit negatively acknowledged, return to INIT and try again
+    } else if (buff == 0x15) {  // transmit negatively acknowledged, return to IDLE
       if (_printer)
         _printer->println(F("nack"));
-      _setState(INIT);
+      _errorCode = 1;
+      _setAction(RETURN_ERROR);
+      _setState(IDLE);
       _clearInputBuffer();
       return;
     }
   }
-  if (millis() - _lastMillis > 2 * 1000UL) {  // if no ACK is coming, return to INIT and try again
+  if (millis() - _lastMillis > 2 * 1000UL) {  // if no ACK is coming, return to INIT
     if (_printer)
       _printer->println(F("t/o"));
+    _errorCode = 1;
+    _setAction(RETURN_ERROR);
     _setState(INIT);
     _clearInputBuffer();
   }
@@ -248,22 +253,22 @@ void OptolinkP300::_receiveHandler() {
       _printer->println();
     }
     if (_rcvBuffer[1] != (_rcvLen - 3)) {  // check for message length
-      _numberOfTries = 0;
       _errorCode = 4;
+      _setState(RECEIVE_ACK);
+      if (_printer)
+        _printer->println(F("nack, length"));
       return;
     }
-    if (_rcvBuffer[2] != 0x01) {  // Vitotronic returns an error message, skipping DP
-      _numberOfTries = 0;
+    if (_rcvBuffer[2] != 0x01) {  // Vitotronic returns an error message
       _errorCode = 3;  // Vitotronic error
+      _setState(RECEIVE_ACK);
       if (_printer)
         _printer->println(F("nack, comm error"));
       return;
     }
-    if (!_checkChecksum(_rcvBuffer, _rcvLen)) {  // checksum is wrong, trying again
-      _rcvBufferLen = 0;
-      _errorCode = 2;  // checksum error
-      memset(_rcvBuffer, 0, 12);
-      _setState(INIT);
+    if (!_checkChecksum(_rcvBuffer, _rcvLen)) {  // checksum is wrong
+      _errorCode = 2;
+      _setState(RECEIVE_ACK);  // should we return NACK?
       if (_printer)
         _printer->println(F("nack, checksum"));
       return;
@@ -272,7 +277,6 @@ void OptolinkP300::_receiveHandler() {
       // message is from READ command, so returning read value
     }
     _setState(RECEIVE_ACK);
-    _setAction(RETURN);
     _errorCode = 0;
     if (_printer)
       _printer->println(F("ack"));
@@ -281,9 +285,8 @@ void OptolinkP300::_receiveHandler() {
     // wrong message length
   }
   if (millis() - _lastMillis > 10 * 1000UL) {  // Vitotronic isn't answering, try again
-    _rcvBufferLen = 0;
     _errorCode = 1;  // Connection error
-    memset(_rcvBuffer, 0, 12);
+    _setAction(RETURN_ERROR);
     _setState(INIT);
     if (_printer)
       _printer->println(F("nack, timeout"));
@@ -296,6 +299,11 @@ void OptolinkP300::_receiveAckHandler() {
   _stream->write(buff, sizeof(buff));
   _lastMillis = millis();
   _setState(INIT);
+  if (!_errorCode) {
+    _setAction(RETURN);
+  } else {
+    _setAction(RETURN_ERROR);
+  }
 }
 
 // set properties for datapoint and move state to SEND
@@ -308,7 +316,6 @@ bool OptolinkP300::readFromDP(uint16_t address, uint8_t length) {
   _length = length;
   _writeMessageType = false;
   _rcvBufferLen = 0;
-  _numberOfTries = 5;
   memset(_rcvBuffer, 0, 12);
   _setState(SEND);
   _setAction(PROCESS);
@@ -326,7 +333,6 @@ bool OptolinkP300::writeToDP(uint16_t address, uint8_t length, uint8_t value[]) 
   memcpy(_value, value, _length);
   _writeMessageType = true;
   _rcvBufferLen = 0;
-  _numberOfTries = 5;
   memset(_rcvBuffer, 0, 12);
   _setState(SEND);
   _setAction(PROCESS);
