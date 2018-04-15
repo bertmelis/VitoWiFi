@@ -69,6 +69,7 @@ class OptolinkP300 {
   void _receiveHandler();
   void _receiveAckHandler();
   void _returnHandler();
+  bool _transmit(uint16_t address, uint8_t length, bool write, uint8_t value[]);
   inline uint8_t _calcChecksum(uint8_t array[], uint8_t length);
   inline bool _checkChecksum(uint8_t array[], uint8_t length);
   inline void _printHex(Print* printer, uint8_t array[], uint8_t length);
