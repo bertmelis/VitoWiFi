@@ -34,7 +34,7 @@ typedef void (*CountSCallbackFunction)(const char*, const char*, uint16_t);  // 
 typedef void (*ModeCallbackFunction)(const char*, const char*, uint8_t);
 typedef ModeCallbackFunction TempSCallbackFunction;  // 1 byte temperature, unsigned
 
-enum DPType { TEMP, TEMPS, STAT, COUNT, COUNTS, MODE };
+enum DPType { TEMP, TEMPS, STAT, COUNT, COUNTS, MODE, COP };
 
 class Datapoint {
  public:
@@ -136,4 +136,16 @@ class ModeDP : public Datapoint {
 
  private:
   ModeCallbackFunction _callback;
+};
+
+class COPDP : public Datapoint {
+ public:
+  COPDP(const char* name, const char* group, const uint16_t address, bool isWriteable);
+  virtual Datapoint& setCallback(TempCallbackFunction callback);
+  virtual const uint8_t getLength() const { return 1; }
+  virtual void callback(uint8_t value[]);
+  virtual void parse(uint8_t transformedValue[], float value);
+
+ private:
+  TempCallbackFunction _callback;
 };

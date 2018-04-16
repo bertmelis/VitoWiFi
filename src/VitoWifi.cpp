@@ -99,6 +99,9 @@ Datapoint& VitoWifiBase::addDatapoint(const char* name, const char* group, const
     case MODE:
       DP = new ModeDP(name, group, address, isWriteable);
       break;
+    case COP:
+      DP = new COPDP(name, group, address, isWriteable);
+      break;
   }
   if (!DP) abort();  // out of memory?
   _datapoints.push_back(DP);
