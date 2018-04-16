@@ -112,7 +112,7 @@ void OptolinkP300::_resetHandler() {
 
 void OptolinkP300::_resetAckHandler() {
   if (_stream->available()) {
-    if (_stream->peek() == 0x05) {  // use peek so connection can be made immediately in next state
+    if (_stream->read() == 0x05) {  // use peek so connection can be made immediately in next state
       // received 0x05/enquiry: optolink has been reset
       _setState(INIT);
     } else {
@@ -127,15 +127,10 @@ void OptolinkP300::_resetAckHandler() {
 
 // send initiator to Vitotronic to establish connection
 void OptolinkP300::_initHandler() {
-  if (_stream->available()) {
-    if (_stream->read() == 0x05) {
-      // 0x05/ENQ received, sending initiator
-      const uint8_t buff[] = {0x16, 0x00, 0x00};
-      _stream->write(buff, sizeof(buff));
-      _lastMillis = millis();
-      _setState(INIT_ACK);
-    }
-  }
+  const uint8_t buff[] = {0x16, 0x00, 0x00};
+  _stream->write(buff, sizeof(buff));
+  _lastMillis = millis();
+  _setState(INIT_ACK);
 }
 
 void OptolinkP300::_initAckHandler() {
@@ -152,11 +147,8 @@ void OptolinkP300::_initAckHandler() {
 
 // idle state, waiting for user action
 void OptolinkP300::_idleHandler() {
-  if (millis() - _lastMillis > 15 * 1000UL) {  // send INIT every 30 seconds to keep communication alive
-    const uint8_t buff[] = {0x16, 0x00, 0x00};
-    _stream->write(buff, sizeof(buff));
-    _lastMillis = millis();
-    _setState(INIT_ACK);
+  if (millis() - _lastMillis > 15 * 1000UL) {  // send INIT every 15 seconds to keep communication alive
+    _setState(INIT);
   }
   _clearInputBuffer();  // keep input clean
   if (_action == PROCESS) {
