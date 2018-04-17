@@ -69,10 +69,12 @@ class OptolinkKW {
   Print* _printer;
 
   inline void _setState(OptolinkState state) {
+    /*
     if (_printer) {
       _printer->print("Optolink state: ");
       _printer->println(state, DEC);
     }
+    */
     _state = state;
   }
   inline void _setAction(OptolinkAction action) {
