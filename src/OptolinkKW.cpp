@@ -37,7 +37,6 @@ OptolinkKW::OptolinkKW() :
     _rcvBufferLen(0),
     _rcvLen(0),
     _lastMillis(0),
-    _numberOfTries(5),
     _errorCode(0),
     _printer(nullptr) {}
 
@@ -57,15 +56,29 @@ void OptolinkKW::begin(HardwareSerial* serial) {
 #endif
 
 void OptolinkKW::loop() {
-  if (_numberOfTries < 1) {
-    _setState(IDLE);
+  switch (_state) {
+    case INIT:
+      _initHandler();
+      break;
+    case IDLE:
+      _idleHandler();
+      break;
+    case SYNC:
+      _syncHandler();
+      break;
+    case SEND:
+      _sendHandler();
+      break;
+    case RECEIVE:
+      _receiveHandler();
+      break;
+  }
+  if (_action == PROCESS && (millis() - _lastMillis > 5 * 1000UL)) {  // general timeout when reading or writing
+    if (_printer)
+      _printer->println(F("read/write timeout"));
+    _errorCode = 1;
     _setAction(RETURN_ERROR);
-  } else if (_state == INIT) {
-    _initHandler();
-  } else if (_state == IDLE) {
-    _idleHandler();
-  } else if (_state == RECEIVE) {
-    _receiveHandler();
+    _setState(INIT);
   }
 }
 
@@ -75,16 +88,14 @@ void OptolinkKW::_initHandler() {
     if (_stream->peek() == 0x05) {
       _setState(IDLE);
       _idleHandler();
-      if (_printer)
-        _printer->println("INIT done.");
     } else {
       _stream->read();
     }
   } else {
-    if (millis() - _lastMillis > 1000UL) {
+    if (millis() - _lastMillis > 1000UL) {  // try to reset if Vitotronic is in a connected state with the P300 protocol
       _lastMillis = millis();
       const uint8_t buff[] = {0x04};
-      _stream->write(buff, 1);
+      _stream->write(buff, sizeof(buff));
     }
   }
 }
@@ -96,7 +107,6 @@ void OptolinkKW::_idleHandler() {
       _lastMillis = millis();
       if (_action == PROCESS) {
         _setState(SYNC);
-        _syncHandler();
       }
     } else {
       // received something unexpected
@@ -104,16 +114,15 @@ void OptolinkKW::_idleHandler() {
   } else if (_action == PROCESS && (millis() - _lastMillis < 10UL)) {  // don't wait for 0x05 sync signal, send directly after last request
     _setState(SEND);
     _sendHandler();
-  } else if (millis() - _lastMillis > 10 * 1000UL) {
-    _setState(IDLE);
+  } else if (millis() - _lastMillis > 5 * 1000UL) {
+    _setState(INIT);
     _errorCode = 1;
-    --_numberOfTries;
   }
 }
 
 void OptolinkKW::_syncHandler() {
   const uint8_t buff[1] = {0x01};
-  _stream->write(buff, 1);
+  _stream->write(buff, sizeof(buff));
   _setState(SEND);
   _sendHandler();
 }
@@ -144,7 +153,6 @@ void OptolinkKW::_sendHandler() {
   }
   _clearInputBuffer();
   _rcvBufferLen = 0;
-  --_numberOfTries;
   _setState(RECEIVE);
   if (_writeMessageType) {
     if (_printer)
@@ -164,21 +172,21 @@ void OptolinkKW::_receiveHandler() {
     ++_rcvBufferLen;
   }
   if (_rcvBufferLen == _rcvLen) {  // message complete, TODO: check message (eg 0x00 for READ messages)
+    if (_printer)
+      _printer->println(F("ok"));
     _setState(IDLE);
     _setAction(RETURN);
     _lastMillis = millis();
     _errorCode = 0;  // succes
-    if (_printer)
-      _printer->println(F("ack"));
     return;
-  } else if (millis() - _lastMillis > 2 * 1000UL) {  // Vitotronic isn't answering, try again
+  } else if (millis() - _lastMillis > 1 * 1000UL) {  // Vitotronic isn't answering, try again
+    if (_printer)
+      _printer->println(F("timeout"));
     _rcvBufferLen = 0;
     _errorCode = 1;  // Connection error
     memset(_rcvBuffer, 0, 4);
-    _setState(IDLE);
+    _setState(INIT);
     _setAction(RETURN_ERROR);
-    if (_printer)
-      _printer->println(F("nack"));
   }
 }
 
@@ -192,7 +200,6 @@ bool OptolinkKW::readFromDP(uint16_t address, uint8_t length) {
   _length = length;
   _writeMessageType = false;
   _rcvBufferLen = 0;
-  _numberOfTries = 5;
   memset(_rcvBuffer, 0, 4);
   _setAction(PROCESS);
   return true;
@@ -209,7 +216,6 @@ bool OptolinkKW::writeToDP(uint16_t address, uint8_t length, uint8_t value[]) {
   memcpy(_value, value, _length);
   _writeMessageType = true;
   _rcvBufferLen = 0;
-  _numberOfTries = 5;
   memset(_rcvBuffer, 0, 4);
   _setAction(PROCESS);
   return true;

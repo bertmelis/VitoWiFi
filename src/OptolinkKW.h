@@ -57,7 +57,6 @@ class OptolinkKW {
   uint8_t _rcvBufferLen;
   uint8_t _rcvLen;
   uint32_t _lastMillis;
-  uint8_t _numberOfTries;
   uint8_t _errorCode;
   void _initHandler();
   void _idleHandler();
@@ -70,19 +69,17 @@ class OptolinkKW {
   Print* _printer;
 
   inline void _setState(OptolinkState state) {
-    /*
     if (_printer) {
-      _logger->print(F("Optolink state: "));
-      _logger->println(state, DEC);
+      _printer->print("Optolink state: ");
+      _printer->println(state, DEC);
     }
-    */
     _state = state;
   }
   inline void _setAction(OptolinkAction action) {
     /*
     if (_printer) {
-      _logger->print(F("Optolink action: "));
-      _logger->println(action, DEC);
+      _printer->print("Optolink action: ");
+      _printer->println(action, DEC);
     }
     */
     _action = action;
