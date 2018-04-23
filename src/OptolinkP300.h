@@ -37,6 +37,7 @@ class OptolinkP300 {
   void begin(HardwareSerial* serial);
 #endif
   void loop();
+  const bool connected() const;
   const int8_t available() const;
   const bool isBusy() const;
   bool readFromDP(uint16_t address, uint8_t length);
@@ -47,8 +48,8 @@ class OptolinkP300 {
 
  private:
   Stream* _stream;
-  enum OptolinkState : uint8_t { RESET, RESET_ACK, INIT, INIT_ACK, IDLE, SEND, SEND_ACK, RECEIVE, RECEIVE_ACK } _state;
-  enum OptolinkAction : uint8_t { WAIT, PROCESS, RETURN, RETURN_ERROR } _action;
+  enum OptolinkState : uint8_t { RESET = 0, RESET_ACK, INIT, INIT_ACK, IDLE, SEND, SEND_ACK, RECEIVE, RECEIVE_ACK } _state;
+  enum OptolinkAction : uint8_t { WAIT = 0, PROCESS, RETURN, RETURN_ERROR } _action;
   uint16_t _address;
   uint8_t _length;
   bool _writeMessageType;
@@ -57,7 +58,6 @@ class OptolinkP300 {
   uint8_t _rcvBufferLen;
   uint8_t _rcvLen;
   uint32_t _lastMillis;
-  uint8_t _numberOfTries;
   uint8_t _errorCode;
   void _resetHandler();
   void _resetAckHandler();
@@ -69,6 +69,7 @@ class OptolinkP300 {
   void _receiveHandler();
   void _receiveAckHandler();
   void _returnHandler();
+  bool _transmit(uint16_t address, uint8_t length, bool write, uint8_t value[]);
   inline uint8_t _calcChecksum(uint8_t array[], uint8_t length);
   inline bool _checkChecksum(uint8_t array[], uint8_t length);
   inline void _printHex(Print* printer, uint8_t array[], uint8_t length);
@@ -78,8 +79,8 @@ class OptolinkP300 {
   inline void _setState(OptolinkState state) {
     /*
     if (_printer) {
-      _printer->print(F("Optolink state: "));
-      _printer->println(state, DEC);
+      _printer->print("Optolink state: ");
+      _printer->println(static_cast<uint8_t>(state));
     }
     */
     _state = state;
@@ -87,8 +88,9 @@ class OptolinkP300 {
   inline void _setAction(OptolinkAction action) {
     /*
     if (_printer) {
-      _printer->print(F("Optolink action: "));
-      _printer->println(action, DEC);
+      _printer->print("Optolink action: ");
+      _printer->println(static_cast<uint8_t>(action));
+    }
     */
     _action = action;
   }
