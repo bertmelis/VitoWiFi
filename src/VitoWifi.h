@@ -32,7 +32,6 @@ and many others
 #pragma once
 #include <Arduino.h>
 #include <queue>
-#include <vector>
 #include "Constants.h"
 #include "Datapoint.h"
 #include "OptolinkKW.h"
@@ -44,32 +43,27 @@ class VitoWifiBase {
   ~VitoWifiBase();
 
   void loop();
-  void setGlobalCallback(GlobalCallbackFunction globalCallback);
-  Datapoint& addDatapoint(const char* name, const char* group, const uint16_t address, const DPType type, bool isWriteable);
-  Datapoint& addDatapoint(const char* name, const char* group, const uint16_t address, const DPType type);
+  void setGlobalCallback(Callback globalCallback);
+  IDatapoint& addDatapoint(const char* name, const char* group, const uint16_t address, const DPType type, bool isWriteable);
+  IDatapoint& addDatapoint(const char* name, const char* group, const uint16_t address, const DPType type);
 
   void readAll();
   void readGroup(const char* group);
   void readDatapoint(const char* name);
 
-  template <typename TArg>
-  void writeDatapoint(const char* name, TArg arg) {
-    static_assert(sizeof(TArg) <= sizeof(float), "writeDatapoint() argument size must be <= 4 bytes");
-    float _float = static_cast<float>(arg);
-    size_t length = sizeof(arg);  // JS: Why was this ceil(sizeof(arg/2)??  Not sure so using _writeDatapoint directly in homieboiler
-    _writeDatapoint(name, _float, length);
-  }
-  void _writeDatapoint(const char* name, float value, size_t length);
+  void writeDatapoint(const char* name, DPValue value);
+
+  DPManager& getDPManager() { return _DPManager; }
 
  protected:
-  inline void _readDatapoint(Datapoint* dp);
-  Datapoint* _getDatapoint(const char* name);
-  std::vector<Datapoint*> _datapoints;
+ void _readDatapoint(IDatapoint* DP);
+ void _writeDatapoint(IDatapoint* DP, DPValue value);
   struct Action {
-    Datapoint* DP;
+    IDatapoint* DP;
     bool write;
-    uint8_t value[4];
+    uint8_t value[MAX_DP_LENGTH];
   };
+  DPManager _DPManager;
   std::queue<Action> _queue;
   bool _enablePrinter;
   Print* _printer;

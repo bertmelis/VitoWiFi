@@ -45,14 +45,12 @@ VitoWifiInterface<OptolinkKW>::VitoWifiInterface() {}
 template <>
 void VitoWifiInterface<OptolinkP300>::setup(HardwareSerial* serial, int8_t rxPin, int8_t txPin) {
   _optolink.begin(serial, rxPin, txPin);
-  _datapoints.shrink_to_fit();
 }
 #endif
 #ifdef ESP8266
 template <>
 void VitoWifiInterface<OptolinkP300>::setup(HardwareSerial* serial) {
   _optolink.begin(serial);
-  _datapoints.shrink_to_fit();
 }
 #endif
 
@@ -68,80 +66,47 @@ void VitoWifiInterface<OptolinkKW>::setup(HardwareSerial* serial, int8_t rxPin, 
 template <>
 void VitoWifiInterface<OptolinkKW>::setup(HardwareSerial* serial) {
   _optolink.begin(serial);
-  _datapoints.shrink_to_fit();
 }
 #endif
 
-void VitoWifiBase::setGlobalCallback(GlobalCallbackFunction globalCallback) {
-  if (_datapoints.size()) {
-    _datapoints.front()->setGlobalCallback(globalCallback);
+void VitoWifiBase::setGlobalCallback(Callback globalCallback) {
+  if (_DPManager.size()) {
+    _DPManager.at(0)->setGlobalCallback(globalCallback);
   }
 }
 
-Datapoint& VitoWifiBase::addDatapoint(const char* name, const char* group, const uint16_t address, const DPType type, bool isWriteable) {
-  Datapoint* DP;
-  switch (type) {
-    case TEMP:
-      DP = new TempDP(name, group, address, isWriteable);
-      break;
-    case TEMPS:
-      DP = new TempSDP(name, group, address, isWriteable);
-      break;
-    case STAT:
-      DP = new StatDP(name, group, address, isWriteable);
-      break;
-    case COUNT:
-      DP = new CountDP(name, group, address, isWriteable);
-      break;
-    case COUNTS:
-      DP = new CountSDP(name, group, address, isWriteable);
-      break;
-    case MODE:
-      DP = new ModeDP(name, group, address, isWriteable);
-      break;
-    case COP:
-      DP = new COPDP(name, group, address, isWriteable);
-      break;
-  }
-  if (!DP) abort();  // out of memory?
-  _datapoints.push_back(DP);
-  return *_datapoints.back();
+IDatapoint& VitoWifiBase::addDatapoint(const char* name, const char* group, const uint16_t address, const DPType type, bool isWriteable) {
+  return _DPManager.addDP(name, group, address, type, isWriteable);
 }
 
-Datapoint& VitoWifiBase::addDatapoint(const char* name, const char* group, const uint16_t address, const DPType type) { return addDatapoint(name, group, address, type, false); }
-
-Datapoint* VitoWifiBase::_getDatapoint(const char* name) {
-  Datapoint* DP = nullptr;
-  for (std::vector<Datapoint*>::iterator it = _datapoints.begin(); it != _datapoints.end(); ++it) {
-    if (strcmp(name, (*it)->getName()) == 0) DP = *it;
-  }
-  return DP;
+IDatapoint& VitoWifiBase::addDatapoint(const char* name, const char* group, const uint16_t address, const DPType type) {
+  return addDatapoint(name, group, address, type, false);
 }
 
 void VitoWifiBase::readAll() {
-  for (Datapoint* iDP : _datapoints) {
-    _readDatapoint(iDP);
+  for (auto it = _DPManager.begin(); it != _DPManager.end(); ++it) {
+    _readDatapoint((*it).get());
   }
 }
 
 void VitoWifiBase::readGroup(const char* group) {
-  for (Datapoint* iDP : _datapoints) {
-    if (strcmp(group, iDP->getGroup()) == 0) {
-      _readDatapoint(iDP);
+  for (auto it = _DPManager.begin(); it != _DPManager.end(); ++it) {
+    if (strcmp(group, (*it).get()->getGroup()) == 0) {
+      _readDatapoint((*it).get());
     }
   }
 }
 
 void VitoWifiBase::readDatapoint(const char* name) {
-  for (Datapoint* iDP : _datapoints) {
-    if (strcmp(name, iDP->getName()) == 0) {
-      _readDatapoint(iDP);
+  for (auto it = _DPManager.begin(); it != _DPManager.end(); ++it) {
+    if (strcmp(name, (*it).get()->getName()) == 0) {
+      _readDatapoint((*it).get());
       return;
     }
   }
 }
 
-inline void VitoWifiBase::_readDatapoint(Datapoint* dp) {
+void VitoWifiBase::_readDatapoint(IDatapoint* dp) {
   Action action = {dp, false};
   _queue.push(action);
   if (_enablePrinter && _printer) {
@@ -150,38 +115,36 @@ inline void VitoWifiBase::_readDatapoint(Datapoint* dp) {
   }
 }
 
-void VitoWifiBase::_writeDatapoint(const char* name, float value, size_t length) {
-  Datapoint* DP = _getDatapoint(name);
-  if (DP) {
-    if (DP->getLength() != length) {
-      if (_enablePrinter && _printer)
-        _printer->println(F("Value does not match DP, skipping"));
+void VitoWifiBase::writeDatapoint(const char* name, DPValue value) {
+  for (auto it = _DPManager.begin(); it != _DPManager.end(); ++it) {
+    if (strcmp(name, (*it).get()->getName()) == 0) {
+      _writeDatapoint((*it).get(), value);
       return;
     }
-    if (!DP->isWriteable()) {
-      if (_enablePrinter && _printer)
-        _printer->println(F("DP is readonly, skipping"));
-      return;
-    }
-    uint8_t transformedValue[2] = {0};
-    DP->parse(transformedValue, value);
-    Action action;
-    action.DP = DP;
-    action.write = true;
-    memcpy(action.value, transformedValue, 2);
-    _queue.push(action);
+  }
+}
+
+void VitoWifiBase::_writeDatapoint(IDatapoint* dp, DPValue value) {
+  if (!dp->isWriteable()) {
+    if (_enablePrinter && _printer)
+      _printer->println(F("DP is readonly, skipping"));
     return;
   }
+  uint8_t value_enc[MAX_DP_LENGTH] = {0};
+  dp->encode(value_enc, value);
+  Action action = {dp, true};
+  memcpy(action.value, value_enc, MAX_DP_LENGTH);
+  _queue.push(action);
 }
 
 template <>
 void VitoWifiInterface<OptolinkP300>::loop() {
   _optolink.loop();
   if (!_queue.empty() && !_optolink.isBusy()) {
-    if (_queue.front().write) {
-      _optolink.writeToDP(_queue.front().DP->getAddress(), _queue.front().DP->getLength(), _queue.front().value);
-    } else {
+    if (!_queue.front().write) {
       _optolink.readFromDP(_queue.front().DP->getAddress(), _queue.front().DP->getLength());
+    } else {
+      _optolink.writeToDP(_queue.front().DP->getAddress(), _queue.front().DP->getLength(), _queue.front().value);
     }
     return;
   }
@@ -191,9 +154,9 @@ void VitoWifiInterface<OptolinkP300>::loop() {
       _printer->print(_queue.front().DP->getName());
       _printer->println(F(" succes"));
     }
-    uint8_t value[4] = {0};
-    _optolink.read(value);
-    _queue.front().DP->callback(value);
+    uint8_t value_enc[MAX_DP_LENGTH] = {0};
+    _optolink.read(value_enc);
+    _queue.front().DP->callback(_queue.front().DP->decode(value_enc));
     _queue.pop();
     return;
   }
@@ -213,10 +176,10 @@ template <>
 void VitoWifiInterface<OptolinkKW>::loop() {
   _optolink.loop();
   if (!_queue.empty() && !_optolink.isBusy()) {
-    if (_queue.front().write) {
-      _optolink.writeToDP(_queue.front().DP->getAddress(), _queue.front().DP->getLength(), _queue.front().value);
-    } else {
+    if (!_queue.front().write) {
       _optolink.readFromDP(_queue.front().DP->getAddress(), _queue.front().DP->getLength());
+    } else {
+      _optolink.writeToDP(_queue.front().DP->getAddress(), _queue.front().DP->getLength(), _queue.front().value);
     }
     return;
   }
@@ -226,9 +189,9 @@ void VitoWifiInterface<OptolinkKW>::loop() {
       _printer->print(_queue.front().DP->getName());
       _printer->println(F(" succes"));
     }
-    uint8_t value[4] = {0};
-    _optolink.read(value);
-    _queue.front().DP->callback(value);
+    uint8_t value_enc[MAX_DP_LENGTH] = {0};
+    _optolink.read(value_enc);
+    _queue.front().DP->callback(_queue.front().DP->decode(value_enc));
     _queue.pop();
     return;
   }

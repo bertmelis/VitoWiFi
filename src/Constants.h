@@ -24,7 +24,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #pragma once
-#include <Arduino.h>
 
 /*
 const char* error0 PROGMEM = "Success";
@@ -36,3 +35,5 @@ const char* error5 PROGMEM = "error5";
 
 const char* errorMessages[6];
 */
+
+#define MAX_DP_LENGTH 4
