@@ -56,8 +56,8 @@ class VitoWifiBase {
   DPManager& getDPManager() { return _DPManager; }
 
  protected:
- void _readDatapoint(IDatapoint* DP);
- void _writeDatapoint(IDatapoint* DP, DPValue value);
+  void _readDatapoint(IDatapoint* DP);
+  void _writeDatapoint(IDatapoint* DP, DPValue value);
   struct Action {
     IDatapoint* DP;
     bool write;

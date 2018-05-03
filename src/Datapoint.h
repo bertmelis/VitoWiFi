@@ -27,7 +27,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <stdint.h>
 #include <math.h>  // floor()
-#include <string.h> // for strcmp()
+#include <string.h>  // for strcmp()
 #include <functional>
 #include <vector>
 #include <memory>
@@ -42,15 +42,15 @@ typedef std::function<void(const IDatapoint&, DPValue)> Callback;
 
 // all defined datatypes
 enum DPType {
-  RAW,  // undefined number of bytes, no conversion
-  TEMPL,  // 2 bytes, div10
-  TEMPS,  // 1 byte, no factor
-  STAT,  // 1 byte, to 0/1
+  RAW,     // undefined number of bytes, no conversion
+  TEMPL,   // 2 bytes, div10
+  TEMPS,   // 1 byte, no factor
+  STAT,    // 1 byte, to 0/1
   COUNTL,  // 4 bytes, no factor
   COUNTS,  // 2 bytes, no factor
-  MODE,  // 1 byte, no factor (same as TEMPS)
-  HOURS, // 4 bytes, div3600
-  COP  // 1 byte, div10
+  MODE,    // 1 byte, no factor (same as TEMPS)
+  HOURS,   // 4 bytes, div3600
+  COP      // 1 byte, div10
 };
 enum DPValueType {
   BOOL,
@@ -84,21 +84,37 @@ class DPValue {
         memcpy(raw.value, r, MAX_DP_LENGTH);
     }
   } v;
+
  public:
   // DPValue() : v() {}
-  DPValue(bool b) : v(b) {}
-  DPValue(uint8_t u8) : v(u8) {}
-  DPValue(uint16_t u16) : v(u16) {}
-  DPValue(uint32_t u32) : v(u32) {}
-  DPValue(float f) : v(f) {}
+  explicit DPValue(bool b) : v(b) {}
+  explicit DPValue(uint8_t u8) : v(u8) {}
+  explicit DPValue(uint16_t u16) : v(u16) {}
+  explicit DPValue(uint32_t u32) : v(u32) {}
+  explicit DPValue(float f) : v(f) {}
   DPValue(uint8_t* r, size_t length) : v(r, length) {}
   DPValue(DPValue const&) = default;
   ~DPValue() = default;
-  bool getBool() { if (v.b.type == BOOL) return v.b.value; else return false; }
-  uint8_t getU8() { if (v.b.type == UINT8_T) return v.u8.value; else return 0; }
-  uint16_t getU16() { if (v.b.type == UINT16_T) return v.u16.value; else return 0; }
-  uint32_t getU32() { if (v.b.type == UINT32_T) return v.u32.value; else return 0; }
-  float getFloat() { if (v.b.type == FLOAT) return v.f.value; else return 0.0; }
+  bool getBool() {
+    if (v.b.type == BOOL) return v.b.value;
+    else return false;
+  }
+  uint8_t getU8() {
+    if (v.b.type == UINT8_T) return v.u8.value;
+    else return 0;
+  }
+  uint16_t getU16() {
+    if (v.b.type == UINT16_T) return v.u16.value;
+    else return 0;
+  }
+  uint32_t getU32() {
+    if (v.b.type == UINT32_T) return v.u32.value;
+    else return 0;
+  }
+  float getFloat() {
+    if (v.b.type == FLOAT) return v.f.value;
+    else return 0.0;
+  }
   void getRaw(uint8_t* out) { memcpy(out, &v.raw.value[0], v.raw.length); }
   size_t getRawLength() { return v.raw.length; }
   void getString(char* c, size_t s) {
@@ -141,7 +157,7 @@ so high byte comes last:
 class convRaw {
  public:
   void encode(uint8_t* out, DPValue in, size_t length);
-  DPValue decode(const uint8_t* in, size_t length); 
+  DPValue decode(const uint8_t* in, size_t length);
 };
 
 // naming: conv _ #bytes _ factor _ type
@@ -207,8 +223,8 @@ class IDatapoint {
   IDatapoint& setWriteable(bool writeable) { _writeable = writeable; return *this; }
   IDatapoint& setGlobalCallback(Callback cb) { _globalCb = cb; return *this; }
   IDatapoint& setCallback(Callback cb) { _cb = cb; return *this; }
-  virtual void encode(uint8_t* out, const DPValue in) {};
-  virtual DPValue decode(const uint8_t* in) { uint32_t tmp = 0; DPValue out(tmp); return out; };
+  virtual void encode(uint8_t* out, const DPValue in) {}
+  virtual DPValue decode(const uint8_t* in) { uint32_t tmp = 0; DPValue out(tmp); return out; }
   void callback(DPValue value);
  protected:
   const char* _name;
