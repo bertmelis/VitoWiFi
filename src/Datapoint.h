@@ -96,8 +96,11 @@ class DPValue {
   DPValue(DPValue const&) = default;
   ~DPValue() = default;
   bool getBool() {
-    if (v.b.type == BOOL) return v.b.value;
-    else return false;
+    if (v.b.type == BOOL) {
+      return v.b.value;
+    } else {
+      return false;
+    }
   }
   uint8_t getU8() {
     if (v.b.type == UINT8_T) {
@@ -116,7 +119,7 @@ class DPValue {
   uint32_t getU32() {
     if (v.b.type == UINT32_T) {
       return v.u32.value;
-    } else { 
+    } else {
       return 0;
     }
   }
