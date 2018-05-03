@@ -100,20 +100,32 @@ class DPValue {
     else return false;
   }
   uint8_t getU8() {
-    if (v.b.type == UINT8_T) return v.u8.value;
-    else return 0;
+    if (v.b.type == UINT8_T) {
+      return v.u8.value;
+    } else {
+      return 0;
+    }
   }
   uint16_t getU16() {
-    if (v.b.type == UINT16_T) return v.u16.value;
-    else return 0;
+    if (v.b.type == UINT16_T) {
+      return v.u16.value;
+    } else {
+      return 0;
+    }
   }
   uint32_t getU32() {
-    if (v.b.type == UINT32_T) return v.u32.value;
-    else return 0;
+    if (v.b.type == UINT32_T) {
+      return v.u32.value;
+    } else { 
+      return 0;
+    }
   }
   float getFloat() {
-    if (v.b.type == FLOAT) return v.f.value;
-    else return 0.0;
+    if (v.b.type == FLOAT) {
+      return v.f.value;
+    } else {
+      return 0.0;
+    }
   }
   void getRaw(uint8_t* out) { memcpy(out, &v.raw.value[0], v.raw.length); }
   size_t getRawLength() { return v.raw.length; }
