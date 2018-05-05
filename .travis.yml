@@ -15,6 +15,7 @@ env:
     - PLATFORMIO_CI_SRC=examples/readDatapoint/readDatapoint.ino PLATFORMIO_CI_EXTRA_ARGS="--board=d1_mini"
     - PLATFORMIO_CI_SRC=examples/setupMethods/setupMethods.ino PLATFORMIO_CI_EXTRA_ARGS="--board=d1_mini"
     - PLATFORMIO_CI_SRC=examples/rawOptolink/rawOptolink.ino PLATFORMIO_CI_EXTRA_ARGS="--board=d1_mini"
+    - PLATFORMIO_CI_SRC=examples/datapoints/datapoints.ino PLATFORMIO_CI_EXTRA_ARGS="--board=d1_mini"
     - CPPLINT=true
 
 install:
