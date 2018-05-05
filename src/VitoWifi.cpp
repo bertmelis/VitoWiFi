@@ -94,21 +94,27 @@ void VitoWifiClass<P>::readDatapoint(const char* name) {
 }
 
 template <class P>
-void VitoWifiClass<P>::_readDatapoint(IDatapoint* dp) {
-  Action action = {dp, false};
-  _queue.push(action);
-  if (_enablePrinter && _printer) {
-    _printer->print("READ ");
-    _printer->println(dp->getName());
-  }
-}
-
-template <class P>
 void VitoWifiClass<P>::writeDatapoint(const char* name, DPValue value) {
   for (auto it = _DPManager.begin(); it != _DPManager.end(); ++it) {
     if (strcmp(name, (*it).get()->getName()) == 0) {
       _writeDatapoint((*it).get(), value);
       return;
+    }
+  }
+}
+
+template <class P>
+void VitoWifiClass<P>::_readDatapoint(IDatapoint* dp) {
+  if (_queue.size() < (_DPManager.size() * 2)) {
+    Action action = {dp, false};
+    _queue.push(action);
+    if (_enablePrinter && _printer) {
+      _printer->print("READ ");
+      _printer->println(dp->getName());
+    }
+  } else {
+    if (_enablePrinter && _printer) {
+      _printer->print("queue full");
     }
   }
 }
@@ -120,11 +126,17 @@ void VitoWifiClass<P>::_writeDatapoint(IDatapoint* dp, DPValue value) {
       _printer->println("DP is readonly, skipping");
     return;
   }
-  uint8_t value_enc[MAX_DP_LENGTH] = {0};
-  dp->encode(value_enc, value);
-  Action action = {dp, true};
-  memcpy(action.value, value_enc, MAX_DP_LENGTH);
-  _queue.push(action);
+  if (_queue.size() < (_DPManager.size() * 2)) {
+    uint8_t value_enc[MAX_DP_LENGTH] = {0};
+    dp->encode(value_enc, value);
+    Action action = {dp, true};
+    memcpy(action.value, value_enc, MAX_DP_LENGTH);
+    _queue.push(action);
+  } else {
+    if (_enablePrinter && _printer) {
+      _printer->print("queue full");
+    }
+  }
 }
 
 template <class P>
