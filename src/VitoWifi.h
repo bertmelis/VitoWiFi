@@ -30,6 +30,7 @@ and many others
 */
 
 #pragma once
+
 #include <Arduino.h>
 #include <queue>
 #include "Constants.h"
@@ -37,43 +38,11 @@ and many others
 #include "OptolinkKW.h"
 #include "OptolinkP300.h"
 
-class VitoWifiBase {
- public:
-  VitoWifiBase();
-  ~VitoWifiBase();
-
-  void loop();
-  void setGlobalCallback(Callback globalCallback);
-  IDatapoint& addDatapoint(const char* name, const char* group, const uint16_t address, const DPType type, bool isWriteable);
-  IDatapoint& addDatapoint(const char* name, const char* group, const uint16_t address, const DPType type);
-
-  void readAll();
-  void readGroup(const char* group);
-  void readDatapoint(const char* name);
-
-  void writeDatapoint(const char* name, DPValue value);
-
-  DPManager& getDPManager() { return _DPManager; }
-
- protected:
-  void _readDatapoint(IDatapoint* DP);
-  void _writeDatapoint(IDatapoint* DP, DPValue value);
-  struct Action {
-    IDatapoint* DP;
-    bool write;
-    uint8_t value[MAX_DP_LENGTH];
-  };
-  DPManager _DPManager;
-  std::queue<Action> _queue;
-  bool _enablePrinter;
-  Print* _printer;
-};
-
 template <class P>
-class VitoWifiInterface : public VitoWifiBase {
+class VitoWifiClass {
  public:
-  VitoWifiInterface() {}
-  ~VitoWifiInterface() {}
+  VitoWifiClass();
+  ~VitoWifiClass();
 #ifdef ARDUINO_ARCH_ESP32
   void setup(HardwareSerial* serial, int8_t rxPin, int8_t txPin);
 #endif
@@ -81,15 +50,34 @@ class VitoWifiInterface : public VitoWifiBase {
   void setup(HardwareSerial* serial);
 #endif
   void loop();
-
+  void setGlobalCallback(Callback globalCallback);
+  IDatapoint& addDatapoint(const char* name, const char* group, const uint16_t address, const DPType type, bool isWriteable);
+  IDatapoint& addDatapoint(const char* name, const char* group, const uint16_t address, const DPType type);
+  void readAll();
+  void readGroup(const char* group);
+  void readDatapoint(const char* name);
+  void writeDatapoint(const char* name, DPValue value);
   void enableLogger();
   void disableLogger();
   void setLogger(Print* printer);
 
- private:
+ protected:
+  void _readDatapoint(IDatapoint* dp);
+  void _writeDatapoint(IDatapoint* dp, DPValue value);
+  struct Action {
+    IDatapoint* DP;
+    bool write;
+    uint8_t value[MAX_DP_LENGTH];
+  };
   P _optolink;
+  DPManager _DPManager;
+  std::queue<Action> _queue;
+  bool _enablePrinter;
+  Print* _printer;
 };
+
+#include "VitoWifi.cpp"
 
 #define P300 OptolinkP300
 #define KW OptolinkKW
-#define VitoWifi_setProtocol(protocol) VitoWifiInterface<protocol> VitoWifi
+#define VitoWifi_setProtocol(protocol) VitoWifiClass<protocol> VitoWifi
