@@ -11,12 +11,14 @@ For each Datapoint, the read value is returned using globalCallbackHandler
 
 VitoWifi_setProtocol(P300);
 
-void globalCallbackHandler(const char* name, const char* group, const char* value) {
-  Serial1.print(group);
+void globalCallbackHandler(const IDatapoint& dp, DPValue value) {
+  Serial1.print(dp.getGroup());
   Serial1.print(" - ");
-  Serial1.print(name);
+  Serial1.print(dp.getName());
   Serial1.print(": ");
-  Serial1.println(value);
+  char value_str[15] = {0};
+  value.getString(value_str, sizeof(value_str));
+  Serial1.println(value_str);
 }
 
 void setup() {
@@ -26,8 +28,8 @@ void setup() {
   VitoWifi.enableLogger();
   VitoWifi.setLogger(&Serial1);
 
-  VitoWifi.addDatapoint("outsidetemp", "boiler", 0x5525, TEMP);
-  VitoWifi.addDatapoint("boilertemp", "boiler", 0x0810, TEMP);
+  VitoWifi.addDatapoint("outsidetemp", "boiler", 0x5525, TEMPL);
+  VitoWifi.addDatapoint("boilertemp", "boiler", 0x0810, TEMPL);
   VitoWifi.setGlobalCallback(globalCallbackHandler);
   VitoWifi.setup(&Serial);
 

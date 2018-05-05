@@ -23,7 +23,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
 
-#pragma once
+#pragma once  // Please ignore this error.
 
 #include "VitoWifi.h"
 
@@ -34,9 +34,7 @@ VitoWifiClass<P>::VitoWifiClass() :
 
 template <class P>
 VitoWifiClass<P>::~VitoWifiClass() {
-  if (_enablePrinter && _printer)
-    _printer->println(F("Destructing of VitoWifi is unsupported"));
-  abort();
+  abort();  // destructing is not supported
 }
 
 #ifdef ARDUINO_ARCH_ESP32
@@ -119,7 +117,7 @@ template <class P>
 void VitoWifiClass<P>::_writeDatapoint(IDatapoint* dp, DPValue value) {
   if (!dp->isWriteable()) {
     if (_enablePrinter && _printer)
-      _printer->println(F("DP is readonly, skipping"));
+      _printer->println("DP is readonly, skipping");
     return;
   }
   uint8_t value_enc[MAX_DP_LENGTH] = {0};
@@ -142,9 +140,9 @@ void VitoWifiClass<P>::loop() {
   }
   if (_optolink.available() > 0) {  // trigger callback when ready and remove element from queue
     if (_enablePrinter && _printer) {
-      _printer->print(F("DP "));
+      _printer->print("DP ");
       _printer->print(_queue.front().DP->getName());
-      _printer->println(F(" succes"));
+      _printer->println(" succes");
     }
     uint8_t value_enc[MAX_DP_LENGTH] = {0};
     _optolink.read(value_enc);
@@ -155,9 +153,9 @@ void VitoWifiClass<P>::loop() {
   if (_optolink.available() < 0) {  // display error message and remove element from queue
     uint8_t errorCode = _optolink.readError();
     if (_enablePrinter && _printer) {
-      _printer->print(F("DP "));
+      _printer->print("DP ");
       _printer->print(_queue.front().DP->getName());
-      _printer->print(F(" error: "));
+      _printer->print(" error: ");
       _printer->println(errorCode, DEC);
     }
     _queue.pop();

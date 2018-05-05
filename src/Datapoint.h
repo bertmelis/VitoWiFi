@@ -26,6 +26,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #pragma once
 
 #include <stdint.h>
+#include <stdio.h>
 #include <math.h>  // floor()
 #include <string.h>  // for strcmp()
 #include <functional>
