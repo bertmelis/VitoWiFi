@@ -269,6 +269,7 @@ class DPManager {
  public:
   IDatapoint& addDP(const char* name, const char* group, uint16_t address, DPType type, bool writeable = false);
   IDatapoint& addDP(const char* name, const char* group, uint16_t address, size_t length, DPType type, bool writeable = false);
+  IDatapoint* getDP(const char* name);
   void executeDP(const char* name, std::function<void(IDatapoint*)> fn);
   void executeGroup(const char* group, std::function<void(IDatapoint*)> fn);
   void executeAll(std::function<void(IDatapoint*)> fn);

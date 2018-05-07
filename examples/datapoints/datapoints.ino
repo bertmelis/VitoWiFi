@@ -7,12 +7,7 @@ DPManager dpManager;
 
 // find datapoint
 IDatapoint* getDP(DPManager dpManager, const char* name) {
-  for (auto it = dpManager.begin(); it != dpManager.end(); ++it) {
-    if (strcmp(name, (*it).get()->getName()) == 0) {
-      return (*it).get();
-    }
-  }
-  return nullptr;
+  return dpManager.getDP(name);
 }
 
 void setup() {
@@ -149,9 +144,9 @@ void loop() {
 
     // test: print all DPs and length
     Serial.print("\nThese are all the registered datapoints:\n");
-    for (auto i = dpManager.begin(); i != dpManager.end(); ++i) {
-      Serial.printf("DP: %s - length %d\n", (*i)->getName(), (*i)->getLength());
-    }
+    dpManager.executeAll([](IDatapoint* dp) {
+      Serial.printf("DP: %s - length %d\n", dp->getName(), dp->getLength());
+    });
 
     // test: what happens if DP is not found?
     delay(1000);

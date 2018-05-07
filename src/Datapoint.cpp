@@ -175,6 +175,15 @@ IDatapoint& DPManager::addDP(const char* name, const char* group, uint16_t addre
   return *_dps.back();
 }
 
+IDatapoint* DPManager::getDP(const char* name) {
+  for (auto it = _dps.begin(); it != _dps.end(); ++it) {
+    if (strcmp(name, (*it).get()->getName()) == 0) {
+      return (*it).get();
+    }
+  }
+  return nullptr;
+}
+
 void DPManager::executeDP(const char* name, std::function<void(IDatapoint*)> fn) {
   for (auto it = _dps.begin(); it != _dps.end(); ++it) {
     if (strcmp(name, (*it).get()->getName()) == 0) {
