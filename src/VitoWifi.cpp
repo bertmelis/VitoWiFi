@@ -52,9 +52,9 @@ void VitoWifiClass<P>::setup(HardwareSerial* serial) {
 
 template <class P>
 void VitoWifiClass<P>::setGlobalCallback(Callback globalCallback) {
-  if (_DPManager.size()) {
-    _DPManager.at(0)->setGlobalCallback(globalCallback);
-  }
+    _DPManager.executeAll([this, globalCallback](IDatapoint* dp){
+      dp->setGlobalCallback(globalCallback);
+    });
 }
 
 template <class P>
@@ -69,43 +69,35 @@ IDatapoint& VitoWifiClass<P>::addDatapoint(const char* name, const char* group, 
 
 template <class P>
 void VitoWifiClass<P>::readAll() {
-  for (auto it = _DPManager.begin(); it != _DPManager.end(); ++it) {
-    _readDatapoint((*it).get());
-  }
+  _DPManager.executeAll([this](IDatapoint* dp){
+    _readDatapoint(dp);
+  });
 }
 
 template <class P>
 void VitoWifiClass<P>::readGroup(const char* group) {
-  for (auto it = _DPManager.begin(); it != _DPManager.end(); ++it) {
-    if (strcmp(group, (*it).get()->getGroup()) == 0) {
-      _readDatapoint((*it).get());
-    }
-  }
+  _DPManager.executeGroup(group, [this](IDatapoint* dp) {
+    _readDatapoint(dp);
+  });
 }
 
 template <class P>
 void VitoWifiClass<P>::readDatapoint(const char* name) {
-  for (auto it = _DPManager.begin(); it != _DPManager.end(); ++it) {
-    if (strcmp(name, (*it).get()->getName()) == 0) {
-      _readDatapoint((*it).get());
-      return;
-    }
-  }
+  _DPManager.executeDP(name, [this](IDatapoint* dp) {
+    _readDatapoint(dp);
+  });
 }
 
 template <class P>
 void VitoWifiClass<P>::writeDatapoint(const char* name, DPValue value) {
-  for (auto it = _DPManager.begin(); it != _DPManager.end(); ++it) {
-    if (strcmp(name, (*it).get()->getName()) == 0) {
-      _writeDatapoint((*it).get(), value);
-      return;
-    }
-  }
+  _DPManager.executeDP(name, [this, value](IDatapoint* dp) {
+    _writeDatapoint(dp, value);
+  });
 }
 
 template <class P>
 void VitoWifiClass<P>::_readDatapoint(IDatapoint* dp) {
-  if (_queue.size() < (_DPManager.size() * 2)) {
+  if (_queue.size() < (_DPManager.numberOfDPs() * 2)) {
     Action action = {dp, false};
     _queue.push(action);
     if (_enablePrinter && _printer) {
@@ -126,7 +118,7 @@ void VitoWifiClass<P>::_writeDatapoint(IDatapoint* dp, DPValue value) {
       _printer->println("DP is readonly, skipping");
     return;
   }
-  if (_queue.size() < (_DPManager.size() * 2)) {
+  if (_queue.size() < (_DPManager.numberOfDPs() * 2)) {
     uint8_t value_enc[MAX_DP_LENGTH] = {0};
     dp->encode(value_enc, value);
     Action action = {dp, true};

@@ -269,10 +269,10 @@ class DPManager {
  public:
   IDatapoint& addDP(const char* name, const char* group, uint16_t address, DPType type, bool writeable = false);
   IDatapoint& addDP(const char* name, const char* group, uint16_t address, size_t length, DPType type, bool writeable = false);
-  std::vector<std::shared_ptr<IDatapoint>>::iterator begin() { return _dps.begin(); }
-  std::vector<std::shared_ptr<IDatapoint>>::iterator end() { return _dps.end(); }
-  size_t size() { return _dps.size(); }
-  IDatapoint* at(size_t n);
+  void executeDP(const char* name, std::function<void(IDatapoint*)> fn);
+  void executeGroup(const char* group, std::function<void(IDatapoint*)> fn);
+  void executeAll(std::function<void(IDatapoint*)> fn);
+  size_t numberOfDPs() { return _dps.size(); }
  private:
   std::vector<std::shared_ptr<IDatapoint>> _dps;
 };

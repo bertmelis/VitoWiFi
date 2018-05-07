@@ -175,10 +175,25 @@ IDatapoint& DPManager::addDP(const char* name, const char* group, uint16_t addre
   return *_dps.back();
 }
 
-IDatapoint* DPManager::at(size_t n) {
-  if (n < _dps.size()) {
-    return _dps.at(n).get();
-  } else {
-    return nullptr;
+void DPManager::executeDP(const char* name, std::function<void(IDatapoint*)> fn) {
+  for (auto it = _dps.begin(); it != _dps.end(); ++it) {
+    if (strcmp(name, (*it).get()->getName()) == 0) {
+      fn((*it).get());
+      return;
+    }
+  }
+}
+
+void DPManager::executeGroup(const char* group, std::function<void(IDatapoint*)> fn) {
+  for (auto it = _dps.begin(); it != _dps.end(); ++it) {
+    if (strcmp(group, (*it).get()->getGroup()) == 0) {
+      fn((*it).get());
+    }
+  }
+}
+
+void DPManager::executeAll(std::function<void(IDatapoint*)> fn) {
+  for (auto it = _dps.begin(); it != _dps.end(); ++it) {
+    fn((*it).get());
   }
 }
