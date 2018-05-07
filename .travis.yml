@@ -24,3 +24,8 @@ install:
 
 script:
     - if [[ "$CPPLINT" ]]; then cpplint --repository=. --recursive --linelength=200 --filter=-build/include  ./src; else platformio ci --lib="." $PLATFORMIO_CI_EXTRA_ARGS; fi
+
+notifications:
+  email:
+    on_success: change
+    on_failure: change
