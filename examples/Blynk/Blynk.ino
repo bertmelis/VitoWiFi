@@ -47,7 +47,7 @@ void sendRoomtempSet(const char* name, const char* group, byte value) {
 // write the receive value to VitoWifi and read back
 BLYNK_WRITE(V0) {
   uint8_t pinValue = param.asInt();
-  DPValue value(pinValue)
+  DPValue value(pinValue);
   terminal.printf("Blynk update: V0 = %d\n", pinValue);
   VitoWifi.writeDatapoint("roomtempset", value);
   VitoWifi.readDatapoint("roomtempset");
