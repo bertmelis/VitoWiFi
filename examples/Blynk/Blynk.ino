@@ -32,7 +32,7 @@ void update() {
 void globalCallbackHandler(const IDatapoint& dp, DPValue value) {
   char value_str[15] = {0};
   value.getString(value_str, sizeof(value_str));
-  terminal.printf("Received: %s - %s: %s\n", dp.getGroup, dp.getName, value_str);
+  terminal.printf("Received: %s - %s: %s\n", dp.getGroup(), dp.getName(), value_str);
 }
 
 // send receive outside temperature to virtual pin V1
@@ -60,7 +60,7 @@ void setup() {
   VitoWifi.setLogger(&terminal);  // might be too verbose/fast for Blynk to handle
   VitoWifi.enableLogger();  // might be too verbose/fast for Blynk to handle
   VitoWifi.addDatapoint("outsidetemp", "boiler", 0x5525, TEMPL).setCallback(sendOutsidetemp);
-  VitoWifi.addDatapoint("roomtempset", "heating", 0x2306, TEMPS).setWriteable().setCallback(sendRoomtempSet);
+  VitoWifi.addDatapoint("roomtempset", "heating", 0x2306, TEMPS).setWriteable(true).setCallback(sendRoomtempSet);
   VitoWifi.setGlobalCallback(globalCallbackHandler);
   VitoWifi.setup(&Serial);
 
