@@ -46,9 +46,10 @@ void sendRoomtempSet(const char* name, const char* group, byte value) {
 // callback for Blynk when widget Step V (on V0) has been changed
 // write the receive value to VitoWifi and read back
 BLYNK_WRITE(V0) {
-  int pinValue = param.asInt();
+  uint8_t pinValue = param.asInt();
+  DPValue value(pinValue)
   terminal.printf("Blynk update: V0 = %d\n", pinValue);
-  VitoWifi.writeDatapoint("roomtempset", pinValue);
+  VitoWifi.writeDatapoint("roomtempset", value);
   VitoWifi.readDatapoint("roomtempset");
 }
 
@@ -56,7 +57,7 @@ void setup() {
   // VitoWifi setup
   VitoWifi.setLogger(&terminal);  // might be too verbose/fast for Blynk to handle
   VitoWifi.enableLogger();  // might be too verbose/fast for Blynk to handle
-  VitoWifi.addDatapoint("outsidetemp", "boiler", 0x5525, TEMP).setCallback(sendOutsidetemp);
+  VitoWifi.addDatapoint("outsidetemp", "boiler", 0x5525, TEMPL).setCallback(sendOutsidetemp);
   VitoWifi.addDatapoint("roomtempset", "heating", 0x2306, TEMPS).setWriteable().setCallback(sendRoomtempSet);
   VitoWifi.setGlobalCallback(globalCallbackHandler);
   VitoWifi.setup(&Serial);
