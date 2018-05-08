@@ -1,4 +1,9 @@
-/* Copyright 2017 Bert Melis */
+/*
+
+This example displays all possible datapoints and shows how the conversion is done.
+You don't need an actual optolink to use this example.
+
+*/
 
 #include <Arduino.h>
 #include <Datapoint.h>
