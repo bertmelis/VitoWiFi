@@ -19,7 +19,7 @@ env:
 
 install:
     - pip install -U platformio
-    - platformio lib install 451
+    - platformio lib install 415
     - pip install -U cpplint
 
 script:

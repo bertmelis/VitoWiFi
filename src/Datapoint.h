@@ -40,7 +40,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 class DPValue;
 class IDatapoint;
 typedef std::function<void(const IDatapoint&, DPValue)> Callback;
-typedef std::function<void(const Idatapoint&, DPValue, void*)> Callback_w_arg
+typedef std::function<void(const IDatapoint&, DPValue, void*)> Callback_w_arg
 
 // all defined datatypes
 enum DPType {
