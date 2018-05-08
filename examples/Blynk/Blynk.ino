@@ -29,18 +29,20 @@ void update() {
 }
 
 // fallback when no handler has been found, just print received data to Blynk terminal
-void globalCallbackHandler(const char* name, const char* group, const char* value) {
-  terminal.printf("Received: %s - %s: %s\n", group, name, value);
+void globalCallbackHandler(const IDatapoint& dp, DPValue value) {
+  char value_str[15] = {0};
+  value.getString(value_str, sizeof(value_str));
+  terminal.printf("Received: %s - %s: %s\n", dp.getGroup, dp.getName, value_str);
 }
 
 // send receive outside temperature to virtual pin V1
-void sendOutsidetemp(const char* name, const char* group, float value) {
-  Blynk.virtualWrite(V1, value);
+void sendOutsidetemp(const IDatapoint& dp, DPValue value) {
+  Blynk.virtualWrite(V1, value.getFloat());
 }
 
 // send receive room temperature (soll) to virtual pin V2
-void sendRoomtempSet(const char* name, const char* group, byte value) {
-  Blynk.virtualWrite(V2, value);
+void sendRoomtempSet(const IDatapoint& dp, DPValue value) {
+  Blynk.virtualWrite(V2, value.getU8());
 }
 
 // callback for Blynk when widget Step V (on V0) has been changed
