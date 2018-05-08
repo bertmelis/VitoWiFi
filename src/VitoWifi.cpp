@@ -68,37 +68,37 @@ IDatapoint& VitoWifiClass<P>::addDatapoint(const char* name, const char* group, 
 }
 
 template <class P>
-void VitoWifiClass<P>::readAll() {
-  _DPManager.executeAll([this](IDatapoint* dp){
-    _readDatapoint(dp);
+void VitoWifiClass<P>::readAll(void* arg) {
+  _DPManager.executeAll([this, arg](IDatapoint* dp){
+    _readDatapoint(dp, arg);
   });
 }
 
 template <class P>
-void VitoWifiClass<P>::readGroup(const char* group) {
-  _DPManager.executeGroup(group, [this](IDatapoint* dp) {
-    _readDatapoint(dp);
+void VitoWifiClass<P>::readGroup(const char* group, void* arg) {
+  _DPManager.executeGroup(group, [this, arg](IDatapoint* dp) {
+    _readDatapoint(dp, arg);
   });
 }
 
 template <class P>
-void VitoWifiClass<P>::readDatapoint(const char* name) {
-  _DPManager.executeDP(name, [this](IDatapoint* dp) {
-    _readDatapoint(dp);
+void VitoWifiClass<P>::readDatapoint(const char* name, void* arg) {
+  _DPManager.executeDP(name, [this, arg](IDatapoint* dp) {
+    _readDatapoint(dp, arg);
   });
 }
 
 template <class P>
-void VitoWifiClass<P>::writeDatapoint(const char* name, DPValue value) {
-  _DPManager.executeDP(name, [this, value](IDatapoint* dp) {
-    _writeDatapoint(dp, value);
+void VitoWifiClass<P>::writeDatapoint(const char* name, DPValue value, void* arg) {
+  _DPManager.executeDP(name, [this, value, arg](IDatapoint* dp) {
+    _writeDatapoint(dp, value, arg);
   });
 }
 
 template <class P>
-void VitoWifiClass<P>::_readDatapoint(IDatapoint* dp) {
+void VitoWifiClass<P>::_readDatapoint(IDatapoint* dp, void* arg) {
   if (_queue.size() < (_DPManager.numberOfDPs() * 2)) {
-    Action action = {dp, false};
+    Action action = {dp, false, arg};
     _queue.push(action);
     if (_enablePrinter && _printer) {
       _printer->print("READ ");
@@ -112,7 +112,7 @@ void VitoWifiClass<P>::_readDatapoint(IDatapoint* dp) {
 }
 
 template <class P>
-void VitoWifiClass<P>::_writeDatapoint(IDatapoint* dp, DPValue value) {
+void VitoWifiClass<P>::_writeDatapoint(IDatapoint* dp, DPValue value, void* arg) {
   if (!dp->isWriteable()) {
     if (_enablePrinter && _printer)
       _printer->println("DP is readonly, skipping");
@@ -121,7 +121,7 @@ void VitoWifiClass<P>::_writeDatapoint(IDatapoint* dp, DPValue value) {
   if (_queue.size() < (_DPManager.numberOfDPs() * 2)) {
     uint8_t value_enc[MAX_DP_LENGTH] = {0};
     dp->encode(value_enc, value);
-    Action action = {dp, true};
+    Action action = {dp, true, arg};
     memcpy(action.value, value_enc, MAX_DP_LENGTH);
     _queue.push(action);
   } else {

@@ -53,20 +53,21 @@ class VitoWifiClass {
   void setGlobalCallback(Callback globalCallback);
   IDatapoint& addDatapoint(const char* name, const char* group, const uint16_t address, const DPType type, bool isWriteable);
   IDatapoint& addDatapoint(const char* name, const char* group, const uint16_t address, const DPType type);
-  void readAll();
-  void readGroup(const char* group);
-  void readDatapoint(const char* name);
-  void writeDatapoint(const char* name, DPValue value);
+  void readAll(void* arg = nullptr);
+  void readGroup(const char* group, void* arg = nullptr);
+  void readDatapoint(const char* name, void* arg = nullptr);
+  void writeDatapoint(const char* name, DPValue value, void* arg = nullptr);
   void enableLogger();
   void disableLogger();
   void setLogger(Print* printer);
 
  protected:
-  void _readDatapoint(IDatapoint* dp);
-  void _writeDatapoint(IDatapoint* dp, DPValue value);
+  void _readDatapoint(IDatapoint* dp, void* arg = nullptr);
+  void _writeDatapoint(IDatapoint* dp, DPValue value, void* arg = nullptr);
   struct Action {
     IDatapoint* DP;
     bool write;
+    void* arg;
     uint8_t value[MAX_DP_LENGTH];
   };
   P _optolink;
