@@ -130,6 +130,7 @@ A templated Datapoint class inherits from IDatapoint. Datapoint contains a (temp
 For easier coding, the template specializations have a typedef.
 
 An overview of the builtin datapoint types
+
 | Type     | Underlying type         | Length | Conversion factor | Value type |
 |----------|-------------------------|--------|-------------------|------------|
 | DPTemp   | Datapoint<conv2_10_F>   | 2      | / 10              | float      |
@@ -141,6 +142,7 @@ An overview of the builtin datapoint types
 | DPHours  | Datapoint<conv4_3600_F> | 4      | / 3600            | float      |
 | DPCoP    | Datapoint<conv1_10_F>   | 1      | / 10              | float      |
 | DPRaw    | Datapoint<convRaw>      | -(1)   | -                 | uint8_t*   |
+
 (1) the length of DPRaw has to be explicitly set using `setLength()`
 
 ### My datapoint type isn’t listed?
@@ -183,11 +185,11 @@ An example:
 
 ```C++
 uint16_t myInt = 234;
-DPValue value(234); // value holds a uint16_t with value 234.
-value1 = value.getU16()  // value1 = 234
+DPValue value(234);  // value holds a uint16_t with value 234
 value1 = value.getFloat();  // value1 = 0 as value didn’t contain a float
+value1 = value.getU16()  // value1 = 234
 char str[4];
-value.getString(str, sizeof(str));  // str contains “234” (mind the extra space for null-termination)
+value.getString(str, sizeof(str));  // str contains “234” (+ extra null-termination)
 ```
 
 The possible types are:
