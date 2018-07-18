@@ -25,11 +25,11 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 #include <Arduino.h>
-#include "Constants.h"
+#include "Constants.hpp"
 
-class OptolinkP300 {
+class OptolinkKW {
  public:
-  OptolinkP300();
+  OptolinkKW();
 #ifdef ARDUINO_ARCH_ESP32
   void begin(HardwareSerial* serial, int8_t rxPin, int8_t txPin);
 #endif
@@ -37,7 +37,6 @@ class OptolinkP300 {
   void begin(HardwareSerial* serial);
 #endif
   void loop();
-  const bool connected() const;
   const int8_t available() const;
   const bool isBusy() const;
   bool readFromDP(uint16_t address, uint8_t length);
@@ -48,30 +47,23 @@ class OptolinkP300 {
 
  private:
   Stream* _stream;
-  enum OptolinkState : uint8_t { RESET = 0, RESET_ACK, INIT, INIT_ACK, IDLE, SEND, SEND_ACK, RECEIVE, RECEIVE_ACK } _state;
-  enum OptolinkAction : uint8_t { WAIT = 0, PROCESS, RETURN, RETURN_ERROR } _action;
+  enum OptolinkState : uint8_t { INIT, IDLE, SYNC, SEND, RECEIVE } _state;  // include INIT to reset devices compatible with P300
+  enum OptolinkAction : uint8_t { WAIT, PROCESS, RETURN, RETURN_ERROR } _action;
   uint16_t _address;
   uint8_t _length;
   bool _writeMessageType;
   uint8_t _value[4];
-  uint8_t _rcvBuffer[12];
+  uint8_t _rcvBuffer[4];
   uint8_t _rcvBufferLen;
   uint8_t _rcvLen;
   uint32_t _lastMillis;
   uint8_t _errorCode;
-  void _resetHandler();
-  void _resetAckHandler();
   void _initHandler();
-  void _initAckHandler();
   void _idleHandler();
+  void _syncHandler();
   void _sendHandler();
-  void _sendAckHandler();
   void _receiveHandler();
-  void _receiveAckHandler();
-  void _returnHandler();
-  bool _transmit(uint16_t address, uint8_t length, bool write, uint8_t value[]);
-  inline uint8_t _calcChecksum(uint8_t array[], uint8_t length);
-  inline bool _checkChecksum(uint8_t array[], uint8_t length);
+  bool _debugMessage;
   inline void _printHex(Print* printer, uint8_t array[], uint8_t length);
   inline void _clearInputBuffer();
   Print* _printer;
@@ -80,7 +72,7 @@ class OptolinkP300 {
     /*
     if (_printer) {
       _printer->print("Optolink state: ");
-      _printer->println(static_cast<uint8_t>(state));
+      _printer->println(state, DEC);
     }
     */
     _state = state;
@@ -89,7 +81,7 @@ class OptolinkP300 {
     /*
     if (_printer) {
       _printer->print("Optolink action: ");
-      _printer->println(static_cast<uint8_t>(action));
+      _printer->println(action, DEC);
     }
     */
     _action = action;

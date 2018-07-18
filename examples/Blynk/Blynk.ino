@@ -9,17 +9,20 @@
 */
 
 #include <Arduino.h>
-#include <VitoWifi.h>
+#include <VitoWiFi.h>
 #include <ESP8266WiFi.h>
 #include <BlynkSimpleEsp8266.h>
 
 const char ssid[] = "xxxx";
 const char pass[] = "xxxx";
 const char auth[] = "xxxx";
-VitoWifi_setProtocol(KW);
-bool updateItems = false;
+VitoWiFi_setProtocol(KW);
+
+DPTemp outsideTemp("outsidetemp", "boiler", 0x552);
+DPTempS roomTempSet("roomtempset", "heating", 0x2306);
 
 BlynkTimer timer;
+bool updateItems = false;
 WidgetTerminal terminal(V3);
 
 
@@ -51,18 +54,18 @@ BLYNK_WRITE(V0) {
   uint8_t pinValue = param.asInt();
   DPValue value(pinValue);
   terminal.printf("Blynk update: V0 = %d\n", pinValue);
-  VitoWifi.writeDatapoint("roomtempset", value);
-  VitoWifi.readDatapoint("roomtempset");
+  VitoWiFi.writeDatapoint(roomTempSet, value);
+  VitoWiFi.readDatapoint(roomTempSet);
 }
 
 void setup() {
   // VitoWifi setup
-  VitoWifi.setLogger(&terminal);  // might be too verbose/fast for Blynk to handle
-  VitoWifi.enableLogger();  // might be too verbose/fast for Blynk to handle
-  VitoWifi.addDatapoint("outsidetemp", "boiler", 0x5525, TEMPL).setCallback(sendOutsidetemp);
-  VitoWifi.addDatapoint("roomtempset", "heating", 0x2306, TEMPS).setWriteable(true).setCallback(sendRoomtempSet);
-  VitoWifi.setGlobalCallback(globalCallbackHandler);
-  VitoWifi.setup(&Serial);
+  VitoWiFi.setLogger(&terminal);  // might be too verbose/fast for Blynk to handle
+  VitoWiFi.enableLogger();  // might be too verbose/fast for Blynk to handle
+  outsideTemp.setCallback(sendOutsidetemp);
+  roomTempSet.setWriteable(true).setCallback(sendRoomtempSet);
+  VitoWiFi.setGlobalCallback(globalCallbackHandler);
+  VitoWiFi.setup(&Serial);
 
   // Blynk setup
   Blynk.begin(auth, ssid, pass);
@@ -70,7 +73,7 @@ void setup() {
 }
 
 void loop() {
-  VitoWifi.loop();
+  VitoWiFi.loop();
   Blynk.run();
   timer.run();
 
@@ -78,6 +81,6 @@ void loop() {
   if (updateItems) {
     updateItems = false;
     terminal.println("Updating items!");
-    VitoWifi.readAll();
+    VitoWiFi.readAll();
   }
 }

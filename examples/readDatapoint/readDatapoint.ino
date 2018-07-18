@@ -8,9 +8,12 @@ as group.
 
 */
 
-#include <VitoWifi.h>
+#include <VitoWiFi.h>
 
-VitoWifi_setProtocol(P300);
+VitoWiFi_setProtocol(P300);
+
+DPTemp outsideTemp("outsidetemp", "boiler", 0x5525);
+DPTemp boilerTemp("boilertemp", "boiler", 0x0810);
 
 void globalCallbackHandler(const IDatapoint& dp, DPValue value) {
   Serial1.print(dp.getGroup());
@@ -23,10 +26,8 @@ void globalCallbackHandler(const IDatapoint& dp, DPValue value) {
 }
 
 void setup() {
-  VitoWifi.addDatapoint("outsidetemp", "boiler", 0x5525, TEMPL);
-  VitoWifi.addDatapoint("boilertemp", "boiler", 0x0810, TEMPL);
-  VitoWifi.setGlobalCallback(globalCallbackHandler);
-  VitoWifi.setup(&Serial);
+  VitoWiFi.setGlobalCallback(globalCallbackHandler);
+  VitoWiFi.setup(&Serial);
 
   Serial1.begin(115200);
   Serial1.println(F("Setup finished..."));
@@ -36,10 +37,10 @@ void loop() {
   static unsigned long lastMillis = 0;
   if (millis() - lastMillis > 60 * 1000UL) {
     lastMillis = millis();
-    VitoWifi.readDatapoint("outsidetemp");
-    VitoWifi.readDatapoint("boilertemp");
-    // Calling VitoWifi.readGroup("boiler"); would have the same result in this case.
+    VitoWiFi.readDatapoint(outsideTemp);
+    VitoWiFi.readDatapoint(boilerTemp);
+    // Calling VitoWifi.readGroup("boiler"); would have the same result in this case are there are only 2 datapoints.
     // Calling VitoWifi.readAll(); obviously also has the same result in this example.
   }
-  VitoWifi.loop();
+  VitoWiFi.loop();
 }

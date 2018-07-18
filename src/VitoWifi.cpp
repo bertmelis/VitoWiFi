@@ -23,81 +23,67 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
 
-#pragma once  // Please ignore this error.
+#pragma once  // this file is #included in VitoWiFi.hpp to split templated interface from source, please ignore warning
 
-#include "VitoWifi.h"
+#include "VitoWiFi.hpp"
 
 template <class P>
-VitoWifiClass<P>::VitoWifiClass() :
+VitoWiFiClass<P>::VitoWiFiClass() :
   _enablePrinter(false),
   _printer(nullptr) {}
 
 template <class P>
-VitoWifiClass<P>::~VitoWifiClass() {
+VitoWiFiClass<P>::~VitoWiFiClass() {
   abort();  // destructing is not supported
 }
 
 #ifdef ARDUINO_ARCH_ESP32
 template <class P>
-void VitoWifiClass<P>::setup(HardwareSerial* serial, int8_t rxPin, int8_t txPin) {
+void VitoWiFiClass<P>::setup(HardwareSerial* serial, int8_t rxPin, int8_t txPin) {
   _optolink.begin(serial, rxPin, txPin);
 }
 #endif
 #ifdef ESP8266
 template <class P>
-void VitoWifiClass<P>::setup(HardwareSerial* serial) {
+void VitoWiFiClass<P>::setup(HardwareSerial* serial) {
   _optolink.begin(serial);
 }
 #endif
 
 template <class P>
-void VitoWifiClass<P>::setGlobalCallback(Callback globalCallback) {
-    _DPManager.executeAll([this, globalCallback](IDatapoint* dp){
-      dp->setGlobalCallback(globalCallback);
-    });
+void VitoWiFiClass<P>::setGlobalCallback(Callback globalCallback) {
+  IDatapoint::_dps.front()->setGlobalCallback(globalCallback);
 }
 
 template <class P>
-IDatapoint& VitoWifiClass<P>::addDatapoint(const char* name, const char* group, const uint16_t address, const DPType type, bool isWriteable) {
-  return _DPManager.addDP(name, group, address, type, isWriteable);
+void VitoWiFiClass<P>::readAll(void* arg) {
+  for (auto it = IDatapoint::_dps.begin(); it != IDatapoint::_dps.end(); ++it) {
+    _readDatapoint(*it, arg);
+  }
 }
 
 template <class P>
-IDatapoint& VitoWifiClass<P>::addDatapoint(const char* name, const char* group, const uint16_t address, const DPType type) {
-  return addDatapoint(name, group, address, type, false);
+void VitoWiFiClass<P>::readGroup(const char* group, void* arg) {
+  for (auto it = IDatapoint::_dps.begin(); it != IDatapoint::_dps.end(); ++it) {
+    if (strcmp(group, (*it)->getGroup()) == 0) {
+      _readDatapoint(*it, arg);
+    }
+  }
 }
 
 template <class P>
-void VitoWifiClass<P>::readAll(void* arg) {
-  _DPManager.executeAll([this, arg](IDatapoint* dp){
-    _readDatapoint(dp, arg);
-  });
+void VitoWiFiClass<P>::readDatapoint(IDatapoint& dp, void* arg) {
+  _readDatapoint(&dp, arg);
 }
 
 template <class P>
-void VitoWifiClass<P>::readGroup(const char* group, void* arg) {
-  _DPManager.executeGroup(group, [this, arg](IDatapoint* dp) {
-    _readDatapoint(dp, arg);
-  });
+void VitoWiFiClass<P>::writeDatapoint(IDatapoint& dp, DPValue value, void* arg) {
+  _writeDatapoint(&dp, value, arg);
 }
 
 template <class P>
-void VitoWifiClass<P>::readDatapoint(const char* name, void* arg) {
-  _DPManager.executeDP(name, [this, arg](IDatapoint* dp) {
-    _readDatapoint(dp, arg);
-  });
-}
-
-template <class P>
-void VitoWifiClass<P>::writeDatapoint(const char* name, DPValue value, void* arg) {
-  _DPManager.executeDP(name, [this, value, arg](IDatapoint* dp) {
-    _writeDatapoint(dp, value, arg);
-  });
-}
-
-template <class P>
-void VitoWifiClass<P>::_readDatapoint(IDatapoint* dp, void* arg) {
-  if (_queue.size() < (_DPManager.numberOfDPs() * 2)) {
+void VitoWiFiClass<P>::_readDatapoint(IDatapoint* dp, void* arg) {
+  if (_queue.size() < (IDatapoint::_dps.size() * 2)) {
     Action action = {dp, false, arg};
     _queue.push(action);
     if (_enablePrinter && _printer) {
@@ -112,13 +98,13 @@ void VitoWifiClass<P>::_readDatapoint(IDatapoint* dp, void* arg) {
 }
 
 template <class P>
-void VitoWifiClass<P>::_writeDatapoint(IDatapoint* dp, DPValue value, void* arg) {
+void VitoWiFiClass<P>::_writeDatapoint(IDatapoint* dp, DPValue value, void* arg) {
   if (!dp->isWriteable()) {
     if (_enablePrinter && _printer)
       _printer->println("DP is readonly, skipping");
     return;
   }
-  if (_queue.size() < (_DPManager.numberOfDPs() * 2)) {
+  if (_queue.size() < (IDatapoint::_dps.size() * 2)) {
     uint8_t value_enc[MAX_DP_LENGTH] = {0};
     dp->encode(value_enc, value);
     Action action = {dp, true, arg};
@@ -132,7 +118,7 @@ void VitoWifiClass<P>::_writeDatapoint(IDatapoint* dp, DPValue value, void* arg)
 }
 
 template <class P>
-void VitoWifiClass<P>::loop() {
+void VitoWiFiClass<P>::loop() {
   _optolink.loop();
   if (!_queue.empty() && !_optolink.isBusy()) {
     if (!_queue.front().write) {
@@ -150,7 +136,7 @@ void VitoWifiClass<P>::loop() {
     }
     uint8_t value_enc[MAX_DP_LENGTH] = {0};
     _optolink.read(value_enc);
-    _queue.front().DP->callback(_queue.front().DP->decode(value_enc));
+    _queue.front().DP->setValue(_queue.front().DP->decode(value_enc));
     _queue.pop();
     return;
   }
@@ -168,19 +154,19 @@ void VitoWifiClass<P>::loop() {
 }
 
 template <class P>
-void VitoWifiClass<P>::setLogger(Print* printer) {
+void VitoWiFiClass<P>::setLogger(Print* printer) {
   _printer = printer;
   _optolink.setLogger(_printer);
 }
 
 template <class P>
-void VitoWifiClass<P>::enableLogger() {
+void VitoWiFiClass<P>::enableLogger() {
   _enablePrinter = true;
   _optolink.setLogger(_printer);
 }
 
 template <class P>
-void VitoWifiClass<P>::disableLogger() {
+void VitoWiFiClass<P>::disableLogger() {
   _enablePrinter = false;
   _optolink.setLogger(nullptr);
 }

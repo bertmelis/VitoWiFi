@@ -1,18 +1,22 @@
 /*
 
 This example defines three datapoints.
-The first two are TEMPL type datapoints and have their own callback.
+The first two are DPTemp type datapoints and have their own callback.
 When no specific callback is attached to a datapoint, it uses the global callback.
 
 Note the difference in return value between the callbacks:
-for tempCallback uses value.getFloat() as TEMPL datapoints return a float.
+for tempCallback uses value.getFloat() as DPTemp datapoints return a float.
 globalCallback uses value.getString(char*,size_t). This method is independent of the returned type.
 
 */
 
-#include <VitoWifi.h>
+#include <VitoWiFi.h>
 
-VitoWifi_setProtocol(P300);
+VitoWiFi_setProtocol(P300);
+
+DPTemp outsideTemp("outsideTemp", "boiler", 0x5525);
+DPTemp boilerTemp("boilertemp", "boiler", 0x0810);
+DPStat pumpStat("pump", "heating1", 0x2906);
 
 HardwareSerial Serial1(1);  // use Serial1 for VitoWifi
 
@@ -37,12 +41,11 @@ void globalCallbackHandler(const IDatapoint& dp, DPValue value) {
 }
 
 void setup() {
-  VitoWifi.addDatapoint("outsidetemp", "boiler", 0x5525, TEMPL).setCallback(tempCallbackHandler);
-  VitoWifi.addDatapoint("boilertemp", "boiler", 0x0810, TEMPL).setCallback(tempCallbackHandler);
-  VitoWifi.addDatapoint("pump", "heating1", 0x2906, STAT);
-  VitoWifi.setGlobalCallback(globalCallbackHandler);  // this callback will be used for all DPs without specific callback
+  outsideTemp.setCallback(tempCallbackHandler);
+  boilerTemp.setCallback(tempCallbackHandler);
+  VitoWiFi.setGlobalCallback(globalCallbackHandler);  // this callback will be used for all DPs without specific callback
                                                       // must be set after adding at least 1 datapoint
-  VitoWifi.setup(&Serial1, 21, 22);  // 
+  VitoWiFi.setup(&Serial1, 21, 22);  // 
   Serial.begin(115200);
   Serial.println(F("Setup finished..."));
 }
@@ -51,7 +54,7 @@ void loop() {
   static unsigned long lastMillis = 0;
   if (millis() - lastMillis > 60 * 1000UL) {  // read all values every 60 seconds
     lastMillis = millis();
-    VitoWifi.readAll();
+    VitoWiFi.readAll();
   }
-  VitoWifi.loop();
+  VitoWiFi.loop();
 }
