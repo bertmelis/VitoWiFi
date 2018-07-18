@@ -44,6 +44,7 @@ typedef std::function<void(const IDatapoint&, DPValue)> Callback;
 // Datapoints
 class IDatapoint {
   template<class> friend class VitoWiFiClass;
+
  public:
   IDatapoint(const char* name, const char* group, uint16_t address, bool writeable = false);
   ~IDatapoint();
@@ -60,6 +61,7 @@ class IDatapoint {
   virtual void encode(uint8_t* out, const DPValue in) = 0;
   virtual DPValue decode(const uint8_t* in) = 0;
   void setValue(DPValue value);
+
  protected:
   const char* _name;
   const char* _group;
@@ -68,7 +70,9 @@ class IDatapoint {
   static Callback _globalCb;
   Callback _cb;
   static std::vector<IDatapoint*> _dps;
+
  public:
+  // better not use this publicly
   const std::vector<IDatapoint*>& getCollection() const { return _dps; }
 };
 
@@ -77,10 +81,12 @@ class Datapoint : public IDatapoint {
  public:
   Datapoint(const char* name, const char* group, uint16_t address, bool writeable = false) :
     IDatapoint(name, group, address, writeable) {}
+
  protected:
   T _t;
+
  public:
-  const size_t getLength() const { return _t.getLength(); };
+  const size_t getLength() const { return _t.getLength(); }
   IDatapoint& setLength(uint8_t length) { _t.setLength(length); return *this; }
   void encode(uint8_t* out, const DPValue in)  { _t.encode(out, in); }
   DPValue decode(const uint8_t* in) { return _t.decode(in); }

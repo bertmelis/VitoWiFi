@@ -72,12 +72,12 @@ void VitoWiFiClass<P>::readGroup(const char* group, void* arg) {
 }
 
 template <class P>
-void VitoWiFiClass<P>::readDatapoint(IDatapoint& dp, void* arg) {
+void VitoWiFiClass<P>::readDatapoint(IDatapoint& dp, void* arg) {  // NOLINT TODO(@bertmelis) make it a const reference
   _readDatapoint(&dp, arg);
 }
 
 template <class P>
-void VitoWiFiClass<P>::writeDatapoint(IDatapoint& dp, DPValue value, void* arg) {
+void VitoWiFiClass<P>::writeDatapoint(IDatapoint& dp, DPValue value, void* arg) {  // NOLINT TODO(@bertmelis) make it a const reference
   _writeDatapoint(&dp, value, arg);
 }
 
