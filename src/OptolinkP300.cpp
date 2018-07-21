@@ -23,7 +23,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
 
-#include "OptolinkP300.h"
+#include "OptolinkP300.hpp"
 
 OptolinkP300::OptolinkP300() :
     _stream(nullptr),

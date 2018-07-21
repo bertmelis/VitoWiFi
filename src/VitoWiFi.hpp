@@ -30,56 +30,19 @@ and many others
 */
 
 #pragma once
+
 #include <Arduino.h>
 #include <queue>
-#include <vector>
-#include "Constants.h"
-#include "Datapoint.h"
-#include "OptolinkKW.h"
-#include "OptolinkP300.h"
-
-class VitoWifiBase {
- public:
-  VitoWifiBase();
-  ~VitoWifiBase();
-
-  void loop();
-  void setGlobalCallback(GlobalCallbackFunction globalCallback);
-  Datapoint& addDatapoint(const char* name, const char* group, const uint16_t address, const DPType type, bool isWriteable);
-  Datapoint& addDatapoint(const char* name, const char* group, const uint16_t address, const DPType type);
-
-  void readAll();
-  void readGroup(const char* group);
-  void readDatapoint(const char* name);
-
-  template <typename TArg>
-  void writeDatapoint(const char* name, TArg arg) {
-    static_assert(sizeof(TArg) <= sizeof(float), "writeDatapoint() argument size must be <= 4 bytes");
-    float _float = static_cast<float>(arg);
-    size_t length = sizeof(arg);  // JS: Why was this ceil(sizeof(arg/2)??  Not sure so using _writeDatapoint directly in homieboiler
-    _writeDatapoint(name, _float, length);
-  }
-  void _writeDatapoint(const char* name, float value, size_t length);
-
- protected:
-  inline void _readDatapoint(Datapoint* dp);
-  Datapoint* _getDatapoint(const char* name);
-  std::vector<Datapoint*> _datapoints;
-  struct Action {
-    Datapoint* DP;
-    bool write;
-    uint8_t value[4];
-  };
-  std::queue<Action> _queue;
-  bool _enablePrinter;
-  Print* _printer;
-};
+#include "Constants.hpp"
+#include "Datapoint.hpp"
+#include "OptolinkKW.hpp"
+#include "OptolinkP300.hpp"
 
 template <class P>
-class VitoWifiInterface : public VitoWifiBase {
+class VitoWiFiClass {
  public:
-  VitoWifiInterface() {}
-  ~VitoWifiInterface() {}
+  VitoWiFiClass();
+  ~VitoWiFiClass();
 #ifdef ARDUINO_ARCH_ESP32
   void setup(HardwareSerial* serial, int8_t rxPin, int8_t txPin);
 #endif
@@ -87,15 +50,32 @@ class VitoWifiInterface : public VitoWifiBase {
   void setup(HardwareSerial* serial);
 #endif
   void loop();
-
+  void setGlobalCallback(Callback globalCallback);
+  void readAll(void* arg = nullptr);
+  void readGroup(const char* group, void* arg = nullptr);
+  void readDatapoint(IDatapoint& dp, void* arg = nullptr);  // NOLINT TODO(bertmelis) make it a const reference
+  void writeDatapoint(IDatapoint& dp, DPValue value, void* arg = nullptr);  // NOLINT TODO(bertmelis) make it a const reference
   void enableLogger();
   void disableLogger();
   void setLogger(Print* printer);
 
  private:
+  struct Action {
+    IDatapoint* DP;
+    bool write;
+    void* arg;
+    uint8_t value[MAX_DP_LENGTH];
+  };
+  void _readDatapoint(IDatapoint* dp, void* arg);
+  void _writeDatapoint(IDatapoint* dp, DPValue value, void* arg);
   P _optolink;
+  std::queue<Action> _queue;
+  bool _enablePrinter;
+  Print* _printer;
 };
+
+#include "VitoWiFi.cpp"
 
 #define P300 OptolinkP300
 #define KW OptolinkKW
-#define VitoWifi_setProtocol(protocol) VitoWifiInterface<protocol> VitoWifi
+#define VitoWiFi_setProtocol(protocol) VitoWiFiClass<protocol> VitoWiFi

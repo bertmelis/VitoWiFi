@@ -1,30 +1,33 @@
 /*
 
-This example defines 2 datapoints of type "TEMP".
-Every 60 seconds, the loop function call the readDatapoint-method for both DPs.
-
-For each Datapoint, the read value is returned using globalCallbackHandler
+This example is the same is the Basic example.
+The only difference is the way the datapoints are read: instead of calling VitoWifi.readAll(),
+the two datapoints are updated seperately via VitoWifi.readDatapoint(const char*).
+Another method would be to call VitoWifi.readGroup(const char*) where you could fill "boiler"
+as group.
 
 */
 
-#include <VitoWifi.h>
+#include <VitoWiFi.h>
 
-VitoWifi_setProtocol(P300);
+VitoWiFi_setProtocol(P300);
 
-void globalCallbackHandler(const char* name, const char* group, const char* value) {
-  Serial1.print(group);
+DPTemp outsideTemp("outsidetemp", "boiler", 0x5525);
+DPTemp boilerTemp("boilertemp", "boiler", 0x0810);
+
+void globalCallbackHandler(const IDatapoint& dp, DPValue value) {
+  Serial1.print(dp.getGroup());
   Serial1.print(" - ");
-  Serial1.print(name);
+  Serial1.print(dp.getName());
   Serial1.print(": ");
-  Serial1.println(value);
+  char value_str[15] = {0};
+  value.getString(value_str, sizeof(value_str));
+  Serial1.println(value_str);
 }
 
 void setup() {
-  // setup VitoWifi using a global callback handler
-  VitoWifi.addDatapoint("outsidetemp", "boiler", 0x5525, TEMP);
-  VitoWifi.addDatapoint("boilertemp", "boiler", 0x0810, TEMP);
-  VitoWifi.setGlobalCallback(globalCallbackHandler);
-  VitoWifi.setup(&Serial);
+  VitoWiFi.setGlobalCallback(globalCallbackHandler);
+  VitoWiFi.setup(&Serial);
 
   Serial1.begin(115200);
   Serial1.println(F("Setup finished..."));
@@ -32,11 +35,12 @@ void setup() {
 
 void loop() {
   static unsigned long lastMillis = 0;
-  if (millis() - lastMillis > 60 * 1000UL) {  // read all values every 60 seconds
+  if (millis() - lastMillis > 60 * 1000UL) {
     lastMillis = millis();
-    VitoWifi.readDatapoint("outsidetemp");
-    VitoWifi.readDatapoint("boilertemp");
+    VitoWiFi.readDatapoint(outsideTemp);
+    VitoWiFi.readDatapoint(boilerTemp);
+    // Calling VitoWifi.readGroup("boiler"); would have the same result in this case are there are only 2 datapoints.
+    // Calling VitoWifi.readAll(); obviously also has the same result in this example.
   }
-
-  VitoWifi.loop();
+  VitoWiFi.loop();
 }

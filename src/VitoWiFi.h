@@ -21,18 +21,10 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+BIG thanks to https://github.com/openv/openv
+
 */
 
 #pragma once
-#include <Arduino.h>
 
-/*
-const char* error0 PROGMEM = "Success";
-const char* error1 PROGMEM = "Connection error";
-const char* error2 PROGMEM = "Checksum error";
-const char* error3 PROGMEM = "Vitotronic returned 'DP error'";
-const char* error4 PROGMEM = "Message length check error";
-const char* error5 PROGMEM = "error5";
-
-const char* errorMessages[6];
-*/
+#include "VitoWiFi.hpp"

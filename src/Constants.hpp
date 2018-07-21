@@ -23,31 +23,17 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
 
-#include "Datapoint.hpp"
+#pragma once
 
-Callback IDatapoint::_globalCb = nullptr;
-std::vector<IDatapoint*> IDatapoint::_dps;
+/*
+const char* error0 PROGMEM = "Success";
+const char* error1 PROGMEM = "Connection error";
+const char* error2 PROGMEM = "Checksum error";
+const char* error3 PROGMEM = "Vitotronic returned 'DP error'";
+const char* error4 PROGMEM = "Message length check error";
+const char* error5 PROGMEM = "error5";
 
-IDatapoint::IDatapoint(const char* name, const char* group, uint16_t address, bool writeable) :
-  _name(name),
-  _group(group),
-  _address(address),
-  _writeable(writeable),
-  _cb(nullptr) {
-    _dps.push_back(this);
-  }
+const char* errorMessages[6];
+*/
 
-IDatapoint::~IDatapoint() {
-  for (auto it = _dps.begin(); it != _dps.end(); ++it) {
-    if (this == *it) _dps.erase(it);
-    return;
-  }
-}
-
-void IDatapoint::setValue(DPValue value) {
-  if (_cb) {
-    _cb(*this, value);
-  } else if (_globalCb) {
-    _globalCb(*this, value);
-  }
-}
+#define MAX_DP_LENGTH 4

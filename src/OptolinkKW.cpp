@@ -23,7 +23,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
 
-#include "OptolinkKW.h"
+#include "OptolinkKW.hpp"
 
 OptolinkKW::OptolinkKW() :
     _stream(nullptr),
