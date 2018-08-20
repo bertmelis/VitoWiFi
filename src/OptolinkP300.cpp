@@ -317,9 +317,9 @@ bool OptolinkP300::_transmit(uint16_t address, uint8_t length, bool write, uint8
   }
   _address = address;
   _length = length;
+  _writeMessageType = write;
   if (write) {
     memcpy(_value, value, _length);
-    _writeMessageType = true;
   }
   _rcvBufferLen = 0;
   memset(_rcvBuffer, 0, 12);
