@@ -63,6 +63,7 @@ class OptolinkKW {
   void _syncHandler();
   void _sendHandler();
   void _receiveHandler();
+  bool _transmit(uint16_t address, uint8_t length, bool write, uint8_t value[]);
   bool _debugMessage;
   inline void _printHex(Print* printer, uint8_t array[], uint8_t length);
   inline void _clearInputBuffer();

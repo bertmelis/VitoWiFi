@@ -192,29 +192,24 @@ void OptolinkKW::_receiveHandler() {
 
 // set properties for datapoint and move state to SEND
 bool OptolinkKW::readFromDP(uint16_t address, uint8_t length) {
-  if (_action != WAIT) {
-    return false;
-  }
-  // setup properties for next state in communicationHandler
-  _address = address;
-  _length = length;
-  _writeMessageType = false;
-  _rcvBufferLen = 0;
-  memset(_rcvBuffer, 0, 4);
-  _setAction(PROCESS);
-  return true;
+  return _transmit(address, length, false, nullptr);
 }
 
 // set properties datapoint and move state to SEND
 bool OptolinkKW::writeToDP(uint16_t address, uint8_t length, uint8_t value[]) {
+  return _transmit(address, length, true, value);
+}
+
+bool OptolinkKW::_transmit(uint16_t address, uint8_t length, bool write, uint8_t value[]) {
   if (_action != WAIT) {
     return false;
   }
-  // setup variables for next state
   _address = address;
   _length = length;
-  memcpy(_value, value, _length);
-  _writeMessageType = true;
+  _writeMessageType = write;
+  if (write) {
+    memcpy(_value, value, _length);
+  }
   _rcvBufferLen = 0;
   memset(_rcvBuffer, 0, 4);
   _setAction(PROCESS);
