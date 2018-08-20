@@ -18,8 +18,6 @@ DPTemp outsideTemp("outsideTemp", "boiler", 0x5525);
 DPTemp boilerTemp("boilertemp", "boiler", 0x0810);
 DPStat pumpStat("pump", "heating1", 0x2906);
 
-HardwareSerial Serial1(1);  // use Serial1 for VitoWifi
-
 void tempCallbackHandler(const IDatapoint& dp, DPValue value) {
   float fahrenheit = 0;
   fahrenheit = (5.0 / 9) * (value.getFloat() + 32);
