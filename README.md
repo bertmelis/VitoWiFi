@@ -1,6 +1,7 @@
 # VitoWiFi
 
-[![Build Status](https://travis-ci.org/bertmelis/VitoWiFi.svg?branch=master)](https://travis-ci.org/bertmelis/VitoWiFi)
+[![Build Status](https://travis-ci.org/bertmelis/VitoWiFi.svg?branch=master)](https://travis-ci.org/bertmelis/VitoWiFi) 
+[![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/VitoWiFi/VitoWiFi)
 
 Arduino Library for ESP8266 to communicate with Viessmann boilers using a (DIY) serial optolink.
 
