@@ -224,6 +224,10 @@ When making bug reports, make sure to include hardware details.
 
 ## End note
 
+### Examples
+
+Next to the examples in this repo, you can find the firmware of the setup I'm using in this repo: [esp-heating](https://github.com/bertmelis/esp-heating).
+
 ### History
 
 I was using the original openv/vcontrold code from wikispaces on a Raspberry Pi V1. However, this setup was a bit overkill: such a powerful device doing only serial communication at 4800 baud. So I wanted to optimise this situation.
