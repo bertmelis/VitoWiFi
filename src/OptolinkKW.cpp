@@ -129,7 +129,7 @@ void OptolinkKW::_syncHandler() {
 
 //
 void OptolinkKW::_sendHandler() {
-  uint8_t buff[6];
+  uint8_t buff[MAX_DP_LENGTH + 4];
   if (_writeMessageType) {
     // type is WRITE
     // has length of 4 chars + length of value
@@ -211,7 +211,7 @@ bool OptolinkKW::_transmit(uint16_t address, uint8_t length, bool write, uint8_t
     memcpy(_value, value, _length);
   }
   _rcvBufferLen = 0;
-  memset(_rcvBuffer, 0, 4);
+  memset(_rcvBuffer, 0, _length);
   _setAction(PROCESS);
   return true;
 }

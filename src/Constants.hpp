@@ -36,4 +36,4 @@ const char* error5 PROGMEM = "error5";
 const char* errorMessages[6];
 */
 
-#define MAX_DP_LENGTH 4
+#define MAX_DP_LENGTH 9
