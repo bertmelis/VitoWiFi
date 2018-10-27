@@ -157,7 +157,7 @@ void OptolinkP300::_idleHandler() {
 }
 
 void OptolinkP300::_sendHandler() {
-  uint8_t buff[12];
+  uint8_t buff[MAX_DP_LENGTH + 8];
   if (_writeMessageType) {
     // type is WRITE
     // has length of 8 chars + length of value
@@ -322,7 +322,7 @@ bool OptolinkP300::_transmit(uint16_t address, uint8_t length, bool write, uint8
     memcpy(_value, value, _length);
   }
   _rcvBufferLen = 0;
-  memset(_rcvBuffer, 0, 12);
+  memset(_rcvBuffer, 0, MAX_DP_LENGTH + 8);
   _setAction(PROCESS);
   _lastMillis = millis();
   return true;
