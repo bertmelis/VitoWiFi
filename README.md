@@ -226,7 +226,7 @@ When making bug reports, make sure to include hardware details.
 
 ### Examples
 
-Next to the examples in this repo, you can find the firmware of the setup I'm using in this repo: [esp-heating](https://github.com/bertmelis/esp-heating).
+Next to the examples in this repo, you can find the firmware of the setup I'm using in this repo: [esp8266-heating](https://github.com/bertmelis/esp8266-heating).
 
 ### History
 
