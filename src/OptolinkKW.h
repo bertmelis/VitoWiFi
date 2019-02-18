@@ -1,6 +1,6 @@
-/*
+/* VitoWiFi
 
-Copyright 2017 Bert Melis
+Copyright 2019 Bert Melis
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the
@@ -23,31 +23,21 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
 
-#include "Datapoint.hpp"
+#pragma once
 
-Callback IDatapoint::_globalCb = nullptr;
-std::vector<IDatapoint*> IDatapoint::_dps;
+#include "Optolink.h"
+#include <Arduino.h>  // for millis
 
-IDatapoint::IDatapoint(const char* name, const char* group, uint16_t address, bool writeable) :
-  _name(name),
-  _group(group),
-  _address(address),
-  _writeable(writeable),
-  _cb(nullptr) {
-    _dps.push_back(this);
-  }
+class OptolinkKW : public Optolink {
+  public:
+    OptolinkKW(HardwareSerial* serial);
+    ~OptolinkKW();
+    void begin();
+    void loop();
 
-IDatapoint::~IDatapoint() {
-  for (auto it = _dps.begin(); it != _dps.end(); ++it) {
-    if (this == *it) _dps.erase(it);
-    return;
-  }
-}
-
-void IDatapoint::setValue(DPValue value) {
-  if (_cb) {
-    _cb(*this, value);
-  } else if (_globalCb) {
-    _globalCb(*this, value);
-  }
-}
+  private:
+      enum OptolinkState : uint8_t {
+      RESET = 0,
+      UNDEF
+    } _state; 
+};

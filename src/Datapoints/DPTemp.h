@@ -23,24 +23,19 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
 
-#include "OptolinkKW.h"
+#pragma once
 
-inline void clearInput(HardwareSerial* serial) {
-    while (serial->read()) {}
-}
+#include "Datapoint.h"
+#include <math.h>  // floor()
 
-OptolinkKW::OptolinkKW(HardwareSerial* serial) :
-    Optolink(serial) {}
+class DPTemp : public Datapoint {
+  public:
+    DPTemp(const char* name, const uint16_t address);
+    ~DPTemp();
+    void onData(std::function<void(float)> callback);
+    void decode(uint8_t* data, uint8_t length);
+    void encode(uint8_t* raw, uint8_t length, float data);
 
-OptolinkKW::~OptolinkKW() {
-    // TODO(bertmelis): anything to do?
-}
-
-void OptolinkKW::begin() {
-    _serial->begin(4800, SERIAL_8E2);
-    _state = RESET;
-}
-
-void OptolinkKW::loop() {
-  // TODO(bertmelis)
-}
+  private:
+    std::function<void(float)> _onData;
+};

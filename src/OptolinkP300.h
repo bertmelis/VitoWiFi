@@ -23,24 +23,46 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
 
-#include "OptolinkKW.h"
+#pragma once
 
-inline void clearInput(HardwareSerial* serial) {
-    while (serial->read()) {}
-}
+#include "Optolink.h"
+#include <Arduino.h>  // for millis
 
-OptolinkKW::OptolinkKW(HardwareSerial* serial) :
-    Optolink(serial) {}
+class OptolinkP300 : public Optolink {
+  public:
+    OptolinkP300(HardwareSerial* serial);
+    ~OptolinkP300();
+    void begin();
+    void loop();
 
-OptolinkKW::~OptolinkKW() {
-    // TODO(bertmelis): anything to do?
-}
+  private:
+    enum OptolinkState : uint8_t {
+      RESET = 0,
+      RESET_ACK,
+      INIT,
+      INIT_ACK,
+      IDLE,
+      SEND,
+      SEND_ACK,
+      RECEIVE,
+      RECEIVE_ACK,
+      UNDEF
+    } _state; 
+    void _reset();
+    void _resetAck();
+    void _init();
+    void _initAck();
+    void _idle();
+    void _send();
+    void _sentAck();
+    void _receive();
+    void _receiveAck();
+    uint32_t _lastMillis;
+    bool _write;
+    uint8_t _rcvBuffer[MAX_DP_LENGTH + 8];
+    size_t _rcvBufferLen;
+    size_t _rcvLen;
 
-void OptolinkKW::begin() {
-    _serial->begin(4800, SERIAL_8E2);
-    _state = RESET;
-}
-
-void OptolinkKW::loop() {
-  // TODO(bertmelis)
-}
+    inline void _tryOnData(uint8_t* data, uint8_t len, void* arg);
+    inline void _tryOnError(uint8_t error);
+};

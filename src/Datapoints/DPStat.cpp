@@ -23,24 +23,38 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
 
-#include "OptolinkKW.h"
+#include "DPStat.h"
 
-inline void clearInput(HardwareSerial* serial) {
-    while (serial->read()) {}
+DPStat::DPStat(const char* name, const uint16_t address) :
+    Datapoint(name, address, 1),
+    _onData(nullptr) {}
+
+DPStat::~DPStat() {
+    // empty
 }
 
-OptolinkKW::OptolinkKW(HardwareSerial* serial) :
-    Optolink(serial) {}
-
-OptolinkKW::~OptolinkKW() {
-    // TODO(bertmelis): anything to do?
+void DPStat::onData(std::function<void(bool)> callback) {
+    _onData = callback;
 }
 
-void OptolinkKW::begin() {
-    _serial->begin(4800, SERIAL_8E2);
-    _state = RESET;
+void DPStat::decode(uint8_t* data, uint8_t length) {
+    if (length != _length) {
+        // display error about length
+    } else {
+        if (_onData) {
+          bool output = data ? true : false;
+          _onData(output);
+        } else {
+            Datapoint::decode(data, length, this);
+        }
+    }
 }
 
-void OptolinkKW::loop() {
-  // TODO(bertmelis)
+void DPStat::encode(uint8_t* raw, uint8_t length, bool data) {
+    if (length != _length) {
+        // display error about length
+        memset(raw, 0, _length);
+    } else {
+          raw[0] = data ? 0x01 : 0x00;
+    }
 }

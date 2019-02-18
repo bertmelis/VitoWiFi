@@ -23,24 +23,39 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
 
-#include "OptolinkKW.h"
+#include "DPCountS.h"
 
-inline void clearInput(HardwareSerial* serial) {
-    while (serial->read()) {}
+DPCountS::DPCountS(const char* name, const uint16_t address) :
+    Datapoint(name, address, 2),
+    _onData(nullptr) {}
+
+DPCountS::~DPCountS() {
+    // empty
 }
 
-OptolinkKW::OptolinkKW(HardwareSerial* serial) :
-    Optolink(serial) {}
-
-OptolinkKW::~OptolinkKW() {
-    // TODO(bertmelis): anything to do?
+void DPCountS::onData(std::function<void(uint16_t)> callback) {
+    _onData = callback;
 }
 
-void OptolinkKW::begin() {
-    _serial->begin(4800, SERIAL_8E2);
-    _state = RESET;
+void DPCountS::decode(uint8_t* data, uint8_t length) {
+    if (length != _length) {
+        // display error about length
+    } else {
+        if (_onData) {
+          uint16_t output = data[1] << 8 | data[0];
+          _onData(output);
+        } else {
+            Datapoint::decode(data, length, this);
+        }
+    }
 }
 
-void OptolinkKW::loop() {
-  // TODO(bertmelis)
+void DPCountS::encode(uint8_t* raw, uint8_t length, uint16_t data) {
+    if (length != _length) {
+        // display error about length
+        memset(raw, 0, _length);
+    } else {
+      raw[1] = data >> 8;
+      raw[0] = data & 0xFF;
+    }
 }

@@ -2,29 +2,20 @@
 # Datatypes (KEYWORD1)
 #######################################
 
-VitoWifi	KEYWORD1
+VitoWiFi	KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
 #######################################
 
-#VitoWifi
 setup	KEYWORD2
 loop	KEYWORD2
 setGlobalCallback	KEYWORD2
-addDatapoint	KEYWORD2
-getDatapoint	KEYWORD2
 readAll	KEYWORD2
 readGroup	KEYWORD2
 readDatapoint	KEYWORD2
 writeDatapoint	KEYWORD2
-enableLogger	KEYWORD2
-disableLogger	KEYWORD2
-setLogger	KEYWORD2
-#getLogger	KEYWORD2
 
-
-#Datapoint public methods
 setWriteable	KEYWORD2
 setCallback	KEYWORD2
 
@@ -33,9 +24,5 @@ setCallback	KEYWORD2
 #######################################
 
 #Transformation
-TEMP	LITERAL2
-STAT	LITERAL2
-MODE	LITERAL2
-#HOURS	LITERAL2
-#HOURSL	LITERAL2
-COUNT	LITERAL2
+#TEMP	LITERAL2
+#STAT	LITERAL2

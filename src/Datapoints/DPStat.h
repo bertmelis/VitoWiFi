@@ -1,6 +1,6 @@
-/*
+/* VitoWiFi
 
-Copyright 2017 Bert Melis
+Copyright 2019 Bert Melis
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the
@@ -25,15 +25,16 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
-/*
-const char* error0 PROGMEM = "Success";
-const char* error1 PROGMEM = "Connection error";
-const char* error2 PROGMEM = "Checksum error";
-const char* error3 PROGMEM = "Vitotronic returned 'DP error'";
-const char* error4 PROGMEM = "Message length check error";
-const char* error5 PROGMEM = "error5";
+#include "Datapoint.h"
 
-const char* errorMessages[6];
-*/
+class DPStat : public Datapoint {
+  public:
+    DPStat(const char* name, const uint16_t address);
+    ~DPStat();
+    void onData(std::function<void(bool)> callback);
+    void decode(uint8_t* data, uint8_t length);
+    void encode(uint8_t* raw, uint8_t length, bool data);
 
-#define MAX_DP_LENGTH 9
+  private:
+    std::function<void(bool)> _onData;
+};

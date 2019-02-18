@@ -23,24 +23,31 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
 
-#include "OptolinkKW.h"
+#pragma once
 
-inline void clearInput(HardwareSerial* serial) {
-    while (serial->read()) {}
-}
+#include <stdint.h>
+#include <functional>
+#include <string.h>  // for memcpy
+#include <vector>
 
-OptolinkKW::OptolinkKW(HardwareSerial* serial) :
-    Optolink(serial) {}
+class Datapoint {
 
-OptolinkKW::~OptolinkKW() {
-    // TODO(bertmelis): anything to do?
-}
+  friend class VitoWiFi;
 
-void OptolinkKW::begin() {
-    _serial->begin(4800, SERIAL_8E2);
-    _state = RESET;
-}
+  public:
+    Datapoint(const char* name, const uint16_t address, const uint8_t length);
+    ~Datapoint();
+    static void globalOnData(std::function<void(const uint8_t[], uint8_t, Datapoint* dp)> callback);
+    const char* getName() const;
+    const uint16_t getAddress() const;
+    const uint8_t getLength() const;
+    void encode(uint8_t* raw, uint8_t length, void* data);
+    virtual void decode(uint8_t* data, uint8_t length, Datapoint* dp = nullptr);
 
-void OptolinkKW::loop() {
-  // TODO(bertmelis)
-}
+  protected:
+    const char* _name;
+    const uint16_t _address;
+    const uint8_t _length;
+    static std::function<void(const uint8_t[], uint8_t, Datapoint* dp)> _globalOnData;
+    static std::vector<Datapoint*> _datapoints;
+};
