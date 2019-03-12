@@ -12,6 +12,7 @@ then
   platformio update
   mkdir build
   platformio ci --lib="./src" --project-conf="tests/platformio.ini" --build-dir=build --keep-build-dir tests/queue.cpp
+  if exist ./build/.pioenvs/test_queue/program.exe ./build/.pioenvs/test_queue/program.exe
 else
   pip install -U platformio
   platformio update
