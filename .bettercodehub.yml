@@ -16,6 +16,14 @@ languages:
       - /examples/.*
       - /scripts/.*
       - /tests/.*
+    include:
+      - /src/.*
   test:
     include:
+      - /tests/.*
+    exclude:
+      - /.github/.*
+      - /docs/.*
+      - /examples/.*
+      - /scripts/.*
       - /tests/.*
