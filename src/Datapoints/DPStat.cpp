@@ -26,35 +26,35 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "DPStat.h"
 
 DPStat::DPStat(const char* name, const uint16_t address) :
-    Datapoint(name, address, 1),
-    _onData(nullptr) {}
+  Datapoint(name, address, 1),
+  _onData(nullptr) {}
 
 DPStat::~DPStat() {
-    // empty
+  // empty
 }
 
 void DPStat::onData(std::function<void(bool)> callback) {
-    _onData = callback;
+  _onData = callback;
 }
 
 void DPStat::decode(uint8_t* data, uint8_t length) {
-    if (length != _length) {
-        // display error about length
+  if (length != _length) {
+    // display error about length
+  } else {
+    if (_onData) {
+      bool output = data ? true : false;
+      _onData(output);
     } else {
-        if (_onData) {
-          bool output = data ? true : false;
-          _onData(output);
-        } else {
-            Datapoint::decode(data, length, this);
-        }
+      Datapoint::decode(data, length, this);
     }
+  }
 }
 
 void DPStat::encode(uint8_t* raw, uint8_t length, bool data) {
-    if (length != _length) {
-        // display error about length
-        memset(raw, 0, _length);
-    } else {
-          raw[0] = data ? 0x01 : 0x00;
-    }
+  if (length != _length) {
+    // display error about length
+    memset(raw, 0, _length);
+  } else {
+    raw[0] = data ? 0x01 : 0x00;
+  }
 }

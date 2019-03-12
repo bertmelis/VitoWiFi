@@ -28,13 +28,13 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "Datapoint.h"
 
 class DPStat : public Datapoint {
-  public:
-    DPStat(const char* name, const uint16_t address);
-    ~DPStat();
-    void onData(std::function<void(bool)> callback);
-    void decode(uint8_t* data, uint8_t length);
-    void encode(uint8_t* raw, uint8_t length, bool data);
+ public:
+  DPStat(const char* name, const uint16_t address);
+  ~DPStat();
+  void onData(std::function<void(bool)> callback);
+  void decode(uint8_t* data, uint8_t length);
+  void encode(uint8_t* raw, uint8_t length, bool data);
 
-  private:
-    std::function<void(bool)> _onData;
+ private:
+  std::function<void(bool)> _onData;
 };

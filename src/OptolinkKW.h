@@ -25,19 +25,29 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
+#if defined ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32
+
 #include "Optolink.h"
 #include <Arduino.h>  // for millis
 
 class OptolinkKW : public Optolink {
-  public:
-    OptolinkKW(HardwareSerial* serial);
-    ~OptolinkKW();
-    void begin();
-    void loop();
+ public:
+  explicit OptolinkKW(HardwareSerial* serial);
+  ~OptolinkKW();
+  void begin();
+  void loop();
 
-  private:
-      enum OptolinkState : uint8_t {
-      RESET = 0,
-      UNDEF
-    } _state; 
+ private:
+  enum OptolinkState : uint8_t {
+    RESET = 0,
+    UNDEF
+  } _state;
 };
+
+#elif defined VITOWIFI_TEST
+
+#else
+
+#pragma message "no suitable platform"
+
+#endif

@@ -25,52 +25,62 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "Optolink.h"
 
+#if defined ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32
+
 Optolink_DP::Optolink_DP(uint16_t address, uint8_t length, bool write, uint8_t* value, void* arg) :
-    address(address),
-    length(length),
-    write(write),
-    data(nullptr),
-    arg(arg) {
-        if (write) {
-            data = new uint8_t[length];
-            memcpy(data, value, length);
-        }
+  address(address),
+  length(length),
+  write(write),
+  data(nullptr),
+  arg(arg) {
+    if (write) {
+      data = new uint8_t[length];
+      memcpy(data, value, length);
     }
+  }
 
 Optolink_DP::~Optolink_DP() {
-    delete[] data;
+  delete[] data;
 }
 
 Optolink::Optolink(HardwareSerial* serial) :
-    _serial(serial),
-    _queue(),
-    _onData(nullptr),
-    _onError(nullptr) {}
+  _serial(serial),
+  _queue(),
+  _onData(nullptr),
+  _onError(nullptr) {}
 
 Optolink::~Optolink() {
-    // TODO(bertmelis): anything to do?
+  // TODO(bertmelis): anything to do?
 }
 
 void Optolink::onData(std::function<void(uint8_t* data, uint8_t len, void* arg)> callback) {
-    _onData = callback;
+  _onData = callback;
 }
 
 void Optolink::onError(std::function<void(uint8_t error)> callback) {
-    _onError = callback;
+  _onError = callback;
 }
 
 bool Optolink::read(uint16_t address, uint8_t length, void* arg) {
-    if (_queue.size() < VITOWIFI_MAX_QUEUE_LENGTH) {
-        _queue.emplace(address, length, false, nullptr, arg);
-        return true;
-    }
-    return false;
+  if (_queue.size() < VITOWIFI_MAX_QUEUE_LENGTH) {
+    _queue.emplace(address, length, false, nullptr, arg);
+    return true;
+  }
+  return false;
 }
 
 bool Optolink::write(uint16_t address, uint8_t length, uint8_t* data, void* arg) {
-    if (_queue.size() < VITOWIFI_MAX_QUEUE_LENGTH) {
-        _queue.emplace(address, length, true, data, arg);
-        return true;
-    }
-    return false;
+  if (_queue.size() < VITOWIFI_MAX_QUEUE_LENGTH) {
+    _queue.emplace(address, length, true, data, arg);
+    return true;
+  }
+  return false;
 }
+
+#elif defined VITOWIFI_TEST
+
+#else
+
+#pragma message "no suitable platform"
+
+#endif
