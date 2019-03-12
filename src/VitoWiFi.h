@@ -23,7 +23,17 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
 
+/**
+ * @file VitoWiFi.h
+ * @brief API definitions for VitoWiFi
+ *
+ * This library is made to use with the Arduino framework for 
+ * esp8266 and esp32.
+ */
+
 #pragma once
+
+#if defined ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32
 
 #include "OptolinkP300.h"
 
@@ -31,6 +41,19 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "Datapoints/DPStat.h"
 #include "Datapoints/DPCountS.h"
 
+/**
+ * @brief Protocols implemented in VitoWiFi
+ * 
+ * Possible values are
+ * - P300: the newer protocol with connection management and message integrity 
+ *         checks (checksum). Units are backward compatible with KW.
+ * - KW: older protocol, based on the early GWG but with support for 
+ *       datapoints > 2 bytes.
+ * 
+ * When first implementing VitoWiFi you should test with P300. If your heater 
+ * doesn't respond switch to KW.
+ * 
+ */
 enum VitoWiFiProtocol {
     P300,
     KW
@@ -90,3 +113,11 @@ class VitoWiFi {
   private:
     Optolink* _optolink;
 };
+
+#elif defined VITOWIFI_TEST
+
+#else
+
+#pragma message "no suitable platform"
+
+#endif

@@ -25,6 +25,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "OptolinkP300.h"
 
+#if defined ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32
+
 inline uint8_t calcChecksum(uint8_t array[], uint8_t length) {
   uint8_t sum = 0;
   for (uint8_t i = 1; i < length - 1; ++i) {  // start with second byte and end before checksum
@@ -268,3 +270,11 @@ void OptolinkP300::_tryOnError(uint8_t error) {
     if (_onError) _onError(error);
     _queue.pop();
 }
+
+#elif defined VITOWIFI_TEST
+
+#else
+
+#pragma message "no suitable platform"
+
+#endif

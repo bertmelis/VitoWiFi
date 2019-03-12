@@ -25,6 +25,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "Optolink.h"
 
+#if defined ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32
+
 Optolink_DP::Optolink_DP(uint16_t address, uint8_t length, bool write, uint8_t* value, void* arg) :
     address(address),
     length(length),
@@ -74,3 +76,11 @@ bool Optolink::write(uint16_t address, uint8_t length, uint8_t* data, void* arg)
     }
     return false;
 }
+
+#elif defined VITOWIFI_TEST
+
+#else
+
+#pragma message "no suitable platform"
+
+#endif

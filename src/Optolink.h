@@ -25,6 +25,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
+#if defined ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32
+
 #ifndef VITOWIFI_MAX_QUEUE_LENGTH
   #define VITOWIFI_MAX_QUEUE_LENGTH 20
 #endif
@@ -74,3 +76,11 @@ class Optolink {
     std::function<void(uint8_t* data, uint8_t len, void* arg)> _onData;
     std::function<void(uint8_t error)> _onError;
 };
+
+#elif defined VITOWIFI_TEST
+
+#else
+
+#pragma message "no suitable platform"
+
+#endif

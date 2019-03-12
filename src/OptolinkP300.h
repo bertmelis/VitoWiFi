@@ -25,6 +25,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
+#if defined ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32
+
 #include "Optolink.h"
 #include <Arduino.h>  // for millis
 
@@ -66,3 +68,11 @@ class OptolinkP300 : public Optolink {
     inline void _tryOnData(uint8_t* data, uint8_t len, void* arg);
     inline void _tryOnError(uint8_t error);
 };
+
+#elif defined VITOWIFI_TEST
+
+#else
+
+#pragma message "no suitable platform"
+
+#endif

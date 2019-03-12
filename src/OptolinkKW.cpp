@@ -25,6 +25,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "OptolinkKW.h"
 
+#if defined ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32
+
 inline void clearInput(HardwareSerial* serial) {
     while (serial->read()) {}
 }
@@ -44,3 +46,11 @@ void OptolinkKW::begin() {
 void OptolinkKW::loop() {
   // TODO(bertmelis)
 }
+
+#elif defined VITOWIFI_TEST
+
+#else
+
+#pragma message "no suitable platform"
+
+#endif
