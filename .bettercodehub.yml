@@ -1,0 +1,19 @@
+exclude:
+- /.github/.*
+- /docs/.*
+- /examples/.*
+- /scripts/.*
+- /tests/.*
+
+languages:
+- name: cpp
+  production:
+    exclude:
+      - /.github/.*
+      - /docs/.*
+      - /examples/.*
+      - /scripts/.*
+      - /tests/.*
+  test:
+    include:
+      - /tests/.*
