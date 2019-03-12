@@ -5,7 +5,4 @@
 .vscode/launch.json
 .vscode/extensions.json
 .vscode/settings.json
-buildexamples.bat
 lib/readme.txt
-platformio.ini
-buildexamples.bat
