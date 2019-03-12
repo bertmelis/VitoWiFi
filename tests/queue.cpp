@@ -20,20 +20,20 @@ int main() {
   for (uint8_t i = 0; i < BUFFER_SIZE; ++i) {
     testResult = queue->add(i);
   }
-  assert(testResult && "FAIL adding\n");
+  assert(testResult && "FAIL adding");
 
   cout << "TEST size after adding\n";
-  assert(queue->size() == BUFFER_SIZE && "FAIL size (adding)\n");
+  assert(queue->size() == BUFFER_SIZE && "FAIL size (adding)");
 
   cout << "TEST adding when full\n";
-  assert(!queue->add(6) && "FAIL overfilling\n");
+  assert(!queue->add(6) && "FAIL overfilling");
 
   cout << "TEST size after overfill\n";
-  assert(queue->size() == BUFFER_SIZE && "FAIL size (overfilling)\n");
+  assert(queue->size() == BUFFER_SIZE && "FAIL size (overfilling)");
 
   cout << "TEST add after rollover\n";
   queue->remove();
-  assert(queue->add(5) && "FAIL rollover\n");
+  assert(queue->add(5) && "FAIL rollover");
 
   cout << "TEST reading/removing\n";
   testResult = true;
@@ -44,13 +44,13 @@ int main() {
       testResult = false;
     }
   }
-  assert(testResult && "FAIL removing\n");
+  assert(testResult && "FAIL removing");
 
   cout << "TEST size after removing\n";
   assert(queue->size() == 0 && "FAIL size (removing)");
 
   cout << "TEST empty queue\n";
-  assert(queue->first() && "FAIL empty queue");
+  assert(queue->first() == nullptr && "FAIL empty queue");
 
   cout << "TEST deleting queue\n";
   delete queue;
