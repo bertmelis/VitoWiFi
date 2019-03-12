@@ -17,6 +17,8 @@ env:
 #    - PLATFORMIO_CI_SRC=examples/readDatapoint/readDatapoint.ino PLATFORMIO_CI_EXTRA_ARGS="--board=d1_mini"
 #    - PLATFORMIO_CI_SRC=examples/Blynk/Blynk.ino PLATFORMIO_CI_EXTRA_ARGS="--board=d1_mini"
 
+install: true
+
 script:
     - bash scripts/travis.sh
 
