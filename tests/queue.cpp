@@ -1,9 +1,10 @@
 /* Copyright 2019 Bert Melis */
 
+#include <Helpers/SimpleQueue.h>
+
+#include <assert.h>
 #include <iostream>
 using std::cout;
-
-#include <Helpers/SimpleQueue.h>
 
 #define BUFFER_SIZE 5
 
@@ -14,58 +15,27 @@ int main() {
   // Create queue
   SimpleQueue<uint8_t>* queue = new SimpleQueue<uint8_t>(BUFFER_SIZE);
 
-  // TEST adding --> buffer = 0, 1, 2, 3, 4
+  cout << "TEST adding to queue\n";
   testResult = true;
   for (uint8_t i = 0; i < BUFFER_SIZE; ++i) {
     testResult = queue->add(i);
   }
-  if (testResult) {
-    cout << "TEST add OK\n";
-  } else {
-    cout << "TEST add FAIL\n";
-    succes = false;
-  }
+  assert(testResult && "FAIL adding");
 
-  // TEST size after adding
-  testResult = queue->size() == BUFFER_SIZE;
-  if (testResult) {
-    cout << "TEST size after add OK\n";
-  } else {
-    cout << "TEST size after add FAIL\n";
-    succes = false;
-  }
+  cout << "TEST size after adding\n";
+  assert(queue->size() == BUFFER_SIZE && "FAIL size (adding)");
 
-  // TEST adding when full
-  testResult = true;
-  testResult = !queue->add(6);
-  if (testResult) {
-    cout << "TEST add when full OK\n";
-  } else {
-    cout << "TEST add FAIL\n";
-    succes = false;
-  }
+  cout << "TEST adding when full\n";
+  assert(!queue->add(6) && "FAIL overfilling");
 
-  // TEST size after overfill
-  testResult = queue->size() == BUFFER_SIZE;
-  if (testResult) {
-    cout << "TEST size after overfill OK\n";
-  } else {
-    cout << "TEST size after overfill FAIL\n";
-    succes = false;
-  }
+  cout << "TEST size after overfill\n";
+  assert(queue->size() == BUFFER_SIZE && "FAIL size (overfilling)");
 
-  // TEST add after rollover  --> buffer = 1, 2, 3, 4, 5
-  testResult = true;
+  cout << "TEST add after rollover\n";
   queue->remove();
-  testResult = queue->add(5);
-  if (testResult) {
-    cout << "TEST add after rollover OK\n";
-  } else {
-    cout << "TEST add after rollover FAIL\n";
-    succes = false;
-  }
+  assert(queue->add(5) && "FAIL rollover");
 
-  // TEST reading/removing
+  cout << "TEST reading/removing\n";
   testResult = true;
   for (uint8_t i = 0; i < BUFFER_SIZE; ++i) {
     if (i + 1 == *queue->first()) {
@@ -74,39 +44,16 @@ int main() {
       testResult = false;
     }
   }
-  if (testResult) {
-    cout << "TEST removing OK\n";
-  } else {
-    cout << "TEST removing FAIL\n";
-    succes = false;
-  }
+  assert(testResult && "FAIL removing");
 
-  // TEST size after removing
-  testResult = queue->size() == 0;
-  if (testResult) {
-    cout << "TEST size after removing OK\n";
-  } else {
-    cout << "TEST size after removing FAIL\n";
-    succes = false;
-  }
+  cout << "TEST size after removing\n";
+  assert(queue->size() == 0 && "FAIL size (removing)");
 
-  // TEST empty queue
-  testResult = queue->first() == nullptr;
-  if (testResult) {
-    cout << "TEST empty queue OK\n";
-  } else {
-    cout << "TEST empty queue FAIL\n";
-    succes = false;
-  }
+  cout << "TEST empty queue\n";
+  assert(queue->first() == nullptr && "FAIL empty queue");
 
-  // TEST deleting queue
+  cout << "TEST deleting queue\n";
   delete queue;
 
-  /* end */
-  if (succes) {
-    cout << "\nAll tests passed!\n\n";
-    return 0;
-  }
-  cout << "\nTest failed!\n\n";
-  return 1;
+  return 0;
 }
