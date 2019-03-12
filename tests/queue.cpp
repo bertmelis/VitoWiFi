@@ -37,7 +37,7 @@ int main() {
 
   // TEST adding when full
   testResult = true;
-  testResult = queue->add(6);
+  testResult = !queue->add(6);
   if (testResult) {
     cout << "TEST add when full OK\n";
   } else {
