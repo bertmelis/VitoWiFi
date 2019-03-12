@@ -40,41 +40,41 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <string.h>  // for memcpy
 
 enum OptolinkError : uint8_t {
-    TIMEOUT,
-    LENGTH,
-    NACK,
-    CRC,
-    VITO_ERROR
+  TIMEOUT,
+  LENGTH,
+  NACK,
+  CRC,
+  VITO_ERROR
 };
 
 struct Optolink_DP {
-    uint16_t address;
-    uint8_t length;
-    bool write;
-    uint8_t* data;
-    void* arg;
-    Optolink_DP(uint16_t address, uint8_t length, bool write, uint8_t* value, void* arg);
-    ~Optolink_DP();
+  uint16_t address;
+  uint8_t length;
+  bool write;
+  uint8_t* data;
+  void* arg;
+  Optolink_DP(uint16_t address, uint8_t length, bool write, uint8_t* value, void* arg);
+  ~Optolink_DP();
 };
 
 class Optolink {
-  public:
-    Optolink(HardwareSerial* serial);
-    virtual ~Optolink();
-    void onData(std::function<void(uint8_t* data, uint8_t len, void* arg)> callback);
-    void onError(std::function<void(uint8_t error)> callback);
-    bool read(uint16_t address, uint8_t length, void* arg = nullptr);
-    bool write(uint16_t address, uint8_t length, uint8_t* data, void* arg = nullptr);
+ public:
+  explicit Optolink(HardwareSerial* serial);
+  virtual ~Optolink();
+  void onData(std::function<void(uint8_t* data, uint8_t len, void* arg)> callback);
+  void onError(std::function<void(uint8_t error)> callback);
+  bool read(uint16_t address, uint8_t length, void* arg = nullptr);
+  bool write(uint16_t address, uint8_t length, uint8_t* data, void* arg = nullptr);
 
-    virtual void begin() = 0;
-    virtual void loop() = 0;
+  virtual void begin() = 0;
+  virtual void loop() = 0;
 
 
-  protected:
-    HardwareSerial* _serial;
-    std::queue<Optolink_DP> _queue;  // TODO(bertmelis): add semaphore to ESP32 version to guard access to queue?
-    std::function<void(uint8_t* data, uint8_t len, void* arg)> _onData;
-    std::function<void(uint8_t error)> _onError;
+ protected:
+  HardwareSerial* _serial;
+  std::queue<Optolink_DP> _queue;  // TODO(bertmelis): add semaphore to ESP32 version to guard access to queue?
+  std::function<void(uint8_t* data, uint8_t len, void* arg)> _onData;
+  std::function<void(uint8_t error)> _onError;
 };
 
 #elif defined VITOWIFI_TEST

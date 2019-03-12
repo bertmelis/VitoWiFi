@@ -44,231 +44,231 @@ inline bool checkChecksum(uint8_t array[], uint8_t length) {
 }
 
 inline void clearInput(HardwareSerial* serial) {
-    while (serial->available()) serial->read();
+  while (serial->available()) serial->read();
 }
 
 OptolinkP300::OptolinkP300(HardwareSerial* serial) :
-    Optolink(serial),
-    _state(UNDEF),
-    _lastMillis(0),
-    _write(false),
-    _rcvBuffer{0},
-    _rcvBufferLen(0),
-    _rcvLen(0) {}
+  Optolink(serial),
+  _state(UNDEF),
+  _lastMillis(0),
+  _write(false),
+  _rcvBuffer{0},
+  _rcvBufferLen(0),
+  _rcvLen(0) {}
 
 OptolinkP300::~OptolinkP300() {
-    // TODO(bertmelis): anything to do?
+  // TODO(bertmelis): anything to do?
 }
 
 void OptolinkP300::begin() {
-    _serial->begin(4800, SERIAL_8E2);
-    _state = RESET;
+  _serial->begin(4800, SERIAL_8E2);
+  _state = RESET;
 }
 
 void OptolinkP300::loop() {
-    switch (_state) {
-    case RESET:
-        _reset();
-        break;
-    case RESET_ACK:
-        _resetAck();
-        break;
-    case INIT:
-        _init();
-        break;
-    case INIT_ACK:
-        _initAck();
-        break;
-    case IDLE:
-        _idle();
-        break;
-    case SEND:
-        _send();
-        break;
-    case SEND_ACK:
-        _sentAck();
-        break;
-    case RECEIVE:
-        _receive();
-        break;
-    case RECEIVE_ACK:
-        _receiveAck();
-        break;
-    default:
-        // begin() not called
-        break;
-    }
-    // TODO(@bertmelis): move timeouts here, clear queue on timeout
+  switch (_state) {
+  case RESET:
+    _reset();
+    break;
+  case RESET_ACK:
+    _resetAck();
+    break;
+  case INIT:
+    _init();
+    break;
+  case INIT_ACK:
+    _initAck();
+    break;
+  case IDLE:
+    _idle();
+    break;
+  case SEND:
+    _send();
+    break;
+  case SEND_ACK:
+    _sentAck();
+    break;
+  case RECEIVE:
+    _receive();
+    break;
+  case RECEIVE_ACK:
+    _receiveAck();
+    break;
+  default:
+    // begin() not called
+    break;
+  }
+  // TODO(@bertmelis): move timeouts here, clear queue on timeout
 }
 
 void OptolinkP300::_reset() {
-    // Set communication with Vitotronic to defined state = reset to KW protocol
-    const uint8_t buff[] = {0x04};
-    _serial->write(buff, sizeof(buff));
-    _lastMillis = millis();
-    _state = RESET_ACK;
+  // Set communication with Vitotronic to defined state = reset to KW protocol
+  const uint8_t buff[] = {0x04};
+  _serial->write(buff, sizeof(buff));
+  _lastMillis = millis();
+  _state = RESET_ACK;
 }
 
 void OptolinkP300::_resetAck() {
-    if (_serial->read() == 0x05) {
-        // received 0x05/enquiry: optolink has been reset
-        _state = INIT;
-    } else {
-        if (millis() - _lastMillis > 1000) {  // try again every 0,5sec
-            _state = RESET;
-        }
+  if (_serial->read() == 0x05) {
+    // received 0x05/enquiry: optolink has been reset
+    _state = INIT;
+  } else {
+    if (millis() - _lastMillis > 1000) {  // try again every 0,5sec
+      _state = RESET;
     }
+  }
 }
 
 void OptolinkP300::_init() {
-    const uint8_t buff[] = {0x16, 0x00, 0x00};
-    _serial->write(buff, sizeof(buff));
-    _lastMillis = millis();
-    _state = INIT_ACK;
+  const uint8_t buff[] = {0x16, 0x00, 0x00};
+  _serial->write(buff, sizeof(buff));
+  _lastMillis = millis();
+  _state = INIT_ACK;
 }
 
 void OptolinkP300::_initAck() {
-    if (_serial->available()) {
-        if (_serial->read() == 0x06) {
-          // ACK received, moving to next state
-          _state = IDLE;
-        }
+  if (_serial->available()) {
+    if (_serial->read() == 0x06) {
+      // ACK received, moving to next state
+      _state = IDLE;
     }
-    if (millis() - _lastMillis > 1000UL) {  // if no ACK is coming, reset connection
-        _state = RESET;
-    }
+  }
+  if (millis() - _lastMillis > 1000UL) {  // if no ACK is coming, reset connection
+    _state = RESET;
+  }
 }
 
 void OptolinkP300::_idle() {
-    if (millis() - _lastMillis > 15 * 1000UL) {  // send INIT every 15 seconds to keep communication alive
-      _state = INIT;
-    }
-    // clearInput(_serial);  // TODO(@bertmelis): keep input clean, needed?
-    if (_queue.size() > 0) {
-        _state = SEND;
-    }
+  if (millis() - _lastMillis > 15 * 1000UL) {  // send INIT every 15 seconds to keep communication alive
+    _state = INIT;
+  }
+  // clearInput(_serial);  // TODO(@bertmelis): keep input clean, needed?
+  if (_queue.size() > 0) {
+    _state = SEND;
+  }
 }
 
 void OptolinkP300::_send() {
-    uint8_t buff[MAX_DP_LENGTH + 8];
-    uint8_t length = _queue.front().length;
-    uint16_t address = _queue.front().address;
-    if (_write) {
-        // type is WRITE
-        // has length of 8 chars + length of value
-        buff[0] = 0x41;
-        buff[1] = 5 + length;
-        buff[2] = 0x00;
-        buff[3] = 0x02;
-        buff[4] = (address >> 8) & 0xFF;
-        buff[5] = address & 0xFF;
-        buff[6] = length;
-        // add value to message
-        memcpy(&buff[7], _queue.front().data, length);
-        buff[7 + length] = calcChecksum(buff, 8 + length);
-        _serial->write(buff, 8 + length);
+  uint8_t buff[MAX_DP_LENGTH + 8];
+  uint8_t length = _queue.front().length;
+  uint16_t address = _queue.front().address;
+  if (_write) {
+    // type is WRITE
+    // has length of 8 chars + length of value
+    buff[0] = 0x41;
+    buff[1] = 5 + length;
+    buff[2] = 0x00;
+    buff[3] = 0x02;
+    buff[4] = (address >> 8) & 0xFF;
+    buff[5] = address & 0xFF;
+    buff[6] = length;
+    // add value to message
+    memcpy(&buff[7], _queue.front().data, length);
+    buff[7 + length] = calcChecksum(buff, 8 + length);
+    _serial->write(buff, 8 + length);
 
-        // Written payload is not returned, the return length is always 8 bytes long
-        _rcvLen = 8;
-    } else {
-        // type is READ
-        // has fixed length of 8 chars
-        buff[0] = 0x41;
-        buff[1] = 0x05;
-        buff[2] = 0x00;
-        buff[3] = 0x01;
-        buff[4] = (address >> 8) & 0xFF;
-        buff[5] = address & 0xFF;
-        buff[6] = length;
-        buff[7] = calcChecksum(buff, 8);
-        _rcvLen = 8 + length;  // expected answer length is 8 + data length
-        _serial->write(buff, 8);
-    }
-    _rcvBufferLen = 0;
-    _lastMillis = millis();
-    _state = SEND_ACK;
+    // Written payload is not returned, the return length is always 8 bytes long
+    _rcvLen = 8;
+  } else {
+    // type is READ
+    // has fixed length of 8 chars
+    buff[0] = 0x41;
+    buff[1] = 0x05;
+    buff[2] = 0x00;
+    buff[3] = 0x01;
+    buff[4] = (address >> 8) & 0xFF;
+    buff[5] = address & 0xFF;
+    buff[6] = length;
+    buff[7] = calcChecksum(buff, 8);
+    _rcvLen = 8 + length;  // expected answer length is 8 + data length
+    _serial->write(buff, 8);
+  }
+  _rcvBufferLen = 0;
+  _lastMillis = millis();
+  _state = SEND_ACK;
 }
 
 void OptolinkP300::_sentAck() {
-    if (_serial->available()) {
-        uint8_t buff = _serial->read();
-        if (buff == 0x06) {  // transmit succesful, moving to next state
-            _state = RECEIVE;
-            return;
-        } else if (buff == 0x15) {  // transmit negatively acknowledged, return to IDLE
-            _tryOnError(NACK);
-            _state = IDLE;
-            clearInput(_serial);
-            return;
-        }
+  if (_serial->available()) {
+    uint8_t buff = _serial->read();
+    if (buff == 0x06) {  // transmit succesful, moving to next state
+      _state = RECEIVE;
+      return;
+    } else if (buff == 0x15) {  // transmit negatively acknowledged, return to IDLE
+      _tryOnError(NACK);
+      _state = IDLE;
+      clearInput(_serial);
+      return;
     }
-    if (millis() - _lastMillis > 1000UL) {  // if no ACK is coming, return to RESET
-        _tryOnError(TIMEOUT);
-        _state = RESET;
-        clearInput(_serial);
-    }
+  }
+  if (millis() - _lastMillis > 1000UL) {  // if no ACK is coming, return to RESET
+    _tryOnError(TIMEOUT);
+    _state = RESET;
+    clearInput(_serial);
+  }
 }
 
 void OptolinkP300::_receive() {
-    while (_serial->available() > 0) {  // while instead of if: read complete RX buffer
-        _rcvBuffer[_rcvBufferLen] = _serial->read();
-        ++_rcvBufferLen;
+  while (_serial->available() > 0) {  // while instead of if: read complete RX buffer
+    _rcvBuffer[_rcvBufferLen] = _serial->read();
+    ++_rcvBufferLen;
+  }
+  if (_rcvBuffer[0] != 0x41) {
+    // TODO(@bertmelis): find out why this is needed! I'd expect the rx-buffer to be empty.
+    return;
+  }
+  if (_rcvBufferLen == _rcvLen) {     // message complete, check message
+    if (_rcvBuffer[1] != (_rcvLen - 3)) {  // check for message length
+      _tryOnError(LENGTH);
+      _state = RECEIVE_ACK;
+      return;
     }
-    if (_rcvBuffer[0] != 0x41) {
-        // TODO(@bertmelis): find out why this is needed! I'd expect the rx-buffer to be empty.
-        return;
+    if (_rcvBuffer[2] != 0x01) {  // Vitotronic returns an error message
+      _tryOnError(VITO_ERROR);
+      _state = RECEIVE_ACK;
+      return;
     }
-    if (_rcvBufferLen == _rcvLen) {     // message complete, check message
-        if (_rcvBuffer[1] != (_rcvLen - 3)) {  // check for message length
-            _tryOnError(LENGTH);
-            _state = RECEIVE_ACK;
-            return;
-        }
-        if (_rcvBuffer[2] != 0x01) {  // Vitotronic returns an error message
-            _tryOnError(VITO_ERROR);
-            _state = RECEIVE_ACK;
-            return;
-        }
-        if (!checkChecksum(_rcvBuffer, _rcvLen)) {  // checksum is wrong
-            _tryOnError(CRC);
-            _state = RECEIVE_ACK;  // TODO(@bertmelis): should we return NACK?
-            return;
-        }
-        if (_rcvBuffer[3] == 0x01) {
-            // message is from READ command, so returning read value
-            _tryOnData(&_rcvBuffer[7], _queue.front().length, _queue.front().arg);
-        } else if (_rcvBuffer[3] == 0x03) {
-            // message is from WRITE command, so returning written value
-            _tryOnData(_queue.front().data, _queue.front().length, _queue.front().arg);
-        } else {
-            // should not be here
-        }
-        _state = RECEIVE_ACK;
-        return;
+    if (!checkChecksum(_rcvBuffer, _rcvLen)) {  // checksum is wrong
+      _tryOnError(CRC);
+      _state = RECEIVE_ACK;  // TODO(@bertmelis): should we return NACK?
+      return;
+    }
+    if (_rcvBuffer[3] == 0x01) {
+      // message is from READ command, so returning read value
+      _tryOnData(&_rcvBuffer[7], _queue.front().length, _queue.front().arg);
+    } else if (_rcvBuffer[3] == 0x03) {
+      // message is from WRITE command, so returning written value
+      _tryOnData(_queue.front().data, _queue.front().length, _queue.front().arg);
     } else {
-        // not yet complete
+      // should not be here
     }
-    if (millis() - _lastMillis > 1 * 1000UL) {  // Vitotronic isn't answering: 20 chars @ 4800baud < 1 sec!
-        _tryOnError(TIMEOUT);
-        _state = RESET;
-    }
+    _state = RECEIVE_ACK;
+    return;
+  } else {
+    // not yet complete
+  }
+  if (millis() - _lastMillis > 1 * 1000UL) {  // Vitotronic isn't answering: 20 chars @ 4800baud < 1 sec!
+    _tryOnError(TIMEOUT);
+    _state = RESET;
+  }
 }
 
 void OptolinkP300::_receiveAck() {
-    const uint8_t buff[] = {0x06};
-    _serial->write(buff, sizeof(buff));
-    _lastMillis = millis();
-    _state = IDLE;
+  const uint8_t buff[] = {0x06};
+  _serial->write(buff, sizeof(buff));
+  _lastMillis = millis();
+  _state = IDLE;
 }
 
 void OptolinkP300::_tryOnData(uint8_t* data, uint8_t len, void* arg) {
-    if (_onData) _onData(data, len, arg);
-    _queue.pop();
+  if (_onData) _onData(data, len, arg);
+  _queue.pop();
 }
 
 void OptolinkP300::_tryOnError(uint8_t error) {
-    if (_onError) _onError(error);
-    _queue.pop();
+  if (_onError) _onError(error);
+  _queue.pop();
 }
 
 #elif defined VITOWIFI_TEST

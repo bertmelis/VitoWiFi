@@ -28,19 +28,19 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #if defined ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32
 
 inline void clearInput(HardwareSerial* serial) {
-    while (serial->read()) {}
+  while (serial->read()) {}
 }
 
 OptolinkKW::OptolinkKW(HardwareSerial* serial) :
-    Optolink(serial) {}
+  Optolink(serial) {}
 
 OptolinkKW::~OptolinkKW() {
-    // TODO(bertmelis): anything to do?
+  // TODO(bertmelis): anything to do?
 }
 
 void OptolinkKW::begin() {
-    _serial->begin(4800, SERIAL_8E2);
-    _state = RESET;
+  _serial->begin(4800, SERIAL_8E2);
+  _state = RESET;
 }
 
 void OptolinkKW::loop() {

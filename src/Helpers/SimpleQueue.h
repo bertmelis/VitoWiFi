@@ -45,7 +45,7 @@ class SimpleQueue {
    * 
    * @param size Maximum number of elements in the queue.
    */
-  SimpleQueue(size_t size) :
+  explicit SimpleQueue(size_t size) :
     _buffer(nullptr),
     _firstPosition(0),
     _nextPosition(0),

@@ -31,42 +31,42 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <Arduino.h>  // for millis
 
 class OptolinkP300 : public Optolink {
-  public:
-    OptolinkP300(HardwareSerial* serial);
-    ~OptolinkP300();
-    void begin();
-    void loop();
+ public:
+  explicit OptolinkP300(HardwareSerial* serial);
+  ~OptolinkP300();
+  void begin();
+  void loop();
 
-  private:
-    enum OptolinkState : uint8_t {
-      RESET = 0,
-      RESET_ACK,
-      INIT,
-      INIT_ACK,
-      IDLE,
-      SEND,
-      SEND_ACK,
-      RECEIVE,
-      RECEIVE_ACK,
-      UNDEF
-    } _state; 
-    void _reset();
-    void _resetAck();
-    void _init();
-    void _initAck();
-    void _idle();
-    void _send();
-    void _sentAck();
-    void _receive();
-    void _receiveAck();
-    uint32_t _lastMillis;
-    bool _write;
-    uint8_t _rcvBuffer[MAX_DP_LENGTH + 8];
-    size_t _rcvBufferLen;
-    size_t _rcvLen;
+ private:
+  enum OptolinkState : uint8_t {
+    RESET = 0,
+    RESET_ACK,
+    INIT,
+    INIT_ACK,
+    IDLE,
+    SEND,
+    SEND_ACK,
+    RECEIVE,
+    RECEIVE_ACK,
+    UNDEF
+  } _state;
+  void _reset();
+  void _resetAck();
+  void _init();
+  void _initAck();
+  void _idle();
+  void _send();
+  void _sentAck();
+  void _receive();
+  void _receiveAck();
+  uint32_t _lastMillis;
+  bool _write;
+  uint8_t _rcvBuffer[MAX_DP_LENGTH + 8];
+  size_t _rcvBufferLen;
+  size_t _rcvLen;
 
-    inline void _tryOnData(uint8_t* data, uint8_t len, void* arg);
-    inline void _tryOnError(uint8_t error);
+  inline void _tryOnData(uint8_t* data, uint8_t len, void* arg);
+  inline void _tryOnError(uint8_t error);
 };
 
 #elif defined VITOWIFI_TEST

@@ -29,13 +29,13 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <math.h>  // floor()
 
 class DPTemp : public Datapoint {
-  public:
-    DPTemp(const char* name, const uint16_t address);
-    ~DPTemp();
-    void onData(std::function<void(float)> callback);
-    void decode(uint8_t* data, uint8_t length);
-    void encode(uint8_t* raw, uint8_t length, float data);
+ public:
+  DPTemp(const char* name, const uint16_t address);
+  ~DPTemp();
+  void onData(std::function<void(float)> callback);
+  void decode(uint8_t* data, uint8_t length);
+  void encode(uint8_t* raw, uint8_t length, float data);
 
-  private:
-    std::function<void(float)> _onData;
+ private:
+  std::function<void(float)> _onData;
 };
