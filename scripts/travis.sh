@@ -8,7 +8,7 @@ then
 elif [[ "$TESTQUEUE" ]]
 then
   mkdir build
-  platformio ci --lib="." --project-conf="tests/platformio.ini" --build-dir=build --keep-build-dir tests/queue.cpp
+  platformio ci --lib="./src" --project-conf="tests/platformio.ini" --build-dir=build --keep-build-dir tests/queue.cpp
 else
   echo "should be building examples"
   # platformio ci --lib="." $PLATFORMIO_CI_EXTRA_ARGS
