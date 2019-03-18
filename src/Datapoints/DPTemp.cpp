@@ -37,18 +37,23 @@ void DPTemp::onData(std::function<void(float)> callback) {
   _onData = callback;
 }
 
-void DPTemp::decode(uint8_t* data, uint8_t length) {
+void DPTemp::decode(const uint8_t* data, const uint8_t length, Datapoint* dp) {
   assert(length >= _length);
+  if (!dp) dp = this;
+  int16_t tmp = data[1] << 8 | data[0];
+  float value = tmp / 10.0f;
   if (_onData) {
-    int16_t tmp = data[1] << 8 | data[0];
-    float output = tmp / 10.0;
-    _onData(output);
+    _onData(value);
   } else {
-    Datapoint::decode(data, length, this);
+    Datapoint::decode(data, length, dp);
   }
 }
 
-void DPTemp::encode(uint8_t* raw, uint8_t length, float data) {
+void DPTemp::encode(uint8_t* raw, const uint8_t length, const void* data) {
+  encode(raw, length, *reinterpret_cast<const float*>(data));
+}
+
+void DPTemp::encode(uint8_t* raw, const uint8_t length, const float data) {
   assert(length >= _length);
   int16_t tmp = floor((data * 10) + 0.5);
   raw[1] = tmp >> 8;

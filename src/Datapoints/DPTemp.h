@@ -33,8 +33,9 @@ class DPTemp : public Datapoint {
   DPTemp(const char* name, const uint16_t address);
   ~DPTemp();
   void onData(std::function<void(float)> callback);
-  void decode(uint8_t* data, uint8_t length);
-  void encode(uint8_t* raw, uint8_t length, float data);
+  void decode(const uint8_t* data, const uint8_t length, Datapoint* dp = nullptr) override;
+  void encode(uint8_t* raw, const uint8_t length, const void* data) override;
+  void encode(uint8_t* raw, const uint8_t length, const float data);
 
  private:
   std::function<void(float)> _onData;
