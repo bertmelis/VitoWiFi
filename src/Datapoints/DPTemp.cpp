@@ -38,26 +38,19 @@ void DPTemp::onData(std::function<void(float)> callback) {
 }
 
 void DPTemp::decode(uint8_t* data, uint8_t length) {
-  if (length != _length) {
-    // display error about length
+  assert(length >= _length);
+  if (_onData) {
+    int16_t tmp = data[1] << 8 | data[0];
+    float output = tmp / 10.0;
+    _onData(output);
   } else {
-    if (_onData) {
-      int16_t tmp = data[1] << 8 | data[0];
-      float output = tmp / 10.0;
-      _onData(output);
-    } else {
-      Datapoint::decode(data, length, this);
-    }
+    Datapoint::decode(data, length, this);
   }
 }
 
 void DPTemp::encode(uint8_t* raw, uint8_t length, float data) {
-  if (length != _length) {
-    // display error about length
-    memset(raw, 0, _length);
-  } else {
-    int16_t tmp = floor((data * 10) + 0.5);
-    raw[1] = tmp >> 8;
-    raw[0] = tmp & 0xFF;
-  }
+  assert(length >= _length);
+  int16_t tmp = floor((data * 10) + 0.5);
+  raw[1] = tmp >> 8;
+  raw[0] = tmp & 0xFF;
 }

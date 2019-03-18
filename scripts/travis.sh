@@ -11,7 +11,7 @@ then
   pip install -U platformio
   platformio update
   mkdir build
-  platformio ci --lib="./src" --project-conf="tests/platformio.ini" --build-dir=build --keep-build-dir tests/queue.cpp
+  platformio ci --lib="./src" --project-conf="scripts/platformio.ini" --build-dir=build --keep-build-dir tests/queue.cpp
   ./build/.pioenvs/test_queue/program
 else
   pip install -U platformio

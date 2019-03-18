@@ -151,8 +151,9 @@ void OptolinkP300::_idle() {
 
 void OptolinkP300::_send() {
   uint8_t buff[MAX_DP_LENGTH + 8];
-  uint8_t length = _queue.front().length;
-  uint16_t address = _queue.front().address;
+  Optolink_DP* dp = _queue.front();
+  uint8_t length = dp->length;
+  uint16_t address = dp->address;
   if (_write) {
     // type is WRITE
     // has length of 8 chars + length of value
@@ -164,7 +165,7 @@ void OptolinkP300::_send() {
     buff[5] = address & 0xFF;
     buff[6] = length;
     // add value to message
-    memcpy(&buff[7], _queue.front().data, length);
+    memcpy(&buff[7], dp->data, length);
     buff[7 + length] = calcChecksum(buff, 8 + length);
     _serial->write(buff, 8 + length);
 
@@ -234,12 +235,13 @@ void OptolinkP300::_receive() {
       _state = RECEIVE_ACK;  // TODO(@bertmelis): should we return NACK?
       return;
     }
+    Optolink_DP* dp = _queue.front();
     if (_rcvBuffer[3] == 0x01) {
       // message is from READ command, so returning read value
-      _tryOnData(&_rcvBuffer[7], _queue.front().length, _queue.front().arg);
+      _tryOnData(&_rcvBuffer[7], dp->length);
     } else if (_rcvBuffer[3] == 0x03) {
       // message is from WRITE command, so returning written value
-      _tryOnData(_queue.front().data, _queue.front().length, _queue.front().arg);
+      _tryOnData(dp->data, dp->length);
     } else {
       // should not be here
     }
@@ -259,16 +261,6 @@ void OptolinkP300::_receiveAck() {
   _serial->write(buff, sizeof(buff));
   _lastMillis = millis();
   _state = IDLE;
-}
-
-void OptolinkP300::_tryOnData(uint8_t* data, uint8_t len, void* arg) {
-  if (_onData) _onData(data, len, arg);
-  _queue.pop();
-}
-
-void OptolinkP300::_tryOnError(uint8_t error) {
-  if (_onError) _onError(error);
-  _queue.pop();
 }
 
 #elif defined VITOWIFI_TEST

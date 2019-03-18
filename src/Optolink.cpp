@@ -45,36 +45,48 @@ Optolink_DP::~Optolink_DP() {
 
 Optolink::Optolink(HardwareSerial* serial) :
   _serial(serial),
-  _queue(),
+  _queue(VITOWIFI_MAX_QUEUE_LENGTH),
   _onData(nullptr),
   _onError(nullptr) {}
 
 Optolink::~Optolink() {
-  // TODO(bertmelis): anything to do?
+  // nothing to do
 }
 
-void Optolink::onData(std::function<void(uint8_t* data, uint8_t len, void* arg)> callback) {
+void Optolink::onData(void (*callback)(uint8_t* data, uint8_t len)) {
+  _onData = reinterpret_cast<OnDataArgCallback>(callback);
+}
+
+void Optolink::onData(void (*callback)(uint8_t* data, uint8_t len, void* arg)) {
   _onData = callback;
 }
 
-void Optolink::onError(std::function<void(uint8_t error)> callback) {
+void Optolink::onError(void (*callback)(uint8_t error)) {
+  _onError = reinterpret_cast<OnErrorArgCallback>(callback);
+}
+
+void Optolink::onError(OnErrorArgCallback callback) {
   _onError = callback;
 }
 
 bool Optolink::read(uint16_t address, uint8_t length, void* arg) {
-  if (_queue.size() < VITOWIFI_MAX_QUEUE_LENGTH) {
-    _queue.emplace(address, length, false, nullptr, arg);
-    return true;
-  }
-  return false;
+  Optolink_DP dp(address, length, false, nullptr, arg);
+  return _queue.push(dp);
 }
 
 bool Optolink::write(uint16_t address, uint8_t length, uint8_t* data, void* arg) {
-  if (_queue.size() < VITOWIFI_MAX_QUEUE_LENGTH) {
-    _queue.emplace(address, length, true, data, arg);
-    return true;
-  }
-  return false;
+  Optolink_DP dp(address, length, true, data, arg);
+  return _queue.push(dp);
+}
+
+void Optolink::_tryOnData(uint8_t* data, uint8_t len) {
+  if (_onData) _onData(data, len, _queue.front()->arg);
+  _queue.pop();
+}
+
+void Optolink::_tryOnError(uint8_t error) {
+  if (_onError) _onError(error, _queue.front()->arg);
+  _queue.pop();
 }
 
 #elif defined VITOWIFI_TEST

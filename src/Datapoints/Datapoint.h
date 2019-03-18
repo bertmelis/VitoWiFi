@@ -26,6 +26,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #pragma once
 
 #include <stdint.h>
+#include <assert.h>
 #include <functional>
 #include <string.h>  // for memcpy
 #include <vector>
@@ -50,3 +51,7 @@ class Datapoint {
   static std::function<void(const uint8_t[], uint8_t, Datapoint* dp)> _globalOnData;
   static std::vector<Datapoint*> _datapoints;
 };
+
+#include "DPTemp.h"
+#include "DPStat.h"
+#include "DPCountS.h"

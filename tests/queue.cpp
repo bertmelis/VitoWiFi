@@ -8,17 +8,15 @@ using std::cout;
 
 #define BUFFER_SIZE 5
 
-bool succes = true;
-bool testResult = true;
-
 int main() {
   // Create queue
   SimpleQueue<uint8_t>* queue = new SimpleQueue<uint8_t>(BUFFER_SIZE);
+  bool testResult = true;
 
   cout << "TEST adding to queue\n";
   testResult = true;
   for (uint8_t i = 0; i < BUFFER_SIZE; ++i) {
-    testResult = queue->add(i);
+    testResult = queue->push(i);
   }
   assert(testResult && "FAIL adding");
 
@@ -26,20 +24,20 @@ int main() {
   assert(queue->size() == BUFFER_SIZE && "FAIL size (adding)");
 
   cout << "TEST adding when full\n";
-  assert(!queue->add(6) && "FAIL overfilling");
+  assert(!queue->push(6) && "FAIL overfilling");
 
   cout << "TEST size after overfill\n";
   assert(queue->size() == BUFFER_SIZE && "FAIL size (overfilling)");
 
   cout << "TEST add after rollover\n";
-  queue->remove();
-  assert(queue->add(5) && "FAIL rollover");
+  queue->pop();
+  assert(queue->push(5) && "FAIL rollover");
 
   cout << "TEST reading/removing\n";
   testResult = true;
   for (uint8_t i = 0; i < BUFFER_SIZE; ++i) {
-    if (i + 1 == *queue->first()) {
-      queue->remove();
+    if (i + 1 == *queue->front()) {
+      queue->pop();
     } else {
       testResult = false;
     }
@@ -50,7 +48,7 @@ int main() {
   assert(queue->size() == 0 && "FAIL size (removing)");
 
   cout << "TEST empty queue\n";
-  assert(queue->first() == nullptr && "FAIL empty queue");
+  assert(queue->front() == nullptr && "FAIL empty queue");
 
   cout << "TEST deleting queue\n";
   delete queue;

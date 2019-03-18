@@ -38,24 +38,17 @@ void DPCountS::onData(std::function<void(uint16_t)> callback) {
 }
 
 void DPCountS::decode(uint8_t* data, uint8_t length) {
-  if (length != _length) {
-    // display error about length
+  assert(length >= _length);
+  if (_onData) {
+    uint16_t output = data[1] << 8 | data[0];
+    _onData(output);
   } else {
-    if (_onData) {
-      uint16_t output = data[1] << 8 | data[0];
-      _onData(output);
-    } else {
-      Datapoint::decode(data, length, this);
-    }
+    Datapoint::decode(data, length, this);
   }
 }
 
 void DPCountS::encode(uint8_t* raw, uint8_t length, uint16_t data) {
-  if (length != _length) {
-    // display error about length
-    memset(raw, 0, _length);
-  } else {
-    raw[1] = data >> 8;
-    raw[0] = data & 0xFF;
-  }
+  assert(length >= _length);
+  raw[1] = data >> 8;
+  raw[0] = data & 0xFF;
 }

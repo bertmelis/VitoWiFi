@@ -23,58 +23,199 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
 
+/**
+ * @file Optolink.h
+ * @brief Optolink API definitions
+ *
+ * This file contains all method definitions for the Optolink. 
+ * The optolink object is the high level class and contains the interface 
+ * and implements the queue system. Protocol details are implemented in the 
+ * inherited classes.
+ * 
+ * The optolink hardware implementation could be as follows:
+ * 
+ *                          3.3V
+ *                           O
+ *                           |
+ *                   +-------+-------+
+ *                   |               |
+ *                   \               \
+ *              180R /               / 10kR
+ *                   \               \
+ *                   /               /
+ *                   |               |
+ *                  ---              |
+ *         SFH487-2 \ / -->          |
+ *          (880nm)  V  -->          |
+ *                 -----             |
+ *                   |               |
+ *     TX -----------+               |
+ *     RX ---------------------------+
+ *                                   |
+ *                                 |/
+ *                             --> |   SFH309FA
+ *                             --> |>
+ *                                   |
+ *                                  ---
+ *                                  GND
+ * 
+ */
+
 #pragma once
 
 #if defined ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32
 
 #ifndef VITOWIFI_MAX_QUEUE_LENGTH
+  /** @brief Maximum number of datapoints the Optolink queue can hold
+   */
   #define VITOWIFI_MAX_QUEUE_LENGTH 20
 #endif
 #ifndef MAX_DP_LENGTH
-#define MAX_DP_LENGTH 9
+  /** @brief Maximum size in bytes of a datapoint
+   */
+  #define MAX_DP_LENGTH 9
 #endif
 
 #include <functional>
-#include <queue>
 #include <HardwareSerial.h>
 #include <string.h>  // for memcpy
 
+#include "Helpers/SimpleQueue.h"
+
+/**
+ * @brief Errors the optolink can encounter
+ */
 enum OptolinkError : uint8_t {
-  TIMEOUT,
-  LENGTH,
-  NACK,
-  CRC,
-  VITO_ERROR
+  TIMEOUT,    ///< Timeout for ack or answer
+  LENGTH,     ///< Received message length differs from expected length
+  NACK,       ///< Message was nacked by Vitotronic
+  CRC,        ///< Checksum failed (only for P300)
+  VITO_ERROR  ///< General error
 };
 
-struct Optolink_DP {
+typedef void (*OnDataArgCallback)(uint8_t* data, uint8_t len, void* arg);
+typedef void (*OnErrorArgCallback)(uint8_t error, void* arg);
+
+/**
+ * @brief Class holding datapoint values. The Optolink queue stores this
+ * struct.
+ */
+class Optolink_DP {
+ public:
+   /**
+   * @brief Construct a new Optolink_DP object.
+   * 
+   * @param address Address of the datapoint (eg. 0x1234)
+   * @param length Length in bytes of the datapoint. This is also the length
+   *               of the value when writing.
+   * @param write Bool indicating the datapoint is readonly (false) or
+   *              read/write (true)
+   * @param value Pointer to data to write (set to nullptr when reading). This 
+   *              data will be copied so it is allowed to go out of scope
+   *              after passing the this object.
+   * @param arg Argument to use for the callback (if not used, set to nullptr)
+   */
+  Optolink_DP(uint16_t address, uint8_t length, bool write, uint8_t* value, void* arg);
+  ~Optolink_DP();
   uint16_t address;
   uint8_t length;
   bool write;
   uint8_t* data;
   void* arg;
-  Optolink_DP(uint16_t address, uint8_t length, bool write, uint8_t* value, void* arg);
-  ~Optolink_DP();
 };
 
+/**
+ * @brief Base class for the Optolink.
+ * 
+ * This class is a pure virtual class. Only the Optolink implemented in the 
+ * different protocol classes are to be used. This class defines the public
+ * API.
+ */
 class Optolink {
  public:
+  /**
+   * @brief Construct the Optolink object.
+   * 
+   * @param serial Hardwareserial object to be used. Pass by reference.
+   */
   explicit Optolink(HardwareSerial* serial);
   virtual ~Optolink();
-  void onData(std::function<void(uint8_t* data, uint8_t len, void* arg)> callback);
-  void onError(std::function<void(uint8_t error)> callback);
+
+  /**
+   * @brief Attach a callback for succesfull requests.
+   * 
+   * @param callback Function to be called when data is received.
+   */
+  void onData(void (*callback)(uint8_t* data, uint8_t len));
+
+  /**
+   * @brief Attach a callback with an argument for succesfull requests.
+   * 
+   * @param callback Function to be called when data is received.
+   */
+  void onData(OnDataArgCallback callback);
+
+  /**
+   * @brief Attach the callback for erroneous requests.
+   * 
+   * @param callback Function to be called when en error is encountered.
+   */
+  void onError(void (*callback)(uint8_t error));
+
+  /**
+   * @brief Attach the callback with an argument for erroneous requests.
+   * 
+   * @param callback Function to be called when en error is encountered.
+   */
+  void onError(OnErrorArgCallback callback);
+
+  /**
+   * @brief Read a datapoint with specified properties
+   * 
+   * @param address Address of the datapoint (eg. 0x1234).
+   * @param length Length in bytes of the datapoint. This is also the length
+   *               of the value when writing.
+   * @param arg Argument to use for the callback. Defaults to nullptr.
+   * @return true Request was queued succesfully.
+   * @return false Request could not be added to the queue (queue full?).
+   */
   bool read(uint16_t address, uint8_t length, void* arg = nullptr);
+
+  /**
+   * @brief Write to a datapoint with specified properties
+   * 
+   * @param address Address of the datapoint (eg. 0x1234).
+   * @param length Length in bytes of the datapoint. This is also the length
+   *               of the value when writing.
+   * @param data Pointer to data to write (set to nullptr when reading). This 
+   *             data will be copied so it is allowed to go out of scope
+   *             after passing the this object.
+   * @param arg Argument to use for the callback. Defaults to nullptr.
+   * @return true Request was queued succesfully.
+   * @return false Request could not be added to the queue (queue full?).
+   */
   bool write(uint16_t address, uint8_t length, uint8_t* data, void* arg = nullptr);
 
+  /**
+   * @brief Pure virtual method to start the Optolink (implemented in protocol 
+   *             classes).
+   */
   virtual void begin() = 0;
+
+  /**
+   * @brief Pure virtual method to keep the Optolink running (implemented in
+   *             protocol classes). Call repeatedly eg. in the Arduino loop.
+   */
   virtual void loop() = 0;
 
 
  protected:
+  void _tryOnData(uint8_t* data, uint8_t len);
+  void _tryOnError(uint8_t error);
   HardwareSerial* _serial;
-  std::queue<Optolink_DP> _queue;  // TODO(bertmelis): add semaphore to ESP32 version to guard access to queue?
-  std::function<void(uint8_t* data, uint8_t len, void* arg)> _onData;
-  std::function<void(uint8_t error)> _onError;
+  SimpleQueue<Optolink_DP> _queue;  // TODO(bertmelis): add semaphore to ESP32 version to guard access to queue
+  OnDataArgCallback _onData;
+  OnErrorArgCallback _onError;
 };
 
 #elif defined VITOWIFI_TEST
