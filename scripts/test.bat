@@ -1,12 +1,8 @@
 @echo off
-echo Cleaning up previous test
 if exist .\build rmdir /s /q .\build
-echo Compiling
 mkdir build
-platformio ci --lib="./src" --project-conf=tests/platformio.ini --build-dir=build --keep-build-dir tests/queue.cpp
-@echo Starting tests
-if exist .\build\.pioenvs\test_queue\program.exe .\build\.pioenvs\test_queue\program.exe
-@echo Cleaning up
+platformio ci --lib="./src" --project-conf=scripts/platformio.ini --build-dir=build --keep-build-dir tests
+if exist .\build\.pioenvs\catch2\program.exe .\build\.pioenvs\catch2\program.exe
 if exist .\build rmdir /s /q .\build
 if exist .\-p rmdir /s /q .\-p
 @echo on

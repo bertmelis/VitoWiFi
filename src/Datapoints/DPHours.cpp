@@ -23,37 +23,41 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
 
-#include "DPCountS.h"
+#include "DPHours.h"
 
-DPCountS::DPCountS(const char* name, const uint16_t address) :
-  Datapoint(name, address, 2),
+DPHours::DPHours(const char* name, const uint16_t address) :
+  Datapoint(name, address, 4),
   _onData(nullptr) {}
 
-DPCountS::~DPCountS() {
+DPHours::~DPHours() {
   // empty
 }
 
-void DPCountS::onData(std::function<void(uint16_t)> callback) {
+void DPHours::onData(std::function<void(float)> callback) {
   _onData = callback;
 }
 
-void DPCountS::decode(const uint8_t* data, const uint8_t length, Datapoint* dp) {
+void DPHours::decode(const uint8_t* data, const uint8_t length, Datapoint* dp) {
   assert(length >= _length);
   if (!dp) dp = this;
   if (_onData) {
-    uint16_t output = data[1] << 8 | data[0];
+    uint32_t tmp = data[3] << 24 | data[2] << 16 | data[1] << 8 | data[0];
+    float output = tmp / 3600.0f;
     _onData(output);
   } else {
     Datapoint::decode(data, length, dp);
   }
 }
 
-void DPCountS::encode(uint8_t* raw, const uint8_t length, const void* data) {
-  encode(raw, length, *reinterpret_cast<const uint16_t*>(data));
+void DPHours::encode(uint8_t* raw, const uint8_t length, const void* data) {
+  encode(raw, length, *reinterpret_cast<const float*>(data));
 }
 
-void DPCountS::encode(uint8_t* raw, uint8_t length, uint16_t data) {
+void DPHours::encode(uint8_t* raw, const uint8_t length, const float data) {
   assert(length >= _length);
-  raw[1] = data >> 8;
-  raw[0] = data & 0xFF;
+  uint32_t tmp = floor((data * 3600) + 0.5f);
+  raw[3] = tmp >> 24;
+  raw[2] = tmp >> 16;
+  raw[1] = tmp >> 8;
+  raw[0] = tmp & 0xFF;
 }

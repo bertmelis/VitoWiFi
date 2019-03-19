@@ -23,37 +23,36 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
 
-#include "DPCountS.h"
+#include "DPCop.h"
 
-DPCountS::DPCountS(const char* name, const uint16_t address) :
-  Datapoint(name, address, 2),
+DPCop::DPCop(const char* name, const uint16_t address) :
+  Datapoint(name, address, 1),
   _onData(nullptr) {}
 
-DPCountS::~DPCountS() {
+DPCop::~DPCop() {
   // empty
 }
 
-void DPCountS::onData(std::function<void(uint16_t)> callback) {
+void DPCop::onData(std::function<void(float)> callback) {
   _onData = callback;
 }
 
-void DPCountS::decode(const uint8_t* data, const uint8_t length, Datapoint* dp) {
+void DPCop::decode(const uint8_t* data, const uint8_t length, Datapoint* dp) {
   assert(length >= _length);
   if (!dp) dp = this;
   if (_onData) {
-    uint16_t output = data[1] << 8 | data[0];
+    float output = data[0] / 10.0f;
     _onData(output);
   } else {
     Datapoint::decode(data, length, dp);
   }
 }
 
-void DPCountS::encode(uint8_t* raw, const uint8_t length, const void* data) {
-  encode(raw, length, *reinterpret_cast<const uint16_t*>(data));
+void DPCop::encode(uint8_t* raw, const uint8_t length, const void* data) {
+  encode(raw, length, *reinterpret_cast<const float*>(data));
 }
 
-void DPCountS::encode(uint8_t* raw, uint8_t length, uint16_t data) {
+void DPCop::encode(uint8_t* raw, const uint8_t length, const float data) {
   assert(length >= _length);
-  raw[1] = data >> 8;
-  raw[0] = data & 0xFF;
+  raw[0] = floor((data * 10) + 0.5);
 }

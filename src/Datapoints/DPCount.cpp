@@ -23,37 +23,39 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
 
-#include "DPCountS.h"
+#include "DPCount.h"
 
-DPCountS::DPCountS(const char* name, const uint16_t address) :
-  Datapoint(name, address, 2),
+DPCount::DPCount(const char* name, const uint16_t address) :
+  Datapoint(name, address, 4),
   _onData(nullptr) {}
 
-DPCountS::~DPCountS() {
+DPCount::~DPCount() {
   // empty
 }
 
-void DPCountS::onData(std::function<void(uint16_t)> callback) {
+void DPCount::onData(std::function<void(uint32_t)> callback) {
   _onData = callback;
 }
 
-void DPCountS::decode(const uint8_t* data, const uint8_t length, Datapoint* dp) {
+void DPCount::decode(const uint8_t* data, const uint8_t length, Datapoint* dp) {
   assert(length >= _length);
   if (!dp) dp = this;
   if (_onData) {
-    uint16_t output = data[1] << 8 | data[0];
+    uint32_t output = data[3] << 24 | data[2] << 16 | data[1] << 8 | data[0];
     _onData(output);
   } else {
     Datapoint::decode(data, length, dp);
   }
 }
 
-void DPCountS::encode(uint8_t* raw, const uint8_t length, const void* data) {
-  encode(raw, length, *reinterpret_cast<const uint16_t*>(data));
+void DPCount::encode(uint8_t* raw, const uint8_t length, const void* data) {
+  encode(raw, length, *reinterpret_cast<const uint32_t*>(data));
 }
 
-void DPCountS::encode(uint8_t* raw, uint8_t length, uint16_t data) {
+void DPCount::encode(uint8_t* raw, const uint8_t length, const uint32_t data) {
   assert(length >= _length);
+  raw[3] = data >> 24;
+  raw[2] = data >> 16;
   raw[1] = data >> 8;
   raw[0] = data & 0xFF;
 }

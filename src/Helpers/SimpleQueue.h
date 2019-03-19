@@ -74,7 +74,7 @@ class SimpleQueue {
    * @return true Element was successfully added.
    * @return false Element has not been added (eg. queue full).
    */
-  bool add(T t) {
+  bool push(T t) {
     if (_count < _size) {
       _buffer[_nextPosition++] = t;
       ++_count;
@@ -96,7 +96,7 @@ class SimpleQueue {
    * Remove() on an empty buffer generates no error.
    * 
    */
-  void remove() {
+  void pop() {
     if (_count > 0) {
       ++_firstPosition;
       if (_firstPosition == _size) {
@@ -115,7 +115,7 @@ class SimpleQueue {
    * 
    * @return T* Pointer to the first element. nullptr on an empty buffer.
    */
-  T* first() const {
+  T* front() const {
     if (_count > 0) {
       return &_buffer[_firstPosition];
     } else {

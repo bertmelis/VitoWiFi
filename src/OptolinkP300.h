@@ -23,6 +23,14 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
 
+/**
+ * @file OptolinkP300.h
+ * @brief Optolink API definions (protocol P300).
+ *
+ * This file contains all method definitions for the Optolink for the 
+ * protocol P300.
+ */
+
 #pragma once
 
 #if defined ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32
@@ -30,11 +38,36 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "Optolink.h"
 #include <Arduino.h>  // for millis
 
+/**
+ * @brief Base class for the Optolink (P300).
+ * 
+ * This class is a P300 version of the Optolink.
+ */
 class OptolinkP300 : public Optolink {
  public:
+  /**
+   * @brief Construct the Optolink object (P300)
+   * 
+   * @param serial Hardwareserial object to be used. Pass by reference.
+   */
   explicit OptolinkP300(HardwareSerial* serial);
   ~OptolinkP300();
+
+  /**
+   * @brief Method to start the Optolink.
+   * 
+   * Calling this method starts the Hardwareserial (passed in the constructor)
+   * with the right settings.
+   */
   void begin();
+
+  /**
+   * @brief Method to keep the Optolink running.
+   * 
+   * This methid has to be called frequently. The Optolink object works by 
+   * polling the Hardwareserial. If applicable, add a delay between calls to 
+   * feed a watchdog (needed for ESP8266 and ESP32).
+   */
   void loop();
 
  private:
@@ -64,9 +97,6 @@ class OptolinkP300 : public Optolink {
   uint8_t _rcvBuffer[MAX_DP_LENGTH + 8];
   size_t _rcvBufferLen;
   size_t _rcvLen;
-
-  inline void _tryOnData(uint8_t* data, uint8_t len, void* arg);
-  inline void _tryOnError(uint8_t error);
 };
 
 #elif defined VITOWIFI_TEST

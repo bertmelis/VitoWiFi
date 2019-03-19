@@ -26,9 +26,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #pragma once
 
 #include <stdint.h>
+#include <assert.h>
 #include <functional>
 #include <string.h>  // for memcpy
-#include <vector>
 
 class Datapoint {
   friend class VitoWiFi;
@@ -40,13 +40,20 @@ class Datapoint {
   const char* getName() const;
   const uint16_t getAddress() const;
   const uint8_t getLength() const;
-  void encode(uint8_t* raw, uint8_t length, void* data);
-  virtual void decode(uint8_t* data, uint8_t length, Datapoint* dp = nullptr);
+  virtual void encode(uint8_t* raw, const uint8_t length, const void* data);
+  virtual void decode(const uint8_t* data, const uint8_t length, Datapoint* dp = nullptr);
 
  protected:
   const char* _name;
   const uint16_t _address;
   const uint8_t _length;
   static std::function<void(const uint8_t[], uint8_t, Datapoint* dp)> _globalOnData;
-  static std::vector<Datapoint*> _datapoints;
 };
+
+#include "DPCop.h"
+#include "DPCount.h"
+#include "DPCountS.h"
+#include "DPHours.h"
+#include "DPStat.h"
+#include "DPTemp.h"
+#include "DPMode.h"

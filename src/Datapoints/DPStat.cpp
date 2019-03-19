@@ -37,24 +37,22 @@ void DPStat::onData(std::function<void(bool)> callback) {
   _onData = callback;
 }
 
-void DPStat::decode(uint8_t* data, uint8_t length) {
-  if (length != _length) {
-    // display error about length
+void DPStat::decode(const uint8_t* data, const uint8_t length, Datapoint* dp) {
+  assert(length >= _length);
+  if (!dp) dp = this;
+  if (_onData) {
+    bool output = data ? true : false;
+    _onData(output);
   } else {
-    if (_onData) {
-      bool output = data ? true : false;
-      _onData(output);
-    } else {
-      Datapoint::decode(data, length, this);
-    }
+    Datapoint::decode(data, length, dp);
   }
 }
 
-void DPStat::encode(uint8_t* raw, uint8_t length, bool data) {
-  if (length != _length) {
-    // display error about length
-    memset(raw, 0, _length);
-  } else {
-    raw[0] = data ? 0x01 : 0x00;
-  }
+void DPStat::encode(uint8_t* raw, const uint8_t length, const void* data) {
+  encode(raw, length, *reinterpret_cast<const bool*>(data));
+}
+
+void DPStat::encode(uint8_t* raw, const uint8_t length, const bool data) {
+  assert(length >= _length);
+  raw[0] = data ? 0x01 : 0x00;
 }

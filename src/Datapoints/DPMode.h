@@ -23,37 +23,21 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
 
-#include "DPCountS.h"
+#pragma once
 
-DPCountS::DPCountS(const char* name, const uint16_t address) :
-  Datapoint(name, address, 2),
-  _onData(nullptr) {}
+#include "Datapoint.h"
 
-DPCountS::~DPCountS() {
-  // empty
-}
+class DPMode : public Datapoint {
+ public:
+  DPMode(const char* name, const uint16_t address);
+  ~DPMode();
+  void onData(std::function<void(uint8_t)> callback);
+  void decode(const uint8_t* data, const uint8_t length, Datapoint* dp = nullptr) override;
+  void encode(uint8_t* raw, const uint8_t length, const void* data) override;
+  void encode(uint8_t* raw, const uint8_t length, const uint8_t data);
 
-void DPCountS::onData(std::function<void(uint16_t)> callback) {
-  _onData = callback;
-}
+ private:
+  std::function<void(uint8_t)> _onData;
+};
 
-void DPCountS::decode(const uint8_t* data, const uint8_t length, Datapoint* dp) {
-  assert(length >= _length);
-  if (!dp) dp = this;
-  if (_onData) {
-    uint16_t output = data[1] << 8 | data[0];
-    _onData(output);
-  } else {
-    Datapoint::decode(data, length, dp);
-  }
-}
-
-void DPCountS::encode(uint8_t* raw, const uint8_t length, const void* data) {
-  encode(raw, length, *reinterpret_cast<const uint16_t*>(data));
-}
-
-void DPCountS::encode(uint8_t* raw, uint8_t length, uint16_t data) {
-  assert(length >= _length);
-  raw[1] = data >> 8;
-  raw[0] = data & 0xFF;
-}
+typedef DPMode DPTempS;

@@ -32,8 +32,9 @@ class DPStat : public Datapoint {
   DPStat(const char* name, const uint16_t address);
   ~DPStat();
   void onData(std::function<void(bool)> callback);
-  void decode(uint8_t* data, uint8_t length);
-  void encode(uint8_t* raw, uint8_t length, bool data);
+  void decode(const uint8_t* data, const uint8_t length, Datapoint* dp = nullptr) override;
+  void encode(uint8_t* raw, const uint8_t length, const void* data) override;
+  void encode(uint8_t* raw, const uint8_t length, const bool data);
 
  private:
   std::function<void(bool)> _onData;
