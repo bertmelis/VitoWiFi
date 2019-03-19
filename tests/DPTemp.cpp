@@ -32,4 +32,6 @@ TEST_CASE("Temperature Datapoint", "[DPTemp]") {
     datapoint->decode(stdValueRaw, datapoint->getLength());
     CHECK_THAT(cnvValue, WithinAbs(stdValue, 0.01f));
   }
+  
+  delete datapoint;
 }

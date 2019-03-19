@@ -30,4 +30,6 @@ TEST_CASE("COP Datapoint", "[DPCop]") {
     datapoint->decode(stdValueRaw, datapoint->getLength());
     CHECK_THAT(cnvValue, WithinAbs(stdValue, 0.01f));
   }
+  
+  delete datapoint;
 }

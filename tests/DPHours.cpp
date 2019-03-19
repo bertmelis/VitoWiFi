@@ -30,4 +30,6 @@ TEST_CASE("Hours Datapoint", "[DPHours]") {
     datapoint->decode(stdValueRaw, datapoint->getLength());
     CHECK_THAT(cnvValue, Catch::Matchers::WithinAbs(stdValue, 0.01f));
   }
+
+  delete datapoint;
 }

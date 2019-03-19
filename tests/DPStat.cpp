@@ -28,4 +28,6 @@ TEST_CASE("Status Datapoint", "[DPStat]") {
     datapoint->decode(stdValueRaw, datapoint->getLength());
     CHECK(cnvValue == stdValue);
   }
+
+  delete datapoint;
 }

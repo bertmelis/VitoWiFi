@@ -35,7 +35,7 @@ class Datapoint {
 
  public:
   Datapoint(const char* name, const uint16_t address, const uint8_t length);
-  ~Datapoint();
+  virtual ~Datapoint();
   static void globalOnData(std::function<void(const uint8_t[], uint8_t, Datapoint* dp)> callback);
   const char* getName() const;
   const uint16_t getAddress() const;

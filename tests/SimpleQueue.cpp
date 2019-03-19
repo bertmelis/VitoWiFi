@@ -39,5 +39,7 @@ TEST_CASE("Simple queue", "[SimpleQueue]") {
   REQUIRE(result == true);
   REQUIRE(queue->size() == 0);
   REQUIRE(queue->front() == nullptr);
+  
+  delete queue;
 }
 

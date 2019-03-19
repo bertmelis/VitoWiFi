@@ -28,4 +28,6 @@ TEST_CASE("Mode (enum) / TempS Datapoint", "[DPMode]") {
     datapoint->decode(stdValueRaw, datapoint->getLength());
     CHECK(cnvValue == stdValue);
   }
+
+  delete datapoint;
 }
