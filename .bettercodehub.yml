@@ -1,4 +1,3 @@
-component_depth: 2
 languages:
 - name: cpp
   production:
