@@ -7,3 +7,5 @@ languages:
   test:
     include:
       - /tests/.*
+    exclude:
+      - /tests/Includes/catch.hpp
