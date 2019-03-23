@@ -215,7 +215,7 @@ void OptolinkP300::_receive() {
     ++_rcvBufferLen;
   }
   if (_rcvBuffer[0] != 0x41) {
-    // TODO(@bertmelis): find out why this is needed! I'd expect the rx-buffer to be empty.
+    // wait for start byte
     return;
   }
   if (_rcvBufferLen == _rcvLen) {     // message complete, check message

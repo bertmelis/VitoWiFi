@@ -3,7 +3,7 @@ languages:
 - name: cpp
   production:
     exclude:
-      - /test/.*
+      - /tests/.*
   test:
     include:
       - /tests/.*
