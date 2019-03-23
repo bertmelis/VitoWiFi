@@ -23,38 +23,39 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
 
-#include "DPCountS.h"
+#include "OptolinkDP.h"
 
-DPCountS::DPCountS(const char* name, const uint16_t address) :
-  Datapoint(name, address, 2),
-  _onData(nullptr) {}
+OptolinkDP::OptolinkDP(uint16_t address, uint8_t length, bool write, uint8_t* value, void* arg) :
+  address(address),
+  length(length),
+  write(write),
+  data(nullptr),
+  arg(arg) {
+    if (write) {
+      data = new uint8_t[length];
+      memcpy(data, value, length);
+    }
+  }
 
-DPCountS::~DPCountS() {
-  // empty
-}
+OptolinkDP::OptolinkDP() :
+  address(0),
+  length(0),
+  write(false),
+  data(nullptr),
+  arg(nullptr) {}
 
-void DPCountS::onData(std::function<void(uint16_t)> callback) {
-  _onData = callback;
-}
-
-void DPCountS::decode(uint8_t* data, uint8_t length, Datapoint* dp) {
-  assert(length >= _length);
-  if (!dp) dp = this;
-  if (_onData) {
-    uint16_t output = data[1] << 8 | data[0];
-    _onData(output);
-  } else {
-    Datapoint::decode(data, length, dp);
+OptolinkDP::OptolinkDP(const OptolinkDP& obj) {
+  address = obj.address;
+  length = obj.length;
+  write = obj.write;
+  data = nullptr;
+  arg = obj.arg;
+  if (write) {
+    data = new uint8_t[length];
+    memcpy(data, obj.data, length);
   }
 }
 
-void DPCountS::encode(uint8_t* raw, uint8_t length, void* data) {
-  uint16_t value = *reinterpret_cast<uint16_t*>(data);
-  encode(raw, length, value);
-}
-
-void DPCountS::encode(uint8_t* raw, uint8_t length, uint16_t data) {
-  assert(length >= _length);
-  raw[1] = data >> 8;
-  raw[0] = data & 0xFF;
+OptolinkDP::~OptolinkDP() {
+  if (data) delete[] data;
 }

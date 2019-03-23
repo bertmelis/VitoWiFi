@@ -37,7 +37,7 @@ void DPCount::onData(std::function<void(uint32_t)> callback) {
   _onData = callback;
 }
 
-void DPCount::decode(const uint8_t* data, const uint8_t length, Datapoint* dp) {
+void DPCount::decode(uint8_t* data, uint8_t length, Datapoint* dp) {
   assert(length >= _length);
   if (!dp) dp = this;
   if (_onData) {
@@ -48,11 +48,12 @@ void DPCount::decode(const uint8_t* data, const uint8_t length, Datapoint* dp) {
   }
 }
 
-void DPCount::encode(uint8_t* raw, const uint8_t length, const void* data) {
-  encode(raw, length, *reinterpret_cast<const uint32_t*>(data));
+void DPCount::encode(uint8_t* raw, uint8_t length, void* data) {
+  uint32_t value = *reinterpret_cast<uint32_t*>(data);
+  encode(raw, length, value);
 }
 
-void DPCount::encode(uint8_t* raw, const uint8_t length, const uint32_t data) {
+void DPCount::encode(uint8_t* raw, uint8_t length, uint32_t data) {
   assert(length >= _length);
   raw[3] = data >> 24;
   raw[2] = data >> 16;

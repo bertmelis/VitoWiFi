@@ -37,7 +37,7 @@ void DPMode::onData(std::function<void(uint8_t)> callback) {
   _onData = callback;
 }
 
-void DPMode::decode(const uint8_t* data, const uint8_t length, Datapoint* dp) {
+void DPMode::decode(uint8_t* data, uint8_t length, Datapoint* dp) {
   assert(length >= _length);
   if (!dp) dp = this;
   if (_onData) {
@@ -47,11 +47,12 @@ void DPMode::decode(const uint8_t* data, const uint8_t length, Datapoint* dp) {
   }
 }
 
-void DPMode::encode(uint8_t* raw, const uint8_t length, const void* data) {
-  encode(raw, length, *reinterpret_cast<const uint8_t*>(data));
+void DPMode::encode(uint8_t* raw, uint8_t length, void* data) {
+  uint8_t value = *reinterpret_cast<uint8_t*>(data);
+  encode(raw, length, value);
 }
 
-void DPMode::encode(uint8_t* raw, const uint8_t length, const uint8_t data) {
+void DPMode::encode(uint8_t* raw, uint8_t length, uint8_t data) {
   assert(length >= _length);
   raw[0] = data;
 }

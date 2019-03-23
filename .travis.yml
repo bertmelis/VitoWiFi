@@ -1,28 +1,51 @@
-language: python
-python:
-    - "2.7"
+language: bash
+os: linux
+dist: trusty
 
-sudo: required
-cache:
-    directories:
-        - "~/.platformio"
+before_install:
+  - sudo apt-get update
 
-env:
-    - CPPLINT=true
-    - TESTQUEUE=true
-    - PLATFORMIO_CI_SRC=examples/basic/basic.ino PLATFORMIO_CI_EXTRA_ARGS="--board=d1_mini"
-#    - PLATFORMIO_CI_SRC=examples/basic-esp32/basic-esp32.ino PLATFORMIO_CI_EXTRA_ARGS="--board=lolin32"
-#    - PLATFORMIO_CI_SRC=examples/datapoints/datapoints.ino PLATFORMIO_CI_EXTRA_ARGS="--board=d1_mini"
-#    - PLATFORMIO_CI_SRC=examples/rawOptolink/rawOptolink.ino PLATFORMIO_CI_EXTRA_ARGS="--board=d1_mini"
-#    - PLATFORMIO_CI_SRC=examples/readDatapoint/readDatapoint.ino PLATFORMIO_CI_EXTRA_ARGS="--board=d1_mini"
-#    - PLATFORMIO_CI_SRC=examples/Blynk/Blynk.ino PLATFORMIO_CI_EXTRA_ARGS="--board=d1_mini"
-
-install: true
-
-script:
-    - bash scripts/travis.sh
+jobs:
+  include:
+    - name: "cpplint"
+      addons:
+        apt:
+          packages:
+            - python-pip
+      script:
+        - pip install -U cpplint
+        - cpplint --repository=. --recursive --linelength=200 --filter=-build/include  ./src
+    - name: "cppcheck"
+      addons:
+        apt:
+          packages:
+            - cppcheck
+      script:
+        - cppcheck --error-exitcode=1 --enable=warning,style,performance,portability -DARDUINO_ARCH_ESP8266=1 ./src
+    - name: "Test"
+      script:
+        - pip install -U platformio
+        - platformio update
+        - rm -rf build
+        - mkdir build
+        - platformio ci --lib="./src" --project-conf="scripts/platformio.ini" --build-dir=build --keep-build-dir tests
+        - ./build/.pioenvs/catch2/program
+    - name: "Memcheck"
+      addons:
+        apt:
+          packages:
+            - valgrind
+      script: 
+        - pip install -U platformio
+        - platformio update
+        - rm -rf build
+        - mkdir build
+        - platformio ci --lib="./src" --project-conf="scripts/platformio.ini" --build-dir=build --keep-build-dir tests
+        - valgrind --leak-check=full ./build/.pioenvs/catch2/program
+    - name: "Build examples"
+      script: $TRAVIS_BUILD_DIR/tests/build_examples.sh
 
 notifications:
   email:
     on_success: change
-    on_failure: always
+    on_failure: change

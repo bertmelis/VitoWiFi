@@ -8,8 +8,8 @@
 #define MAX_DP_LENGTH 9
 
 TEST_CASE("Mode (enum) / TempS Datapoint", "[DPMode]") {
-  const uint8_t stdValue = 3;
-  const uint8_t stdValueRaw[] = {0x03};
+  uint8_t stdValue = 3;
+  uint8_t stdValueRaw[] = {0x03};
   static uint8_t cnvValue = 0;
   uint8_t cnvValueRaw[MAX_DP_LENGTH] = {0};
   Datapoint* datapoint = new DPMode("datapoint", 0x0000);
@@ -20,7 +20,7 @@ TEST_CASE("Mode (enum) / TempS Datapoint", "[DPMode]") {
   REQUIRE(datapoint->getLength() == sizeof(stdValueRaw));
 
   SECTION("Encoding") {
-    datapoint->encode(cnvValueRaw, sizeof(cnvValueRaw), reinterpret_cast<const void*>(&stdValue));
+    datapoint->encode(cnvValueRaw, sizeof(cnvValueRaw), reinterpret_cast<void*>(&stdValue));
     CHECK_THAT(cnvValueRaw, ByteArrayEqual(stdValueRaw, sizeof(stdValueRaw)));
   }
 

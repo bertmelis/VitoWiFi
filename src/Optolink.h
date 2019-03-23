@@ -81,6 +81,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <string.h>  // for memcpy
 
 #include "Helpers/SimpleQueue.h"
+#include "OptolinkDP.h"
 
 /**
  * @brief Errors the optolink can encounter
@@ -95,34 +96,6 @@ enum OptolinkError : uint8_t {
 
 typedef void (*OnDataArgCallback)(uint8_t* data, uint8_t len, void* arg);
 typedef void (*OnErrorArgCallback)(uint8_t error, void* arg);
-
-/**
- * @brief Class holding datapoint values. The Optolink queue stores this
- * struct.
- */
-class Optolink_DP {
- public:
-   /**
-   * @brief Construct a new Optolink_DP object.
-   * 
-   * @param address Address of the datapoint (eg. 0x1234)
-   * @param length Length in bytes of the datapoint. This is also the length
-   *               of the value when writing.
-   * @param write Bool indicating the datapoint is readonly (false) or
-   *              read/write (true)
-   * @param value Pointer to data to write (set to nullptr when reading). This 
-   *              data will be copied so it is allowed to go out of scope
-   *              after passing the this object.
-   * @param arg Argument to use for the callback (if not used, set to nullptr)
-   */
-  Optolink_DP(uint16_t address, uint8_t length, bool write, uint8_t* value, void* arg);
-  ~Optolink_DP();
-  uint16_t address;
-  uint8_t length;
-  bool write;
-  uint8_t* data;
-  void* arg;
-};
 
 /**
  * @brief Base class for the Optolink.
@@ -213,7 +186,7 @@ class Optolink {
   void _tryOnData(uint8_t* data, uint8_t len);
   void _tryOnError(uint8_t error);
   HardwareSerial* _serial;
-  SimpleQueue<Optolink_DP> _queue;  // TODO(bertmelis): add semaphore to ESP32 version to guard access to queue
+  SimpleQueue<OptolinkDP> _queue;  // TODO(bertmelis): add semaphore to ESP32 version to guard access to queue
   OnDataArgCallback _onData;
   OnErrorArgCallback _onError;
 };

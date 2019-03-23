@@ -12,38 +12,41 @@ globalCallback uses value.getString(char*,size_t). This method is independent of
 
 #include <VitoWiFi.h>
 
-VitoWiFi_setProtocol(P300);
+VitoWiFi vitodens200(P300, &Serial);
 
-DPTemp outsideTemp("outsideTemp", "boiler", 0x5525);
-DPTemp boilerTemp("boilertemp", "boiler", 0x0810);
-DPStat pumpStat("pump", "heating1", 0x2906);
+DPTemp outsideTemp("outsideTemp", 0x5525);
+DPTemp boilerTemp("boilertemp", 0x0810);
+DPStat pumpStat("pump", 0x2906);
 
-void tempCallbackHandler(const IDatapoint& dp, DPValue value) {
+void tempCallback(const char* name, float value) {
   float fahrenheit = 0;
-  fahrenheit = (5.0 / 9) * (value.getFloat() + 32);
-  Serial1.print(dp.getGroup());
-  Serial1.print(" - ");
-  Serial1.print(dp.getName());
+  fahrenheit = (5.0 / 9) * (value + 32);
+  Serial1.print(name);
   Serial1.print(": ");
   Serial1.println(fahrenheit, 1);  // print with 1 decimal
 }
 
-void globalCallbackHandler(const IDatapoint& dp, DPValue value) {
-  Serial1.print(dp.getGroup());
-  Serial1.print(" - ");
-  Serial1.print(dp.getName());
-  Serial1.print(" is ");
-  char value_str[15] = {0};
-  value.getString(value_str, sizeof(value_str));
-  Serial1.println(value_str);
+void dataCallback(const uint8_t* data, uint8_t length, Datapoint* dp) {
+  Serial1.print(dp->getName());
+  Serial1.print(" is 0x");
+  for (uint8_t i = 0; i < length; ++i) Serial1.printf("%02x", data[i]);
+  Serial1.print("\n");
+}
+
+void errorCallback(uint8_t error, Datapoint* dp) {
+  Serial1.printf("%s error %u\n", dp->getName(), error);
 }
 
 void setup() {
-  outsideTemp.setCallback(tempCallbackHandler);
-  boilerTemp.setCallback(tempCallbackHandler);
-  VitoWiFi.setGlobalCallback(globalCallbackHandler);  // this callback will be used for all DPs without specific callback
-                                                      // must be set after adding at least 1 datapoint
-  VitoWiFi.setup(&Serial);
+  outsideTemp.onData([](float value) {
+    tempCallback(outsideTemp.getName(), value);
+  });
+  boilerTemp.onData([](float value) {
+    tempCallback(outsideTemp.getName(), value);
+  });
+  Datapoint::stdOnData(dataCallback);  // this callback will be used for all DPs without specific callback
+  Datapoint::stdOnError(errorCallback);
+  vitodens200.begin();
   Serial1.begin(115200);
   Serial1.println(F("Setup finished..."));
 }
@@ -52,7 +55,7 @@ void loop() {
   static unsigned long lastMillis = 0;
   if (millis() - lastMillis > 60 * 1000UL) {  // read all values every 60 seconds
     lastMillis = millis();
-    VitoWiFi.readAll();
+    vitodens200.readAll();
   }
-  VitoWiFi.loop();
+  vitodens200.loop();
 }

@@ -32,9 +32,9 @@ class DPCop : public Datapoint {
   DPCop(const char* name, const uint16_t address);
   ~DPCop();
   void onData(std::function<void(float)> callback);
-  void decode(const uint8_t* data, const uint8_t length, Datapoint* dp = nullptr) override;
-  void encode(uint8_t* raw, const uint8_t length, const void* data) override;
-  void encode(uint8_t* raw, const uint8_t length, const float data);
+  void decode(uint8_t* data, uint8_t length, Datapoint* dp = nullptr) override;
+  void encode(uint8_t* raw, uint8_t length, void* data) override;
+  void encode(uint8_t* raw, uint8_t length, float data);
 
  private:
   std::function<void(float)> _onData;

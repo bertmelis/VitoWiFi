@@ -16,10 +16,10 @@
 const char ssid[] = "xxxx";
 const char pass[] = "xxxx";
 const char auth[] = "xxxx";
-VitoWiFi_setProtocol(KW);
+VitoWiFi vitodens200(P300, &Serial);
 
-DPTemp outsideTemp("outsidetemp", "boiler", 0x552);
-DPTempS roomTempSet("roomtempset", "heating", 0x2306);
+DPTemp outsideTemp("outsidetemp" 0x552);
+DPTempS roomTempSet("roomtempset" 0x2306);
 
 BlynkTimer timer;
 bool updateItems = false;
@@ -32,20 +32,21 @@ void update() {
 }
 
 // fallback when no handler has been found, just print received data to Blynk terminal
-void globalCallbackHandler(const IDatapoint& dp, DPValue value) {
-  char value_str[15] = {0};
-  value.getString(value_str, sizeof(value_str));
-  terminal.printf("Received: %s - %s: %s\n", dp.getGroup(), dp.getName(), value_str);
+void dataCallback(const uint8_t* data, uint8_t length, Datapoint* dp) {
+  terminal.print(dp->getName());
+  terminal.print(" is 0x");
+  for (uint8_t i = 0; i < length; ++i) terminal.printf("%02x", data[i]);
+  terminal.print("\n");
 }
 
 // send receive outside temperature to virtual pin V1
-void sendOutsidetemp(const IDatapoint& dp, DPValue value) {
-  Blynk.virtualWrite(V1, value.getFloat());
+void sendOutsidetemp(float value) {
+  Blynk.virtualWrite(V1, value);
 }
 
 // send receive room temperature (soll) to virtual pin V2
-void sendRoomtempSet(const IDatapoint& dp, DPValue value) {
-  Blynk.virtualWrite(V2, value.getU8());
+void sendRoomtempSet(uint8_t value) {
+  Blynk.virtualWrite(V2, value);
 }
 
 // callback for Blynk when widget Step V (on V0) has been changed
@@ -54,18 +55,16 @@ BLYNK_WRITE(V0) {
   uint8_t pinValue = param.asInt();
   DPValue value(pinValue);
   terminal.printf("Blynk update: V0 = %d\n", pinValue);
-  VitoWiFi.writeDatapoint(roomTempSet, value);
-  VitoWiFi.readDatapoint(roomTempSet);
+  vitodens200.write(roomTempSet, value);
+  vitodens200.readDatapoint(roomTempSet);
 }
 
 void setup() {
   // VitoWifi setup
-  VitoWiFi.setLogger(&terminal);  // might be too verbose/fast for Blynk to handle
-  VitoWiFi.enableLogger();  // might be too verbose/fast for Blynk to handle
   outsideTemp.setCallback(sendOutsidetemp);
-  roomTempSet.setWriteable(true).setCallback(sendRoomtempSet);
-  VitoWiFi.setGlobalCallback(globalCallbackHandler);
-  VitoWiFi.setup(&Serial);
+  roomTempSet.setCallback(sendRoomtempSet);
+  Datapoint::stdOnData(dataCallback);
+  vitodens200.begin();
 
   // Blynk setup
   Blynk.begin(auth, ssid, pass);
@@ -73,7 +72,7 @@ void setup() {
 }
 
 void loop() {
-  VitoWiFi.loop();
+  vitodens200.loop();
   Blynk.run();
   timer.run();
 
@@ -81,6 +80,6 @@ void loop() {
   if (updateItems) {
     updateItems = false;
     terminal.println("Updating items!");
-    VitoWiFi.readAll();
+    vitodens200.readAll();
   }
 }
