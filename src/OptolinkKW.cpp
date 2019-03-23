@@ -32,7 +32,8 @@ inline void clearInput(HardwareSerial* serial) {
 }
 
 OptolinkKW::OptolinkKW(HardwareSerial* serial) :
-  Optolink(serial) {}
+  Optolink(serial),
+  _state(RESET) {}
 
 OptolinkKW::~OptolinkKW() {
   // TODO(bertmelis): anything to do?

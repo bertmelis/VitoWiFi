@@ -35,19 +35,20 @@ class Datapoint {
 
  public:
   Datapoint(const char* name, const uint16_t address, const uint8_t length);
-  ~Datapoint();
-  static void globalOnData(std::function<void(const uint8_t[], uint8_t, Datapoint* dp)> callback);
+  virtual ~Datapoint();
+  static void onData(std::function<void(uint8_t[], uint8_t, Datapoint* dp)> callback);
   const char* getName() const;
   const uint16_t getAddress() const;
   const uint8_t getLength() const;
-  virtual void encode(uint8_t* raw, const uint8_t length, const void* data);
-  virtual void decode(const uint8_t* data, const uint8_t length, Datapoint* dp = nullptr);
+  virtual void encode(uint8_t* raw, uint8_t length, void* data);
+  virtual void decode(uint8_t* data, uint8_t length, Datapoint* dp = nullptr);
+  void onError(uint8_t, Datapoint* dp);
 
  protected:
   const char* _name;
   const uint16_t _address;
   const uint8_t _length;
-  static std::function<void(const uint8_t[], uint8_t, Datapoint* dp)> _globalOnData;
+  static std::function<void(uint8_t[], uint8_t, Datapoint* dp)> _stdOnData;
 };
 
 #include "DPCop.h"

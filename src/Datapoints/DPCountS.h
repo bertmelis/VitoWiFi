@@ -33,8 +33,8 @@ class DPCountS : public Datapoint {
   DPCountS(const char* name, const uint16_t address);
   ~DPCountS();
   void onData(std::function<void(uint16_t)> callback);
-  void decode(const uint8_t* data, const uint8_t length, Datapoint* dp = nullptr) override;
-  void encode(uint8_t* raw, const uint8_t length, const void* data) override;
+  void decode(uint8_t* data, uint8_t length, Datapoint* dp = nullptr) override;
+  void encode(uint8_t* raw, uint8_t length, void* data) override;
   void encode(uint8_t* raw, uint8_t length, uint16_t data);
 
  private:

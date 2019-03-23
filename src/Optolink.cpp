@@ -27,22 +27,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #if defined ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32
 
-Optolink_DP::Optolink_DP(uint16_t address, uint8_t length, bool write, uint8_t* value, void* arg) :
-  address(address),
-  length(length),
-  write(write),
-  data(nullptr),
-  arg(arg) {
-    if (write) {
-      data = new uint8_t[length];
-      memcpy(data, value, length);
-    }
-  }
-
-Optolink_DP::~Optolink_DP() {
-  delete[] data;
-}
-
 Optolink::Optolink(HardwareSerial* serial) :
   _serial(serial),
   _queue(VITOWIFI_MAX_QUEUE_LENGTH),
@@ -57,7 +41,7 @@ void Optolink::onData(void (*callback)(uint8_t* data, uint8_t len)) {
   _onData = reinterpret_cast<OnDataArgCallback>(callback);
 }
 
-void Optolink::onData(void (*callback)(uint8_t* data, uint8_t len, void* arg)) {
+void Optolink::onData(OnDataArgCallback callback) {
   _onData = callback;
 }
 
@@ -70,12 +54,12 @@ void Optolink::onError(OnErrorArgCallback callback) {
 }
 
 bool Optolink::read(uint16_t address, uint8_t length, void* arg) {
-  Optolink_DP dp(address, length, false, nullptr, arg);
+  OptolinkDP dp(address, length, false, nullptr, arg);
   return _queue.push(dp);
 }
 
 bool Optolink::write(uint16_t address, uint8_t length, uint8_t* data, void* arg) {
-  Optolink_DP dp(address, length, true, data, arg);
+  OptolinkDP dp(address, length, true, data, arg);
   return _queue.push(dp);
 }
 

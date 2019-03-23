@@ -8,8 +8,8 @@
 #define MAX_DP_LENGTH 9
 
 TEST_CASE("Count (short) Datapoint", "[DPCountS]") {
-  const uint16_t stdValue = 4586;
-  const uint8_t stdValueRaw[] = {0xEA, 0x11};
+  uint16_t stdValue = 4586;
+  uint8_t stdValueRaw[] = {0xEA, 0x11};
   static uint16_t cnvValue = 0;
   uint8_t cnvValueRaw[MAX_DP_LENGTH] = {0};
   Datapoint* datapoint = new DPCountS("datapoint", 0x0000);
@@ -20,7 +20,7 @@ TEST_CASE("Count (short) Datapoint", "[DPCountS]") {
   REQUIRE(datapoint->getLength() == sizeof(stdValueRaw));
 
   SECTION("Encoding") {
-    datapoint->encode(cnvValueRaw, sizeof(cnvValueRaw), reinterpret_cast<const void*>(&stdValue));
+    datapoint->encode(cnvValueRaw, sizeof(cnvValueRaw), reinterpret_cast<void*>(&stdValue));
     CHECK_THAT(cnvValueRaw, ByteArrayEqual(stdValueRaw, sizeof(stdValueRaw)));
   }
 
@@ -28,4 +28,6 @@ TEST_CASE("Count (short) Datapoint", "[DPCountS]") {
     datapoint->decode(stdValueRaw, datapoint->getLength());
     CHECK(cnvValue == stdValue);
   }
+
+  delete datapoint;
 }

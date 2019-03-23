@@ -37,7 +37,7 @@ void DPHours::onData(std::function<void(float)> callback) {
   _onData = callback;
 }
 
-void DPHours::decode(const uint8_t* data, const uint8_t length, Datapoint* dp) {
+void DPHours::decode(uint8_t* data, uint8_t length, Datapoint* dp) {
   assert(length >= _length);
   if (!dp) dp = this;
   if (_onData) {
@@ -49,11 +49,12 @@ void DPHours::decode(const uint8_t* data, const uint8_t length, Datapoint* dp) {
   }
 }
 
-void DPHours::encode(uint8_t* raw, const uint8_t length, const void* data) {
-  encode(raw, length, *reinterpret_cast<const float*>(data));
+void DPHours::encode(uint8_t* raw, uint8_t length, void* data) {
+  float value = *reinterpret_cast<float*>(data);
+  encode(raw, length, value);
 }
 
-void DPHours::encode(uint8_t* raw, const uint8_t length, const float data) {
+void DPHours::encode(uint8_t* raw, uint8_t length, float data) {
   assert(length >= _length);
   uint32_t tmp = floor((data * 3600) + 0.5f);
   raw[3] = tmp >> 24;

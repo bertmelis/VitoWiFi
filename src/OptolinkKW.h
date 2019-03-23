@@ -39,8 +39,7 @@ class OptolinkKW : public Optolink {
 
  private:
   enum OptolinkState : uint8_t {
-    RESET = 0,
-    UNDEF
+    RESET = 0
   } _state;
 };
 

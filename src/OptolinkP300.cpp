@@ -143,7 +143,6 @@ void OptolinkP300::_idle() {
   if (millis() - _lastMillis > 15 * 1000UL) {  // send INIT every 15 seconds to keep communication alive
     _state = INIT;
   }
-  // clearInput(_serial);  // TODO(@bertmelis): keep input clean, needed?
   if (_queue.size() > 0) {
     _state = SEND;
   }
@@ -151,7 +150,7 @@ void OptolinkP300::_idle() {
 
 void OptolinkP300::_send() {
   uint8_t buff[MAX_DP_LENGTH + 8];
-  Optolink_DP* dp = _queue.front();
+  OptolinkDP* dp = _queue.front();
   uint8_t length = dp->length;
   uint16_t address = dp->address;
   if (_write) {
@@ -216,7 +215,7 @@ void OptolinkP300::_receive() {
     ++_rcvBufferLen;
   }
   if (_rcvBuffer[0] != 0x41) {
-    // TODO(@bertmelis): find out why this is needed! I'd expect the rx-buffer to be empty.
+    // wait for start byte
     return;
   }
   if (_rcvBufferLen == _rcvLen) {     // message complete, check message
@@ -235,7 +234,7 @@ void OptolinkP300::_receive() {
       _state = RECEIVE_ACK;  // TODO(@bertmelis): should we return NACK?
       return;
     }
-    Optolink_DP* dp = _queue.front();
+    OptolinkDP* dp = _queue.front();
     if (_rcvBuffer[3] == 0x01) {
       // message is from READ command, so returning read value
       _tryOnData(&_rcvBuffer[7], dp->length);

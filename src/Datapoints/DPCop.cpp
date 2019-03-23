@@ -37,7 +37,7 @@ void DPCop::onData(std::function<void(float)> callback) {
   _onData = callback;
 }
 
-void DPCop::decode(const uint8_t* data, const uint8_t length, Datapoint* dp) {
+void DPCop::decode(uint8_t* data, uint8_t length, Datapoint* dp) {
   assert(length >= _length);
   if (!dp) dp = this;
   if (_onData) {
@@ -48,11 +48,12 @@ void DPCop::decode(const uint8_t* data, const uint8_t length, Datapoint* dp) {
   }
 }
 
-void DPCop::encode(uint8_t* raw, const uint8_t length, const void* data) {
-  encode(raw, length, *reinterpret_cast<const float*>(data));
+void DPCop::encode(uint8_t* raw, uint8_t length, void* data) {
+  float value = *reinterpret_cast<float*>(data);
+  encode(raw, length, value);
 }
 
-void DPCop::encode(uint8_t* raw, const uint8_t length, const float data) {
+void DPCop::encode(uint8_t* raw, uint8_t length, float data) {
   assert(length >= _length);
   raw[0] = floor((data * 10) + 0.5);
 }
