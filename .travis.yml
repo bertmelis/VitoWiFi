@@ -1,4 +1,4 @@
-language: bash
+language: python
 os: linux
 dist: trusty
 
@@ -8,12 +8,7 @@ before_install:
 jobs:
   include:
     - name: "cpplint"
-      addons:
-        apt:
-          packages:
-            - python-pip
       script:
-        - pip install --upgrade pip
         - pip install -U cpplint
         - cpplint --repository=. --recursive --linelength=200 --filter=-build/include  ./src
     - name: "cppcheck"
@@ -25,7 +20,6 @@ jobs:
         - cppcheck --error-exitcode=1 --enable=warning,style,performance,portability -DARDUINO_ARCH_ESP8266=1 ./src
     - name: "Test"
       script:
-        - pip install --upgrade pip
         - pip install -U platformio
         - platformio update
         - rm -rf build
@@ -38,7 +32,6 @@ jobs:
           packages:
             - valgrind
       script:
-        - pip install --upgrade pip
         - pip install -U platformio
         - platformio update
         - rm -rf build
