@@ -38,8 +38,9 @@ jobs:
         - mkdir build
         - platformio ci --lib="./src" --project-conf="scripts/platformio.ini" --build-dir=build --keep-build-dir tests
         - valgrind --leak-check=full ./build/.pioenvs/catch2/program
-    - name: "Build examples"
-      script: $TRAVIS_BUILD_DIR/tests/build_examples.sh
+#    - name: "Build examples"
+#      script:
+#        - ./scripts/build_examples.sh
 
 notifications:
   email:

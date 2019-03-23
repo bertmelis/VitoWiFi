@@ -169,7 +169,7 @@ class VitoWiFi {
    * @return true Enqueueing was successful
    * @return false Enqueueing failed (eg. queue full)
    */
-  bool read(Datapoint& datapoint) {
+  bool read(Datapoint& datapoint) {  // NOLINT TODO(bertmelis): make const reference
     CbArg* arg = new CbArg(this, &datapoint);
     return _optolink->read(datapoint.getAddress(), datapoint.getLength(), reinterpret_cast<void*>(arg));
   }
@@ -185,7 +185,7 @@ class VitoWiFi {
    * @return false Enqueueing failed (eg. queue full)
    */
   template<class D, typename T>
-  bool write(D& datapoint, T value) {
+  bool write(D& datapoint, T value) {  // NOLINT TODO(bertmelis): make const reference
     uint8_t* raw = new uint8_t[datapoint->getLength()];  // temporary variable to hold encoded value, will be copied by optolink
     datapoint.encode(raw, datapoint->getLength(), value);
     CbArg* arg = new CbArg(this, &datapoint);
