@@ -4,7 +4,6 @@ languages:
   production:
     exclude:
       - /tests/.*
-      - /tests/Includes/catch.hpp
   test:
     include:
       - /tests/.*
