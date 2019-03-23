@@ -13,6 +13,7 @@ jobs:
           packages:
             - python-pip
       script:
+        - pip install --upgrade pip
         - pip install -U cpplint
         - cpplint --repository=. --recursive --linelength=200 --filter=-build/include  ./src
     - name: "cppcheck"
@@ -24,6 +25,7 @@ jobs:
         - cppcheck --error-exitcode=1 --enable=warning,style,performance,portability -DARDUINO_ARCH_ESP8266=1 ./src
     - name: "Test"
       script:
+        - pip install --upgrade pip
         - pip install -U platformio
         - platformio update
         - rm -rf build
@@ -35,7 +37,8 @@ jobs:
         apt:
           packages:
             - valgrind
-      script: 
+      script:
+        - pip install --upgrade pip
         - pip install -U platformio
         - platformio update
         - rm -rf build
