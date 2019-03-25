@@ -186,10 +186,10 @@ class VitoWiFi {
    */
   template<class D, typename T>
   bool write(D& datapoint, T value) {  // NOLINT TODO(bertmelis): make const reference
-    uint8_t* raw = new uint8_t[datapoint->getLength()];  // temporary variable to hold encoded value, will be copied by optolink
-    datapoint.encode(raw, datapoint->getLength(), value);
+    uint8_t* raw = new uint8_t[datapoint.getLength()];  // temporary variable to hold encoded value, will be copied by optolink
+    datapoint.encode(raw, datapoint.getLength(), value);
     CbArg* arg = new CbArg(this, &datapoint);
-    return _optolink->write(datapoint->getAddress(), datapoint.getLength(), raw, reinterpret_cast<void*>(arg));
+    return _optolink->write(datapoint.getAddress(), datapoint.getLength(), raw, reinterpret_cast<void*>(arg));
     delete[] raw;
   }
 
