@@ -18,8 +18,8 @@ const char pass[] = "xxxx";
 const char auth[] = "xxxx";
 VitoWiFi vitodens200(P300, &Serial);
 
-DPTemp outsideTemp("outsidetemp" 0x552);
-DPTempS roomTempSet("roomtempset" 0x2306);
+DPTemp outsideTemp("outsidetemp", 0x552);
+DPTempS roomTempSet("roomtempset", 0x2306);
 
 BlynkTimer timer;
 bool updateItems = false;
@@ -53,7 +53,6 @@ void sendRoomtempSet(uint8_t value) {
 // write the receive value to VitoWifi and read back
 BLYNK_WRITE(V0) {
   uint8_t pinValue = param.asInt();
-  DPValue value(pinValue);
   terminal.printf("Blynk update: V0 = %d\n", pinValue);
   vitodens200.write(roomTempSet, value);
   vitodens200.readDatapoint(roomTempSet);
@@ -66,10 +65,10 @@ void errorCallback(uint8_t error, Datapoint* dp) {
 
 void setup() {
   // VitoWifi setup
-  outsideTemp.setCallback(sendOutsidetemp);
-  roomTempSet.setCallback(sendRoomtempSet);
+  outsideTemp.onData(sendOutsidetemp);
+  roomTempSet.onData(sendRoomtempSet);
   Datapoint::onData(dataCallback);
-  vitodens200.onError(onError);
+  vitodens200.onError(errorCallback);
   vitodens200.begin();
 
   // Blynk setup
