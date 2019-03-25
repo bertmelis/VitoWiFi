@@ -40,7 +40,7 @@ jobs:
         - valgrind --leak-check=full ./build/.pioenvs/catch2/program
     - name: "Build examples"
       script:
-        - ./scripts/build_examples.sh
+        - sh ./scripts/build_examples.sh
 
 notifications:
   email:

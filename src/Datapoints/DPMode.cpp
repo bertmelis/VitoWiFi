@@ -23,7 +23,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
 
-#if defined ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32
+#if defined ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32 || VITOWIFI_TEST
 
 #include "DPMode.h"
 
@@ -59,4 +59,4 @@ void DPMode::encode(uint8_t* raw, uint8_t length, uint8_t data) {
   raw[0] = data;
 }
 
-#endif  // ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32
+#endif  // ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32 || VITOWIFI_TEST

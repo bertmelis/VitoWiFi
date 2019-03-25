@@ -23,7 +23,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
 
-#if defined ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32
+#if defined ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32 || VITOWIFI_TEST
 
 #include "Datapoint.h"
 
@@ -75,4 +75,4 @@ void Datapoint::decode(uint8_t* data, uint8_t length, Datapoint* dp) {
   delete[] output;
 }
 
-#endif  // ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32
+#endif  // ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32 || VITOWIFI_TEST

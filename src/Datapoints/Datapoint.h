@@ -25,7 +25,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
-#if defined ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32
+#if defined ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32 || VITOWIFI_TEST
 
 #include <stdint.h>
 #include <assert.h>
@@ -61,4 +61,4 @@ class Datapoint {
 #include "DPTemp.h"
 #include "DPMode.h"
 
-#endif  // ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32
+#endif  // ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32 || VITOWIFI_TEST
