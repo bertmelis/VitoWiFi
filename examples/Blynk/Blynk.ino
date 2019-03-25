@@ -52,10 +52,10 @@ void sendRoomtempSet(uint8_t value) {
 // callback for Blynk when widget Step V (on V0) has been changed
 // write the receive value to VitoWifi and read back
 BLYNK_WRITE(V0) {
-  uint8_t pinValue = param.asInt();
-  terminal.printf("Blynk update: V0 = %d\n", pinValue);
+  uint8_t value = param.asInt();
+  terminal.printf("Blynk update: V0 = %d\n", value);
   vitodens200.write(roomTempSet, value);
-  vitodens200.readDatapoint(roomTempSet);
+  vitodens200.read(roomTempSet);
 }
 
 // log errors to terminal
