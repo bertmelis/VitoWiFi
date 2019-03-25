@@ -39,8 +39,10 @@ jobs:
         - platformio ci --lib="./src" --project-conf="scripts/platformio.ini" --build-dir=build --keep-build-dir tests
         - valgrind --leak-check=full ./build/.pioenvs/catch2/program
     - name: "Build examples"
+      before_install:
+        - chmod +x ./scripts/build_examples.sh
       script:
-        - sh ./scripts/build_examples.sh
+        - ./scripts/build_examples.sh
 
 notifications:
   email:
