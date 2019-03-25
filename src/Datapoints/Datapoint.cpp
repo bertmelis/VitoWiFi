@@ -23,6 +23,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
 
+#if defined ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32
+
 #include "Datapoint.h"
 
 std::function<void(uint8_t[], uint8_t, Datapoint* dp)> Datapoint::_stdOnData = nullptr;
@@ -72,3 +74,5 @@ void Datapoint::decode(uint8_t* data, uint8_t length, Datapoint* dp) {
   }
   delete[] output;
 }
+
+#endif  // ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32

@@ -63,7 +63,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
-#if defined ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32
+#if defined ARDUINO
 
 #ifndef VITOWIFI_MAX_QUEUE_LENGTH
   /** @brief Maximum number of datapoints the Optolink queue can hold
@@ -76,7 +76,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
   #define MAX_DP_LENGTH 9
 #endif
 
-#include <functional>
 #include <HardwareSerial.h>
 #include <string.h>  // for memcpy
 

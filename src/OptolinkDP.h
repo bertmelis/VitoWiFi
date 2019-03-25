@@ -34,7 +34,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #pragma once
 
 #include <stdint.h>
-#include <cstring>  // memcpy
+#include <string.h>  // memcpy
 
 /**
  * @brief Class holding datapoint values. The Optolink queue stores this

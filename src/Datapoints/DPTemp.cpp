@@ -23,6 +23,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
 
+#if defined ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32
+
 #include "DPTemp.h"
 
 DPTemp::DPTemp(const char* name, const uint16_t address) :
@@ -60,3 +62,5 @@ void DPTemp::encode(uint8_t* raw, uint8_t length, float data) {
   raw[1] = tmp >> 8;
   raw[0] = tmp & 0xFF;
 }
+
+#endif  // ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32

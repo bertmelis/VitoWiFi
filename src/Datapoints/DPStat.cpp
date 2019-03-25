@@ -23,6 +23,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
 
+#if defined ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32
+
 #include "DPStat.h"
 
 DPStat::DPStat(const char* name, const uint16_t address) :
@@ -57,3 +59,5 @@ void DPStat::encode(uint8_t* raw, uint8_t length, bool data) {
   assert(length >= _length);
   raw[0] = data ? 0x01 : 0x00;
 }
+
+#endif  // ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32

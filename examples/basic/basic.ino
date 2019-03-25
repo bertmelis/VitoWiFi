@@ -1,14 +1,4 @@
-/*
-
-This example defines three datapoints.
-The first two are TEMPL type datapoints and have their own callback.
-When no specific callback is attached to a datapoint, it uses the global callback.
-
-Note the difference in return value between the callbacks:
-for tempCallback uses value.getFloat() as TEMPL datapoints return a float.
-globalCallback uses value.getString(char*,size_t). This method is independent of the returned type.
-
-*/
+/* copyright 2019 Bert Melis */
 
 #include <VitoWiFi.h>
 
@@ -44,8 +34,8 @@ void setup() {
   boilerTemp.onData([](float value) {
     tempCallback(outsideTemp.getName(), value);
   });
-  Datapoint::stdOnData(dataCallback);  // this callback will be used for all DPs without specific callback
-  Datapoint::stdOnError(errorCallback);
+  Datapoint::onData(dataCallback);  // this callback will be used for all DPs without specific callback
+  vitodens200.onError(errorCallback);  // error callbacks are registered on VitoWiFi object
   vitodens200.begin();
   Serial1.begin(115200);
   Serial1.println(F("Setup finished..."));

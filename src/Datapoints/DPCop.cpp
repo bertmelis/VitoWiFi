@@ -23,6 +23,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
 
+#if defined ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32
+
 #include "DPCop.h"
 
 DPCop::DPCop(const char* name, const uint16_t address) :
@@ -57,3 +59,5 @@ void DPCop::encode(uint8_t* raw, uint8_t length, float data) {
   assert(length >= _length);
   raw[0] = floor((data * 10) + 0.5);
 }
+
+#endif  // ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32

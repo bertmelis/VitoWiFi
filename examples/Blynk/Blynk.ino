@@ -1,6 +1,6 @@
 /*
   This example is not intended to explain Blynk in detail but
-  actes as an example to bring VitoWifi into your Blynk IoT project.
+  acts as an example to bring VitoWiFi into your Blynk IoT project.
 
   V0: step V (set room temp)
   V1: labeled value (outside temp)
@@ -59,11 +59,17 @@ BLYNK_WRITE(V0) {
   vitodens200.readDatapoint(roomTempSet);
 }
 
+// log errors to terminal
+void errorCallback(uint8_t error, Datapoint* dp) {
+  terminal.printf("%s error %u\n", dp->getName(), error);
+}
+
 void setup() {
   // VitoWifi setup
   outsideTemp.setCallback(sendOutsidetemp);
   roomTempSet.setCallback(sendRoomtempSet);
-  Datapoint::stdOnData(dataCallback);
+  Datapoint::onData(dataCallback);
+  vitodens200.onError(onError);
   vitodens200.begin();
 
   // Blynk setup

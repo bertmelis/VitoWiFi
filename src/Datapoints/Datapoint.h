@@ -25,6 +25,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
+#if defined ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32
+
 #include <stdint.h>
 #include <assert.h>
 #include <functional>
@@ -58,3 +60,5 @@ class Datapoint {
 #include "DPStat.h"
 #include "DPTemp.h"
 #include "DPMode.h"
+
+#endif  // ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32

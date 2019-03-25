@@ -25,6 +25,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
+#if defined ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32
+
 #include "Datapoint.h"
 
 class DPCount : public Datapoint {
@@ -39,3 +41,5 @@ class DPCount : public Datapoint {
  private:
   std::function<void(uint32_t)> _onData;
 };
+
+#endif  // ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32

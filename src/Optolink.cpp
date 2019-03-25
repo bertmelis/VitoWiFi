@@ -25,7 +25,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "Optolink.h"
 
-#if defined ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32
+#if defined ARDUINO
 
 Optolink::Optolink(HardwareSerial* serial) :
   _serial(serial),

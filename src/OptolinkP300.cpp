@@ -25,7 +25,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "OptolinkP300.h"
 
-#if defined ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32
+#if defined ARDUINO
 
 inline uint8_t calcChecksum(uint8_t array[], uint8_t length) {
   uint8_t sum = 0;

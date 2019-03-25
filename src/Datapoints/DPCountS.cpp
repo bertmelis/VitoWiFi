@@ -23,6 +23,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
 
+#if defined ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32
+
 #include "DPCountS.h"
 
 DPCountS::DPCountS(const char* name, const uint16_t address) :
@@ -58,3 +60,5 @@ void DPCountS::encode(uint8_t* raw, uint8_t length, uint16_t data) {
   raw[1] = data >> 8;
   raw[0] = data & 0xFF;
 }
+
+#endif  // ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32

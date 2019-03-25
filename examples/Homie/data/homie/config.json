@@ -1,0 +1,14 @@
+{
+  "name": "vitodens200",
+  "wifi": {
+    "ssid": "my-ssid",
+    "password": "my-wifi-password"
+  },
+  "mqtt": {
+    "host": "192.168.0.10",
+    "port": 1883
+  },
+  "ota": {
+    "enabled": true
+  }
+}

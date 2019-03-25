@@ -23,6 +23,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
 
+#if defined ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32
+
 #include "DPMode.h"
 
 DPMode::DPMode(const char* name, const uint16_t address) :
@@ -56,3 +58,5 @@ void DPMode::encode(uint8_t* raw, uint8_t length, uint8_t data) {
   assert(length >= _length);
   raw[0] = data;
 }
+
+#endif  // ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32

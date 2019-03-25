@@ -25,6 +25,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
+#if defined ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32
+
 #include "Datapoint.h"
 
 class DPMode : public Datapoint {
@@ -41,3 +43,5 @@ class DPMode : public Datapoint {
 };
 
 typedef DPMode DPTempS;
+
+#endif  // ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32
