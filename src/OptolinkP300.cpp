@@ -56,10 +56,6 @@ OptolinkP300::OptolinkP300(HardwareSerial* serial) :
   _rcvBufferLen(0),
   _rcvLen(0) {}
 
-OptolinkP300::~OptolinkP300() {
-  // TODO(bertmelis): anything to do?
-}
-
 void OptolinkP300::begin() {
   _serial->begin(4800, SERIAL_8E2);
   _state = RESET;
@@ -98,6 +94,11 @@ void OptolinkP300::loop() {
     // begin() not called
     break;
   }
+  if (_queue.size() > 0 && millis() - _lastMillis > 1000UL) {  // if no ACK is coming, reset connection
+    _tryOnError(TIMEOUT);
+    _state = RESET;
+    clearInput(_serial);
+  }
   // TODO(@bertmelis): move timeouts here, clear queue on timeout
 }
 
@@ -134,9 +135,6 @@ void OptolinkP300::_initAck() {
       _state = IDLE;
     }
   }
-  if (millis() - _lastMillis > 1000UL) {  // if no ACK is coming, reset connection
-    _state = RESET;
-  }
 }
 
 void OptolinkP300::_idle() {
@@ -153,7 +151,7 @@ void OptolinkP300::_send() {
   OptolinkDP* dp = _queue.front();
   uint8_t length = dp->length;
   uint16_t address = dp->address;
-  if (_write) {
+  if (dp->write) {
     // type is WRITE
     // has length of 8 chars + length of value
     buff[0] = 0x41;
@@ -167,9 +165,8 @@ void OptolinkP300::_send() {
     memcpy(&buff[7], dp->data, length);
     buff[7 + length] = calcChecksum(buff, 8 + length);
     _serial->write(buff, 8 + length);
-
-    // Written payload is not returned, the return length is always 8 bytes long
-    _rcvLen = 8;
+    _rcvLen = 8;  // Written payload is not returned, the return length is
+                  // always 8 bytes long
   } else {
     // type is READ
     // has fixed length of 8 chars
@@ -195,17 +192,13 @@ void OptolinkP300::_sentAck() {
     if (buff == 0x06) {  // transmit succesful, moving to next state
       _state = RECEIVE;
       return;
-    } else if (buff == 0x15) {  // transmit negatively acknowledged, return to IDLE
+    } else if (buff == 0x15) {  // transmit negatively acknowledged, return
+                                // to IDLE
       _tryOnError(NACK);
       _state = IDLE;
       clearInput(_serial);
       return;
     }
-  }
-  if (millis() - _lastMillis > 1000UL) {  // if no ACK is coming, return to RESET
-    _tryOnError(TIMEOUT);
-    _state = RESET;
-    clearInput(_serial);
   }
 }
 
@@ -248,10 +241,6 @@ void OptolinkP300::_receive() {
     return;
   } else {
     // not yet complete
-  }
-  if (millis() - _lastMillis > 1 * 1000UL) {  // Vitotronic isn't answering: 20 chars @ 4800baud < 1 sec!
-    _tryOnError(TIMEOUT);
-    _state = RESET;
   }
 }
 

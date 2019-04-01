@@ -39,7 +39,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <Arduino.h>  // for millis
 
 /**
- * @brief Base class for the Optolink (P300).
+ * @brief Protocol implementation class for the Optolink (P300).
  * 
  * This class is a P300 version of the Optolink.
  */
@@ -51,7 +51,6 @@ class OptolinkP300 : public Optolink {
    * @param serial Hardwareserial object to be used. Pass by reference.
    */
   explicit OptolinkP300(HardwareSerial* serial);
-  ~OptolinkP300();
 
   /**
    * @brief Method to start the Optolink.
