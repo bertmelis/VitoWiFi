@@ -126,7 +126,7 @@ class VitoWiFi {
    * @brief Start VitoWiFi.
    * 
    * This should be called after all setup for VitoWiFi is done.
-   * By calling `begin()`, the Optolink wil lbe started.
+   * By calling `begin()`, the Optolink will be started.
    * 
    */
   void begin() {
@@ -152,7 +152,7 @@ class VitoWiFi {
    * 
    * All registered datapoints are queued to be read. This includes the
    * datapoints that are marked as writeable. This method does not return
-   * any failure code so you don't know whether the enqueueing was
+   * any failure code so you don't know whether the enqueuing was
    * successful.
    * 
    */
@@ -171,11 +171,18 @@ class VitoWiFi {
    */
   bool read(Datapoint& datapoint) {  // NOLINT TODO(bertmelis): make const reference
     CbArg* arg = new CbArg(this, &datapoint);
-    return _optolink->read(datapoint.getAddress(), datapoint.getLength(), reinterpret_cast<void*>(arg));
+    if (_optolink->read(datapoint.getAddress(), datapoint.getLength(), reinterpret_cast<void*>(arg))) {
+      return true;
+    } else {
+      delete arg;
+      return false;
+    }
   }
 
   /**
    * @brief Enqueue a datapoint for writing.
+   * 
+   * The onData callback will be launched on success.
    * 
    * @tparam D Type of datapoint (inherited from class `Datapoint`)
    * @tparam T Type of the value to be written
@@ -189,8 +196,13 @@ class VitoWiFi {
     uint8_t* raw = new uint8_t[datapoint.getLength()];  // temporary variable to hold encoded value, will be copied by optolink
     datapoint.encode(raw, datapoint.getLength(), value);
     CbArg* arg = new CbArg(this, &datapoint);
-    return _optolink->write(datapoint.getAddress(), datapoint.getLength(), raw, reinterpret_cast<void*>(arg));
-    delete[] raw;
+    if (_optolink->write(datapoint.getAddress(), datapoint.getLength(), raw, reinterpret_cast<void*>(arg))) {
+      delete[] raw;
+      return true;
+    } else {
+      delete[] raw;
+      return false;
+    }
   }
 
  private:
