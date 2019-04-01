@@ -101,10 +101,9 @@ class SimpleQueue {
   /**
    * @brief Removes the first element from the ringbuffer.
    * 
-   * Note that the element is not really destroyed but the pointer
-   * to the head of the buffer is moved.
+   * This does not call the element's destructor.
    * 
-   * Remove() on an empty buffer generates no error.
+   * `pop()` on an empty queue generates no error.
    * 
    */
   void pop() {
@@ -122,7 +121,7 @@ class SimpleQueue {
    * @brief Returns a pointer to the first element.
    * 
    * A pointer to the first element in the ringbuffer is returned.
-   * To actually remove the element from the buffer, call `remove()`.
+   * To actually remove the element from the buffer, call `pop()`.
    * 
    * @return T* Pointer to the first element. nullptr on an empty buffer.
    */
