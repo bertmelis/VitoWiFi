@@ -94,7 +94,7 @@ void OptolinkP300::loop() {
     // begin() not called
     break;
   }
-  if (_queue.size() > 0 && millis() - _lastMillis > 1000UL) {  // if no ACK is coming, reset connection
+  if (_queue.size() > 0 && millis() - _lastMillis > 2000UL) {  // if no ACK is coming, reset connection
     _tryOnError(TIMEOUT);
     _state = RESET;
     clearInput(_serial);
@@ -113,6 +113,7 @@ void OptolinkP300::_reset() {
 void OptolinkP300::_resetAck() {
   if (_serial->read() == 0x05) {
     // received 0x05/enquiry: optolink has been reset
+    _lastMillis = millis();
     _state = INIT;
   } else {
     if (millis() - _lastMillis > 1000) {  // try again every 0,5sec
@@ -132,13 +133,15 @@ void OptolinkP300::_initAck() {
   if (_serial->available()) {
     if (_serial->read() == 0x06) {
       // ACK received, moving to next state
+      _lastMillis = millis();
       _state = IDLE;
     }
   }
 }
 
 void OptolinkP300::_idle() {
-  if (millis() - _lastMillis > 15 * 1000UL) {  // send INIT every 15 seconds to keep communication alive
+  // send INIT every 5 seconds to keep communication alive
+  if (millis() - _lastMillis > 5 * 1000UL) {
     _state = INIT;
   }
   if (_queue.size() > 0) {
@@ -152,8 +155,7 @@ void OptolinkP300::_send() {
   uint8_t length = dp->length;
   uint16_t address = dp->address;
   if (dp->write) {
-    // type is WRITE
-    // has length of 8 chars + length of value
+    // type is WRITE, has length of 8 chars + length of value
     buff[0] = 0x41;
     buff[1] = 5 + length;
     buff[2] = 0x00;
@@ -196,16 +198,16 @@ void OptolinkP300::_sentAck() {
                                 // to IDLE
       _tryOnError(NACK);
       _state = IDLE;
-      clearInput(_serial);
       return;
     }
   }
 }
 
 void OptolinkP300::_receive() {
-  while (_serial->available() > 0) {  // while instead of if: read complete RX buffer
+  while (_serial->available() > 0) {  // read complete RX buffer
     _rcvBuffer[_rcvBufferLen] = _serial->read();
     ++_rcvBufferLen;
+    _lastMillis = millis();
   }
   if (_rcvBuffer[0] != 0x41) {
     // wait for start byte

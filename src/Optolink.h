@@ -144,9 +144,12 @@ class Optolink {
   /**
    * @brief Read a datapoint with specified properties
    * 
+   * Read (length) bytes from (address). On success, the data will be returned
+   * by the onData handler; On error, the onError handler will be called.
+   * 
    * @param address Address of the datapoint (eg. 0x1234).
    * @param length Length in bytes of the datapoint. This is also the length
-   *               of the value when writing.
+   *        of the value when writing.
    * @param arg Argument to use for the callback. Defaults to nullptr.
    * @return true Request was queued succesfully.
    * @return false Request could not be added to the queue (queue full?).
@@ -156,12 +159,15 @@ class Optolink {
   /**
    * @brief Write to a datapoint with specified properties
    * 
+   * Write (length) bytes to (address). On success, the written data is
+   * returned by the onData handler. On failure, the onError will be called.
+   * 
    * @param address Address of the datapoint (eg. 0x1234).
    * @param length Length in bytes of the datapoint. This is also the length
-   *               of the value when writing.
+   *        of the value when writing.
    * @param data Pointer to data to write (set to nullptr when reading). This 
-   *             data will be copied so it is allowed to go out of scope
-   *             after passing the this object.
+   *        data will be copied so it is allowed to go out of scope after
+   *        passing the this object.
    * @param arg Argument to use for the callback. Defaults to nullptr.
    * @return true Request was queued succesfully.
    * @return false Request could not be added to the queue (queue full?).
@@ -170,13 +176,13 @@ class Optolink {
 
   /**
    * @brief Pure virtual method to start the Optolink (implemented in protocol 
-   *             classes).
+   *        classes).
    */
   virtual void begin() = 0;
 
   /**
    * @brief Pure virtual method to keep the Optolink running (implemented in
-   *             protocol classes). Call repeatedly eg. in the Arduino loop.
+   *        protocol classes). Call repeatedly eg. in the Arduino loop.
    */
   virtual void loop() = 0;
 
