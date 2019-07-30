@@ -2,3 +2,6 @@
 .piolibdeps
 .vscode
 build
+docs/xml
+docs/sniff.*
+docs/Vitosoft300SID1_Setup.exe
