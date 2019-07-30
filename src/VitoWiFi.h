@@ -135,7 +135,7 @@ class VitoWiFi {
    * @return true Enqueueing was successful
    * @return false Enqueueing failed (eg. queue full)
    */
-  bool read(Datapoint& datapoint);
+  bool read(Datapoint& datapoint);  // NOLINT todo: make it a const ref or pointer?
 
   /**
    * @brief Enqueue a datapoint for writing.
@@ -150,7 +150,7 @@ class VitoWiFi {
    * @return false Enqueueing failed (eg. queue full)
    */
   template<class D, typename T>
-  bool write(D& datapoint, T value);
+  bool write(D& datapoint, T value);  // NOLINT todo: make it a const ref or pointer?
 
  private:
   struct CbArg {

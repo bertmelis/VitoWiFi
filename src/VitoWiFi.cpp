@@ -25,6 +25,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <VitoWiFi.h>
 
+#if defined ARDUINO
+
 VitoWiFi::VitoWiFi(VitoWiFiProtocol protocol, HardwareSerial* serial) :
   _optolink(nullptr),
   _datapoints(),
@@ -93,3 +95,11 @@ void VitoWiFi::_onError(uint8_t error, void* arg) {
   if (cbArg->v->_onErrorCb) cbArg->v->_onErrorCb(error, cbArg->dp);
   delete cbArg;
 }
+
+#elif defined VITOWIFI_TEST
+
+#else
+
+#pragma message "no suitable platform"
+
+#endif
