@@ -25,7 +25,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <VitoWiFi.h>
 
-#if defined ARDUINO
+#if defined ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32
 
 VitoWiFi::VitoWiFi(VitoWiFiProtocol protocol, HardwareSerial* serial) :
   _optolink(nullptr),
