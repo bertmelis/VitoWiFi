@@ -73,30 +73,12 @@ class VitoWiFi {
   * @param protocol Protocol to be used by the optolink (`P300` or `KW`)
   * @param serial Hardwareserial port to be used by the optolink
   */
-  VitoWiFi(VitoWiFiProtocol protocol, HardwareSerial* serial) :
-    _optolink(nullptr),
-    _datapoints(),
-    _onErrorCb(nullptr) {
-      switch (protocol) {
-      case P300:
-        _optolink = new OptolinkP300(serial);
-        break;
-      case KW:
-        // to be implemented
-      default:
-        abort();
-      }
-      if (_optolink) {
-        _optolink->begin();
-      }
-  }
+  VitoWiFi(VitoWiFiProtocol protocol, HardwareSerial* serial);
   /**
    * @brief Destroy the VitoWiFi object
    * 
    */
-  ~VitoWiFi() {
-    delete _optolink;
-  }
+  ~VitoWiFi();
 
   /**
    * @brief Add a datapoint to your VitoWiFi object.
@@ -106,9 +88,7 @@ class VitoWiFi {
    * 
    * @param datapoint Pointer to the datapoint.
    */
-  void addDatapoint(Datapoint* datapoint) {
-    if (datapoint) _datapoints.push_back(datapoint);
-  }
+  void addDatapoint(Datapoint* datapoint);
 
   /**
    * @brief Registers the callback to be used on error.
@@ -118,10 +98,7 @@ class VitoWiFi {
    * 
    * @param callback Function to call on error
    */
-  void onError(std::function<void(uint8_t, Datapoint*)> callback) {
-    _onErrorCb = callback;
-  }
-
+  void onError(std::function<void(uint8_t, Datapoint*)> callback);
   /**
    * @brief Start VitoWiFi.
    * 
@@ -129,12 +106,7 @@ class VitoWiFi {
    * By calling `begin()`, the Optolink will be started.
    * 
    */
-  void begin() {
-    _datapoints.shrink_to_fit();
-    _optolink->onData(&VitoWiFi::_onData);
-    _optolink->onError(&VitoWiFi::_onError);
-    _optolink->begin();
-  }
+  void begin();
 
   /**
    * @brief Keeps VitoWiFi running.
@@ -143,9 +115,7 @@ class VitoWiFi {
    * in the Arduino `loop()` for example.
    * 
    */
-  void loop() {
-    _optolink->loop();
-  }
+  void loop();
 
   /**
    * @brief Queues all registered dataponits for reading.
@@ -156,11 +126,7 @@ class VitoWiFi {
    * successful.
    * 
    */
-  void readAll() {
-    for (Datapoint* dp : _datapoints) {
-      read(*dp);
-    }
-  }
+  void readAll();
 
   /**
    * @brief enqueue a datapoint for reading.
@@ -169,15 +135,7 @@ class VitoWiFi {
    * @return true Enqueueing was successful
    * @return false Enqueueing failed (eg. queue full)
    */
-  bool read(Datapoint& datapoint) {  // NOLINT TODO(bertmelis): make const reference
-    CbArg* arg = new CbArg(this, &datapoint);
-    if (_optolink->read(datapoint.getAddress(), datapoint.getLength(), reinterpret_cast<void*>(arg))) {
-      return true;
-    } else {
-      delete arg;
-      return false;
-    }
-  }
+  bool read(Datapoint& datapoint);
 
   /**
    * @brief Enqueue a datapoint for writing.
@@ -192,18 +150,7 @@ class VitoWiFi {
    * @return false Enqueueing failed (eg. queue full)
    */
   template<class D, typename T>
-  bool write(D& datapoint, T value) {  // NOLINT TODO(bertmelis): make const reference
-    uint8_t* raw = new uint8_t[datapoint.getLength()];  // temporary variable to hold encoded value, will be copied by optolink
-    datapoint.encode(raw, datapoint.getLength(), value);
-    CbArg* arg = new CbArg(this, &datapoint);
-    if (_optolink->write(datapoint.getAddress(), datapoint.getLength(), raw, reinterpret_cast<void*>(arg))) {
-      delete[] raw;
-      return true;
-    } else {
-      delete[] raw;
-      return false;
-    }
-  }
+  bool write(D& datapoint, T value);
 
  private:
   struct CbArg {
@@ -213,25 +160,33 @@ class VitoWiFi {
     VitoWiFi* v;
     Datapoint* dp;
   };
-
-  static void _onData(uint8_t* data, uint8_t len, void* arg) {
-    CbArg* cbArg = reinterpret_cast<CbArg*>(arg);
-    cbArg->dp->decode(data, len, cbArg->dp);
-    delete cbArg;
-  }
-
-  static void _onError(uint8_t error, void* arg) {
-    CbArg* cbArg = reinterpret_cast<CbArg*>(arg);
-    if (cbArg->v->_onErrorCb) cbArg->v->_onErrorCb(error, cbArg->dp);
-    delete cbArg;
-  }
-
+  static void _onData(uint8_t* data, uint8_t len, void* arg);
+  static void _onError(uint8_t error, void* arg);
   Optolink* _optolink;
   std::vector<Datapoint*> _datapoints;
   std::function<void(uint8_t, Datapoint*)> _onErrorCb;
 };
 
+
+// implementation
+template<class D, typename T>
+bool VitoWiFi::write(D& datapoint, T value) {  // NOLINT TODO(bertmelis): make const reference
+  uint8_t* raw = new uint8_t[datapoint.getLength()];  // temporary variable to hold encoded value, will be copied by optolink
+  datapoint.encode(raw, datapoint.getLength(), value);
+  CbArg* arg = new CbArg(this, &datapoint);
+  if (_optolink->write(datapoint.getAddress(), datapoint.getLength(), raw, reinterpret_cast<void*>(arg))) {
+    delete[] raw;
+    return true;
+  } else {
+    delete[] raw;
+    return false;
+  }
+}
+
+
 #elif defined VITOWIFI_TEST
+
+// no tests here
 
 #else
 
