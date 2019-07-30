@@ -25,7 +25,7 @@ jobs:
         - rm -rf build
         - mkdir build
         - platformio ci --lib="./src" --project-conf="scripts/platformio.ini" --build-dir=build --keep-build-dir tests
-        - ./build/.pioenvs/catch2/program
+        - ./build/.pio/build/catch2/program
     - name: "Memcheck"
       addons:
         apt:
@@ -37,7 +37,7 @@ jobs:
         - rm -rf build
         - mkdir build
         - platformio ci --lib="./src" --project-conf="scripts/platformio.ini" --build-dir=build --keep-build-dir tests
-        - valgrind --leak-check=full ./build/.pioenvs/catch2/program
+        - valgrind --leak-check=full ./build/.pio/build/catch2/program
     - name: "Build examples"
       before_install:
         - chmod +x ./scripts/build_examples.sh
