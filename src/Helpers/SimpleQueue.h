@@ -70,7 +70,7 @@ class SimpleQueue {
   /**
    * @brief Destroy the SimpleQueue object.
    * 
-   * Not that when the buffer holds pointers, the actual objects 
+   * Note that when the buffer holds raw pointers, the actual objects 
    * will not be destroyed.
    * 
    */
@@ -79,7 +79,7 @@ class SimpleQueue {
   }
 
   /**
-   * @brief Copies and adds an element to the buffer. 
+   * @brief Copies and adds an element to the queue. 
    * 
    * @param t Element to add.
    * @return true Element was successfully added.
@@ -99,7 +99,7 @@ class SimpleQueue {
   }
 
   /**
-   * @brief Removes the first element from the ringbuffer.
+   * @brief Removes the first element from the queue.
    * 
    * This does not call the element's destructor.
    * 
@@ -120,8 +120,8 @@ class SimpleQueue {
   /**
    * @brief Returns a pointer to the first element.
    * 
-   * A pointer to the first element in the ringbuffer is returned.
-   * To actually remove the element from the buffer, call `pop()`.
+   * A pointer to the first element in the queue is returned.
+   * To actually remove the element from the queue, call `pop()`.
    * 
    * @return T* Pointer to the first element. nullptr on an empty buffer.
    */
@@ -134,7 +134,7 @@ class SimpleQueue {
   }
 
   /**
-   * @brief Return the number of elements in the buffer.
+   * @brief Return the number of elements in the queue.
    * 
    * @return size_t number of elements.
    */
