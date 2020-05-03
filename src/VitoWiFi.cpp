@@ -53,6 +53,10 @@ void VitoWiFi::addDatapoint(Datapoint* datapoint) {
   if (datapoint) _datapoints.push_back(datapoint);
 }
 
+void VitoWiFi::onData(std::function<void(const uint8_t* data, uint8_t length, Datapoint* dp)> callback) {
+  Datapoint::onData(callback);
+}
+
 void VitoWiFi::onError(std::function<void(uint8_t, Datapoint*)> callback) {
   _onErrorCb = callback;
 }
@@ -100,6 +104,6 @@ void VitoWiFi::_onError(uint8_t error, void* arg) {
 
 #else
 
-#pragma message "no suitable platform"
+// unsuitable platform
 
 #endif

@@ -11,19 +11,22 @@ Based on the fantastic work on [openv](https://github.com/openv/openv/wiki). Che
 This also means that the use of blocking code is not supported.
 Since we're talking serial @4800 baud, we would be wasting precious processing time while reading and writing to the optolink. Furthermore this library is useable in async or non blocking frameworks such as the marvellous [Homie for esp8266](https://github.com/marvinroger/homie-esp8266) framework or [Blynk](https://www.blynk.cc).
 
+## Important notice
+
+Version 2 uses a different approach to enable the raw optolink to be used in "regular" Arduino boards. To do this, the API is different and not compatible with version 1.
+
+Second, version 2 is partially untested. I currently don't own a compatible heater anymore so I can not test this library. Without your feedback, I don't know for sure that this library works. Please use the Github issues system or the Gitter channel to raise any questions or signal errors.
+
+Lastly, ESP32 might work but is not supported (mainly due to multithreading behaviour). I'm willing to update the code, but again, I cannot test myself.
+
+Should you prefer version 1, switch branches and look for V1.
+
 ## Table of contents
 
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
-- [Steps to get going](#steps-to-get-going)
-  - [define the protocol](#define-the-protocol)
-  - [Define your datapoints](#define-your-datapoints)
-  - [Setup VitoWiFi](#setup-vitowifi)
-    - [In void setup()](#in-void-setup)
-    - [In void loop()](#in-void-loop)
-  - [Read/write datapoints](#readwrite-datapoints)
+- [How to use](#how-to-use)
 - [Datapoints](#datapoints)
-  - [My datapoint type isn’t listed?](#my-datapoint-type-isn%E2%80%99t-listed)
 - [DPValue](#dpvalue)
 - [Optolink](#optolink)
 - [End note](#end-note)
@@ -39,201 +42,103 @@ Since we're talking serial @4800 baud, we would be wasting precious processing t
 * For Arduino IDE: see [the Arduino Guide](https://www.arduino.cc/en/Guide/Libraries#toc4)
 * For Platformio: see the [Platfomio lib page for VitoWifi](http://platformio.org/lib/show/1939/VitoWiFi)
 
-## Steps to get going
+## How to use
 
-### Define the protocol
+Implementing vitoWiFi takes a few steps:
+1. define your VitoWiFi object and specify the protocol and interface
+2. define all needed datapoints
+3. create callback for when data (or errors) is returned (you can also use lambda's)
+4. in `void setup()`
+  - attach the datapoints to your VitoWiFi object
+  - attach the callbacks to the datapoints
+  - attach general callback to the VitoWiFi object
+  - start VitoWiFi
+5. in `void loop()`:
+  - call `loop()` regularly. It keeps VitoWiFi running. the `loop()` method is not blocking, you shouldn't block either
 
-```C++
-VitoWiFi_setProtocol(protocol);  // set protocol to KW or P300
-```
-
-There’s no typo! This line calls a macro that initialises the class with the protocol parameter: VitoWiFi is a templated class where the template parameter is the protocol. The template design avoids a virtual function call on every interaction with the optolink interface.  
-Also, don't use quotes, protocol is an enum.
-
-### Define your datapoints
-
-```C++
-DPTemp myTempDP(const char name, const char group, uint16_t address)
-```
-
-There are a number of predefined datapoint types:
-
-- DPTemp: 2 byte, factor 10, returning float
-- DPTempS: 1 byte, no factor, returning uint8_t
-- DPStat: 1 byte, no factor, returning bool
-- DPCount: 4 byte, no factor, returning uint32_t
-- DPCountS: 2 byte, no factor, returning uint16_t
-- DPMode: 1 byte, node mode, return uint8_t (same as DPTempS)
-- DPHours: 4 byte, factor 3600, returning float
-- DPCoP: 1 byte, factor 10, returning float
-- DPRaw (see [datapoints](#datapoints))
-
-Each datapoint is defined by a name, a group and an address. The addresses notation is mostly in a 2-byte hex eg. 0x5525.
-
-Read on about datapoints in the separate chapter about [datapoints](#datapoints).
-
-### Setup VitoWiFi
-
-#### In void setup()
+These steps are done in the example below
 
 ```C++
-VitoWiFi.setup(&Serial);
-```
+#include <VitoWiFi.h>  // don't forget to include this lib
 
-Assign the serial interface connected to the optolink. Pass by reference. For ESP32 you also have to give the two pin numbers: setup(&Serial, 21, 22).
-The serial interface will be set to 4800 baud, 8 bits, even parity and 2 stop bits by vitoWiFi.
+// first define your heater
+// first argument is the protocol (P300 or KW), second is the serial interface on which you connect the optolink
+VitoWiFi vitodens200(P300, &Serial);
 
-```C++
-VitoWiFi.setGlobalCallback(Callback);
-```
+// next, define some datapoints, see the "datapoints" section for more info
+DPTemp outsideTemp("outsideTemp", 0x5525);
+DPTemp boilerTemp("boilertemp", 0x0810);
+DPStat pumpStat("pump", 0x2906);
 
-Set the function to execute when data is received when there is no callback defined for the currently processed datapoint.
-The callback has the following signature: `void function(IDatapoint*, DPValue)`
+// create a callback function to do something useful with the data
+// this one is dedicated for temperature values
+void tempCallback(const char* name, float value) {
+  float fahrenheit = 0;
+  fahrenheit = (5.0 / 9) * (value + 32);
+  Serial1.print(name);
+  Serial1.print(": ");
+  Serial1.println(fahrenheit, 1);  // print with 1 decimal
+}
 
-Set additional properties of the individual datapoints:
+// create a general callback for datapoints that don't get a dedicated one
+void dataCallback(const uint8_t* data, uint8_t length, Datapoint* dp) {
+  Serial1.print(dp->getName());
+  Serial1.print(" is 0x");
+  for (uint8_t i = 0; i < length; ++i) Serial1.printf("%02x", data[i]);
+  Serial1.print("\n");
+}
 
-- `IDatapoint.setWriteable(bool)` to make to datapoint R/W instead or RO by default
-- `IDatapoint.setCallback(Callback)` to assign a custom, per datapoint, callback handler. The signature is the same.
+// create a callback to read error messages
+void errorCallback(uint8_t error, Datapoint* dp) {
+  Serial1.printf("%s error %u\n", dp->getName(), error);
+}
 
-The modifiers can be chained, they return a reference to the datapoint.
+void setup() {
+  // attach the "temp" callback to the two temperature datapoints
+  outsideTemp.onData([](float value) {
+    tempCallback(outsideTemp.getName(), value);
+  });
+  boilerTemp.onData([](float value) {
+    tempCallback(outsideTemp.getName(), value);
+  });
+  // when attaching callback not on specific datapoints, use your VitoWiFi
+  // object instead:
+  vitodens200.onData(dataCallback);
+  // attach the errorCallback
+  vitodens200.onError(errorCallback);
+  
+  delay(5);
 
-Optionally:
+  // setup is done, start VitoWiFi
+  vitodens200.begin();
+  Serial1.begin(115200);
+  Serial1.println(F("Setup finished..."));
+}
 
-- `VitoWiFi.setLogger(Printer*)` so vitoWiFi can print messages for debugging purposes.
-- `VitoWiFi.enableLogger()` or `.disableLogger()` enables or disables logging
-
-#### In void loop()
-
-Call `VitoWiFi.loop();` in the Arduino `void loop()`.
-Avoid blocking code. Minimize lengthy calculations etc. VitoWiFi will probably still work (the amount of data coming from the optolink is limited) but vitoWiFi works by polling so try to poll as much as possible.
-
-### Read/write datapoints
-
-```C++
-VitoWiFi.readDatapoint(IDatapoint&);
-```
-
-You pass the datapoints you created in step 1. The datapoint is passed by reference.  
-Do not call this repeatedly but use a timed call. On every call, the action is placed in a queue. This queue is limited in size.  
-Mind that it takes some time (although less than 10ms) to process an action so calling too often will fill the queue.
-
-```C++
-VitoWiFi.writeDatapoint(IDatapoint&, DPValue);
-```
-
-The same as readDatapoint but with an extra DPValue parameter holding the value to be written. Make sure to initialize the value correctly. More on this in the chapter [DPValue](#dpvalue).
-
-Alternative ways to read datapoints is by calling
-
--	`VitoWiFi.readAll();`
--	`VitoWiFi.readGroup(const char*);`
-
-You cannot write to multiple datapoints in one command.
-
-## Datapoints
-
-Some insights...  
-The datapoints architecture is as follows: there is an "IDatapoint" class which is the superclass from which all datapoint types inherit. The is done to have a base type (pointer) for universal storage of the datapoints in a std::vector.  
-A templated "Datapoint" class inherits from "IDatapoint". "Datapoint" contains a class member, which is the template parameter, that handles the encoding and decoding.  
-For easier coding, the builtin specialized classed have a typedef.
-
-An overview of the builtin datapoint types:
-
-| Type     | Underlying type         | Length | Conversion factor | Value type |
-|----------|-------------------------|--------|-------------------|------------|
-| DPTemp   | Datapoint<conv2_10_F>   | 2      | / 10              | float      |
-| DPTempS  | Datapoint<conv1_1_US>   | 1      | 1                 | uint8_t    |
-| DPStat   | Datapoint<conv1_1_B>    | 1      | 1                 | uint8_t    |
-| DPCount  | Datapoint<conv4_1_UL>   | 4      | 1                 | uint32_t   |
-| DPCountS | Datapoint<conv2_1_UL>   | 2      | 1                 | uint16_t   |
-| DPMode   | Datapoint<conv1_1_US>   | 1      | 1                 | uint8_t    |
-| DPHours  | Datapoint<conv4_3600_F> | 4      | / 3600            | float      |
-| DPCoP    | Datapoint<conv1_10_F>   | 1      | / 10              | float      |
-| DPRaw    | Datapoint<convRaw>      | -(1)   | -                 | uint8_t*   |
-
-(1) the length of DPRaw has to be explicitly set using `setLength()`
-
-### My datapoint type isn’t listed?
-
-Then you can build it yourself! (and make a PR afterwards) But how do I do this?
-
-Below is an example that creates a type called "DPSeconds" for a 4 bytes datapoint that holds a seconds counter. The datapoint converts this to a float with the number of minutes. You can place this directly in your code or place it in a seperate file that you include. If you use a seperate file, make sure you include "Datapoint.hpp" in that one.
-
-```C++
-// first create a converter class, and inherit from DPType
-class conv4_60_F : public DPType {
- public:
-  void encode(uint8_t* out, DPValue in) {  // encode can be left empty when the DP is only used for reading.
-  int32_t tmp = floor((in.getFloat() * 60) + 0.5);
-  out[3] = tmp >> 24;
-  out[2] = tmp >> 16;
-  out[1] = tmp >> 8;
-  out[0] = tmp & 0xFF;
+void loop() {
+  static unsigned long lastMillis = 0;
+  if (millis() - lastMillis > 60 * 1000UL) {  // read all values every 60 seconds
+    lastMillis = millis();
+    vitodens200.readAll();
   }
-  DPValue decode(const uint8_t* in) {
-    int32_t tmp = in[3] << 24 | in[2] << 16 | in[1] << 8 | in[0];  // keep endianess in mind! input is LSB first
-    DPValue out(tmp / 60.0f);
-    return out;
-  }
-  const size_t getLength() const {
-    return 4;
-  }
-};
-// the typedef is optional. If you should consider making a PR,
-// please do make a typedef for consistency.
-typedef Datapoint<conv4_1_UL> DPMinutes;
-
-// now you can use the newly created type:
-DPMinutes myDatapoint("name", "group", 0x1234);
+  vitodens200.loop();
+}
 ```
 
-The example above is also in the [examples](https://github.com/bertmelis/VitoWiFi/tree/master/examples) folder.
-
-## DPValue
-
-DPValue is a structure that is used as a universal data holder. It can hold a bool, a unsigned integers (8, 16 and 32 bit) or a float. It cannot convert between types although a `getString()` method is available to print our it’s value.
-An example:
-
-```C++
-uint16_t myInt = 234;
-DPValue value(234);  // value holds a uint16_t with value 234
-value1 = value.getFloat();  // value1 = 0 as value didn’t contain a float
-value1 = value.getU16()  // value1 = 234
-char str[4];
-value.getString(str, sizeof(str));  // str contains “234” (+ extra null-termination)
-```
-
-The possible types are:
-
-| type     | getter             | prints            |
-|----------|--------------------|-------------------|
-| uint8_t  | `getU8()`          | %u                |
-| uint16_t | `getU16()`         | %u                |
-| uint32_t | `getU32()`         | %u                |
-| bool     | `getBool()`        | "true" or "false" |
-| float    | `getFloat()`       | %.1f              |
-| raw      | `getRaw(uint8_t*)` | %02x              |
-
-## Optolink
-
-The optolink is the core of this library. It is rather unpolished and requires some insights to use on it’s own. Please refer to the example for more details.
-There are 2 versions: one for the KW protocol and one for the P300 protocol. Both work as a finite state machine with sequential connection management, waiting state, polling for a response and returning to idle.
-
-You should first try if the P300 protocol works and if it doesn’t, try KW. If that also doesn’t work, you have a hardware problem or an unsupported boiler.
-When making bug reports, make sure to include hardware details.
-
-## End note
-
-### Examples
+### More examples
 
 Next to the examples in this repo, you can find the firmware of the setup I'm using in this repo: [esp8266-heating](https://github.com/bertmelis/esp8266-heating).
 
-### History
+## Datapoints
+
+A datapoint is a 
+
+## History
 
 I was using the original openv/vcontrold code from wikispaces on a Raspberry Pi V1. However, this setup was a bit overkill: such a powerful device doing only serial communication at 4800 baud. So I wanted to optimise this situation.
 An ESP8266 has built-in serial/UART communication and is obviously connectable via Wifi. The small form factor and power consumption were bonus points. Ever since it has been made compatible with the Arduino environment (or other way around), it is my Nr 1 choice for IoT applications.
 
-### License
+## License
 
 Copyright (c) 2017 Bert Melis
 
@@ -255,7 +160,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-### Credits go to
+## Credits go to
 
 * Hex print: 2011, robtillaart @ Arduino.cc forum
 * Logger/Blinker: MIT 2015, marvinroger @ Github

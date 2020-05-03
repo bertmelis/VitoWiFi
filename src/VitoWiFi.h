@@ -83,12 +83,22 @@ class VitoWiFi {
   /**
    * @brief Add a datapoint to your VitoWiFi object.
    * 
-   * Adding a dataponit is not neccecary but `readAll` only reads the
+   * Adding a datapoint is not neccecary but `readAll` only reads the
    * datapoints that were registered by this method.
    * 
    * @param datapoint Pointer to the datapoint.
    */
   void addDatapoint(Datapoint* datapoint);
+
+  /**
+   * @brief Registers the callback to be used on data.
+   * 
+   * The onData callback is called when there is no dedicated callback registered
+   * on the active datapoint
+   * 
+   * @param callback Function to call on data
+   */
+  void onData(std::function<void(const uint8_t* data, uint8_t length, Datapoint* dp)> callback);
 
   /**
    * @brief Registers the callback to be used on error.
@@ -190,6 +200,6 @@ bool VitoWiFi::write(D& datapoint, T value) {  // NOLINT TODO(bertmelis): make c
 
 #else
 
-#pragma message "no suitable platform"
+// unsuitable platform
 
 #endif
