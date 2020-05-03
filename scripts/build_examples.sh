@@ -1,8 +1,8 @@
 #!/bin/bash
 
-#pip3 install -U platformio
-#platformio lib -g install 415  # Blynk
-#platformio lib -g install https://github.com/homieiot/homie-esp8266.git#develop-v3  # Homie
+pip install -U platformio
+platformio lib -g install 415  # Blynk
+platformio lib -g install https://github.com/homieiot/homie-esp8266.git#develop-v3  # Homie
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
