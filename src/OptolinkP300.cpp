@@ -94,7 +94,7 @@ void OptolinkP300::loop() {
     // begin() not called
     break;
   }
-  if (_queue.size() > 0 && millis() - _lastMillis > 2000UL) {  // if no ACK is coming, reset connection
+  if (_queue.size() > 0 && millis() - _lastMillis > 5000UL) {  // if no ACK is coming, reset connection
     _tryOnError(TIMEOUT);
     _state = RESET;
     clearInput(_serial);
