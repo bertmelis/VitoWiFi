@@ -52,7 +52,7 @@ void onData(uint8_t* data, uint8_t len, void* index) {
   Serial1.print("\n");
 }
 
-void onData(uint8_t error, void* arg) {
+void onError(uint8_t error, void* arg) {
   Serial1.print(datapoints[(size_t)arg].name);
   Serial1.print(": error ");
   Serial1.println(error);
@@ -62,6 +62,7 @@ void setup() {
   Serial1.begin(115200);
 
   myOptolink.onData(onData);
+  myOptolink.onError(onError);
   myOptolink.begin();
 }
 
