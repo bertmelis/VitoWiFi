@@ -74,7 +74,7 @@ class DPValue {
   explicit DPValue(uint8_t u8) : v(u8) {}
   explicit DPValue(uint16_t u16) : v(u16) {}
   explicit DPValue(uint32_t u32) : v(u32) {}
-  explicit DPValue(uint32_t u64) : v(u64) {}
+  explicit DPValue(uint64_t u64) : v(u64) {}
   explicit DPValue(float f) : v(f) {}
   DPValue(uint8_t* r, size_t length) : v(r, length) {}
   DPValue(DPValue const&) = default;
