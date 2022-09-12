@@ -58,7 +58,7 @@ class DPValue {
     value(uint8_t u8) : u8{UINT8_T, u8} {}
     value(uint16_t u16) : u16{UINT16_T, u16} {}
     value(uint32_t u32) : u32{UINT32_T, u32} {}
-    value(uint32_t u64) : u64{UINT64_T, u64} {}
+    value(uint64_t u64) : u64{UINT64_T, u64} {}
     value(float f) : f{FLOAT, f} {}
     value(uint8_t* r, size_t length) : raw{PTR, {0}, length} {
       if (length <= MAX_DP_LENGTH)
