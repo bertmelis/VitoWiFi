@@ -123,7 +123,7 @@ DPValue conv2_1_US::decode(const uint8_t* in) {
 }
 
 void conv8_1_Timer::encode(uint8_t* out, DPValue in) {
-  uint64_t tmp = in.getU16();
+  uint64_t tmp = in.getU64();
   out[7] = tmp >> 56;
   out[6] = tmp >> 48;
   out[5] = tmp >> 40;
