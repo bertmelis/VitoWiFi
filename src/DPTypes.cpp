@@ -134,13 +134,13 @@ void conv8_1_Timer::encode(uint8_t* out, DPValue in) {
   out[0] = tmp & 0xFF;
 }
 DPValue conv8_1_Timer::decode(const uint8_t* in) {
-  uint64_t tmp = in[7] << 56 |
-                 in[6] << 48 |
-                 in[5] << 40 |
-                 in[4] << 32 |
-                 in[3] << 24 |
-                 in[2] << 16 |
-                 in[1] << 8 |
+  uint64_t tmp = ((uint64_t)in[7]) << 56 |
+                 ((uint64_t)in[6]) << 48 |
+                 ((uint64_t)in[5]) << 40 |
+                 ((uint64_t)in[4]) << 32 |
+                 ((uint64_t)in[3]) << 24 |
+                 ((uint64_t)in[2]) << 16 |
+                 ((uint64_t)in[1]) << 8 |
                  in[0];
   DPValue out(tmp);
   return out;
