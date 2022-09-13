@@ -101,3 +101,4 @@ typedef Datapoint<conv2_1_UL> DPCountS;
 typedef DPTempS DPMode;
 typedef Datapoint<conv4_3600_F> DPHours;
 typedef Datapoint<conv1_10_F> DPCoP;
+typedef Datapoint<conv8_1_Timer> DPTimer;

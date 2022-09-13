@@ -141,6 +141,11 @@ void OptolinkKW::_sendHandler() {
     memcpy(&buff[4], _value, _length);
     _rcvLen = 1;  // expected length is only ACK (0x00)
     _stream->write(buff, 4 + _length);
+    if (_printer) {
+      _printer->print(F("WRITE "));
+      _printHex(_printer, buff, 4 + _length);
+      _printer->println();
+    }
   } else {
     // type is READ
     // has fixed length of 4 chars
@@ -150,20 +155,15 @@ void OptolinkKW::_sendHandler() {
     buff[3] = _length;
     _rcvLen = _length;  // expected answer length the same as sent
     _stream->write(buff, 4);
+    if (_printer) {
+      _printer->print(F("READ "));
+      _printHex(_printer, buff, 4);
+      _printer->println();
+    }
   }
   _clearInputBuffer();
   _rcvBufferLen = 0;
   _setState(RECEIVE);
-  if (_writeMessageType) {
-    if (_printer)
-      _printer->print(F("WRITE "));
-  } else {
-    if (_printer) {
-      _printer->print(F("READ "));
-      _printHex(_printer, &buff[1], 2);
-      _printer->println();
-    }
-  }
 }
 
 void OptolinkKW::_receiveHandler() {
@@ -172,8 +172,11 @@ void OptolinkKW::_receiveHandler() {
     ++_rcvBufferLen;
   }
   if (_rcvBufferLen == _rcvLen) {  // message complete, TODO: check message (eg 0x00 for READ messages)
-    if (_printer)
+    if (_printer) {
       _printer->println(F("ok"));
+      _printHex(_printer, _rcvBuffer, _rcvBufferLen);
+      _printer->println();
+    }      
     _setState(IDLE);
     _setAction(RETURN);
     _lastMillis = millis();

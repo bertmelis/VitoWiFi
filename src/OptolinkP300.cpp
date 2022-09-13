@@ -172,7 +172,11 @@ void OptolinkP300::_sendHandler() {
     memcpy(&buff[7], _value, _length);
     buff[7 + _length] = _calcChecksum(buff, 8 + _length);
     _stream->write(buff, 8 + _length);
-
+    if (_printer) {
+      _printer->print(F("WRITE "));
+      _printHex(_printer, buff, 8 + _length);
+      _printer->println();
+    }
     // Written payload is not returned, the return length is always 8 bytes long
     _rcvLen = 8;
   } else {
@@ -188,23 +192,15 @@ void OptolinkP300::_sendHandler() {
     buff[7] = _calcChecksum(buff, 8);
     _rcvLen = 8 + _length;  // expected answer length is 8 + data length
     _stream->write(buff, 8);
-  }
-  _rcvBufferLen = 0;
-  _lastMillis = millis();
-  _setState(SEND_ACK);
-  if (_writeMessageType) {
-    if (_printer) {
-      _printer->print(F("WRITE "));
-      _printHex(_printer, buff, 8 + _length);
-      _printer->println();
-    }
-  } else {
     if (_printer) {
       _printer->print(F("READ "));
       _printHex(_printer, buff, 8);
       _printer->println();
     }
   }
+  _rcvBufferLen = 0;
+  _lastMillis = millis();
+  _setState(SEND_ACK);
 }
 
 void OptolinkP300::_sendAckHandler() {

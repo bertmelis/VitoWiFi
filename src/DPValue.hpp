@@ -37,6 +37,7 @@ enum DPValueType {
   UINT8_T,
   UINT16_T,
   UINT32_T,
+  UINT64_T,
   FLOAT,
   PTR
 };
@@ -49,6 +50,7 @@ class DPValue {
     struct u8_t { DPValueType type; uint8_t value; } u8;
     struct u16_t { DPValueType type; uint16_t value; } u16;
     struct u32_t { DPValueType type; uint32_t value; } u32;
+    struct u64_t { DPValueType type; uint64_t value; } u64;
     struct f_t { DPValueType type; float value; } f;
     struct raw { DPValueType type; uint8_t value[MAX_DP_LENGTH]; size_t length; } raw;
     // value() : u32{PTR, 0} {}
@@ -56,6 +58,7 @@ class DPValue {
     value(uint8_t u8) : u8{UINT8_T, u8} {}
     value(uint16_t u16) : u16{UINT16_T, u16} {}
     value(uint32_t u32) : u32{UINT32_T, u32} {}
+    value(uint64_t u64) : u64{UINT64_T, u64} {}
     value(float f) : f{FLOAT, f} {}
     value(uint8_t* r, size_t length) : raw{PTR, {0}, length} {
       if (length <= MAX_DP_LENGTH)
@@ -71,6 +74,7 @@ class DPValue {
   explicit DPValue(uint8_t u8) : v(u8) {}
   explicit DPValue(uint16_t u16) : v(u16) {}
   explicit DPValue(uint32_t u32) : v(u32) {}
+  explicit DPValue(uint64_t u64) : v(u64) {}
   explicit DPValue(float f) : v(f) {}
   DPValue(uint8_t* r, size_t length) : v(r, length) {}
   DPValue(DPValue const&) = default;
@@ -103,6 +107,13 @@ class DPValue {
       return 0;
     }
   }
+  uint64_t getU64() {
+    if (v.b.type == UINT64_T) {
+      return v.u64.value;
+    } else {
+      return 0;
+    }
+  }
   float getFloat() {
     if (v.b.type == FLOAT) {
       return v.f.value;
@@ -125,6 +136,9 @@ class DPValue {
       break;
     case UINT32_T:
       snprintf(c, s, "%u", v.u32.value);
+      break;
+    case UINT64_T:
+      snprintf(c, s, "%llu", v.u64.value);
       break;
     case FLOAT:
       snprintf(c, s, "%.1f", v.f.value);
