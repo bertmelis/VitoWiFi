@@ -1,0 +1,82 @@
+/*
+Copyright (c) 2023 Bert Melis. All rights reserved.
+
+This work is licensed under the terms of the MIT license.  
+For a copy, see <https://opensource.org/licenses/MIT> or
+the LICENSE file.
+*/
+
+#pragma once
+
+#include <functional>
+
+#include "../Constants.h"
+#include "../Helpers.h"
+#include "PacketVS1.h"
+#include "../Datapoint/Datapoint.h"
+#include "../Interface/SerialInterface.h"
+#if defined(ARDUINO)
+#include "../Interface/HardwareSerialInterface.h"
+#include "../Interface/SoftwareSerialInterface.h"
+#else
+// to include
+#endif
+
+namespace VitoWiFi {
+
+class VS1 {
+ public:
+  typedef std::function<void(const uint8_t* data, uint8_t length, const Datapoint& request)> OnResponseCallback;
+  typedef std::function<void(OptolinkResult error, const Datapoint& request)> OnErrorCallback;
+
+  #if defined(ARDUINO)
+  explicit VS1(HardwareSerial* interface);
+  explicit VS1(SoftwareSerial* interface);
+  #else
+  // explicit VS1(LinuxSerial* interface);
+  #endif
+  ~VS1();
+  VS1(const VS1&) = delete;
+
+  bool read(const Datapoint& datapoint);
+  bool write(const Datapoint& datapoint, const VariantValue& value);
+  const uint8_t* response() const;
+  uint8_t responseLength() const;
+  const Datapoint& datapoint() const;
+
+  bool begin();
+  OptolinkResult loop();
+
+ private:
+  enum class State {
+    INIT,
+    INIT_ACK,
+    IDLE,
+    PROBE_ACK,
+    SEND,
+    RECEIVE,
+    UNDEFINED
+  } _state;
+  uint32_t _currentMillis;
+  uint32_t _lastMillis;
+  uint32_t _requestTime;
+  uint8_t _bytesTransferred;
+  OptolinkResult _loopResult;
+  VitoWiFiInternals::SerialInterface* _interface;
+  Datapoint _currentDatapoint;
+  PacketVS1 _currentRequest;
+  uint8_t* _responseBuffer;
+  uint8_t _allocatedLength;
+
+  void _init();
+  void _initAck();
+  void _idle();
+  void _probeAck();
+  void _sync();
+  void _send();
+  void _receive();
+
+  bool _expandResponseBuffer(uint8_t newSize);
+};
+
+}  // end namespace VitoWiFi
