@@ -1,0 +1,49 @@
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+VitoWifi	KEYWORD1
+Datapoint	KEYWORD1
+PacketVS2	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+#VitoWifi
+begin	KEYWORD2
+loop	KEYWORD2
+onResponse	KEYWORD2
+onError	KEYWORD2
+read	KEYWORD2
+write	KEYWORD2
+
+#Datapoint public methods
+name	KEYWORD2
+address	KEYWORD2
+length	KEYWORD2
+decode	KEYWORD2
+encode	KEYWORD2
+
+#PacketVS2 public methods
+createPacket	KEYWORD2
+#setLength	KEYWORD2
+length	KEYWORD2
+packetType	KEYWORD2
+functionCode	KEYWORD2
+id	KEYWORD2
+address	KEYWORD2
+dataLength	KEYWORD2
+data	KEYWORD2
+checksum	KEYWORD2
+#reset	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+#Transformation
+div10	LITERAL2
+div3600	LITERAL2
+noconv	LITERAL2
+raw	LITERAL2

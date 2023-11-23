@@ -1,0 +1,27 @@
+name: Test with Platformio
+
+on: [push, pull_request]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install platformio
+          sudo apt-get install lcov
+      - name: Test
+        run: |
+          pio test -e native -v
+      - uses: actions/upload-artifact@v3
+        with:
+          name: codecov
+          path: cov/

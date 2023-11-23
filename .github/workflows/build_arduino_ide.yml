@@ -1,0 +1,56 @@
+name: Build with Arduino IDE
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  build-for-esp8266:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        fqbn:
+          - esp8266:esp8266:generic
+    steps:
+      - uses: actions/checkout@v3
+      - uses: arduino/compile-sketches@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          fqbn: ${{ matrix.fqbn }}
+          enable-deltas-report: true
+          platforms: |
+            - name: esp8266:esp8266
+              source-url: https://arduino.esp8266.com/stable/package_esp8266com_index.json
+          sketch-paths: |
+            - examples/simple-read
+            - examples/simple-write
+          libraries: |
+            - name: VitoWiFi
+              source-path: ./
+            - name: EspSoftwareSerial
+              source-url: https://github.com/plerup/espsoftwareserial.git
+
+  build-for-esp32:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        fqbn:
+          - esp32:esp32:esp32
+    steps:
+      - uses: actions/checkout@v3
+      - uses: arduino/compile-sketches@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          fqbn: ${{ matrix.fqbn }}
+          enable-deltas-report: true
+          platforms: |
+            - name: esp32:esp32
+              source-url: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+          sketch-paths: |
+            - examples/simple-read
+            - examples/simple-write
+          libraries: |
+            - name: VitoWiFi
+              source-path: ./
+            - name: EspSoftwareSerial
+              source-url: https://github.com/plerup/espsoftwareserial.git
