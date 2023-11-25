@@ -18,12 +18,13 @@ VS1::VS1(HardwareSerial* interface)
 , _lastMillis(_currentMillis)
 , _requestTime(0)
 , _bytesTransferred(0)
-, _loopResult(OptolinkResult::CONTINUE)
 , _interface(nullptr)
-, _currentDatapoint(emptyDatapoint)
+, _currentDatapoint(Datapoint(nullptr, 0x0000, 0, VitoWiFi::noconv))
 , _currentRequest()
 , _responseBuffer(nullptr)
-, _allocatedLength(0) {
+, _allocatedLength(0)
+, _onResponseCallback(nullptr)
+, _onErrorCallback(nullptr) {
   assert(interface != nullptr);
   _interface = new(std::nothrow) VitoWiFiInternals::HardwareSerialInterface(interface);
   if (!_interface) {
@@ -43,12 +44,13 @@ VS1::VS1(SoftwareSerial* interface)
 , _lastMillis(_currentMillis)
 , _requestTime(0)
 , _bytesTransferred(0)
-, _loopResult(OptolinkResult::CONTINUE)
 , _interface(nullptr)
-, _currentDatapoint(emptyDatapoint)
+, _currentDatapoint(Datapoint(nullptr, 0x0000, 0, VitoWiFi::noconv))
 , _currentRequest()
 , _responseBuffer(nullptr)
-, _allocatedLength(0) {
+, _allocatedLength(0)
+, _onResponseCallback(nullptr)
+, _onErrorCallback(nullptr) {
   assert(interface != nullptr);
   _interface = new(std::nothrow) VitoWiFiInternals::SoftwareSerialInterface(interface);
   if (!_interface) {
@@ -69,6 +71,13 @@ VS1::VS1(SoftwareSerial* interface)
 VS1::~VS1() {
   delete _interface;
   free(_responseBuffer);
+}
+
+void VS1::onResponse(OnResponseCallback callback) {
+  _onResponseCallback = callback;
+}
+void VS1::onError(OnErrorCallback callback) {
+  _onErrorCallback = callback;
 }
 
 bool VS1::read(const Datapoint& datapoint) {
@@ -101,25 +110,12 @@ bool VS1::write(const Datapoint& datapoint, const VariantValue& value) {
   return false;
 }
 
-const uint8_t* VS1::response() const {
-  return _responseBuffer;
-}
-
-uint8_t VS1::responseLength() const {
-  return _currentRequest.dataLength();
-}
-
-const Datapoint& VS1::datapoint() const {
-  return _currentDatapoint;
-}
-
 bool VS1::begin() {
   _state = State::INIT;
   return _interface->begin();
 }
 
-OptolinkResult VS1::loop() {
-  _loopResult = OptolinkResult::CONTINUE;
+void VS1::loop() {
   _currentMillis = millis();
   switch (_state) {
   case State::INIT:
@@ -146,10 +142,9 @@ OptolinkResult VS1::loop() {
   }
   // double timeout to accomodate for connection initialization
   if (_requestTime != 0 && _currentMillis - _requestTime > 4000UL) {
-    _loopResult = OptolinkResult::TIMEOUT;
     _state = State::INIT;
+    _tryOnError(OptolinkResult::TIMEOUT);
   }
-  return _loopResult;
 }
 
 void VS1::_init() {
@@ -214,9 +209,17 @@ void VS1::_receive() {
   }
   if (_bytesTransferred == _currentRequest.length()) {
     _bytesTransferred = 0;
-    _loopResult = OptolinkResult::PACKET;
     _state = State::IDLE;
+    _tryOnResponse();
   }
+}
+
+void VS1::_tryOnResponse() {
+  if (_onResponseCallback) _onResponseCallback(_responseBuffer, _currentRequest.length(), _currentDatapoint);
+}
+
+void VS1::_tryOnError(OptolinkResult result) {
+  if (_onErrorCallback) _onErrorCallback(result, _currentDatapoint);
 }
 
 bool VS1::_expandResponseBuffer(uint8_t newSize) {

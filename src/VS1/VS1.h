@@ -10,6 +10,7 @@ the LICENSE file.
 
 #include <functional>
 
+#include "Logging.h"
 #include "../Constants.h"
 #include "../Helpers.h"
 #include "PacketVS1.h"
@@ -38,14 +39,14 @@ class VS1 {
   ~VS1();
   VS1(const VS1&) = delete;
 
+  void onResponse(OnResponseCallback callback);
+  void onError(OnErrorCallback callback);
+
   bool read(const Datapoint& datapoint);
   bool write(const Datapoint& datapoint, const VariantValue& value);
-  const uint8_t* response() const;
-  uint8_t responseLength() const;
-  const Datapoint& datapoint() const;
 
   bool begin();
-  OptolinkResult loop();
+  void loop();
 
  private:
   enum class State {
@@ -61,12 +62,13 @@ class VS1 {
   uint32_t _lastMillis;
   uint32_t _requestTime;
   uint8_t _bytesTransferred;
-  OptolinkResult _loopResult;
   VitoWiFiInternals::SerialInterface* _interface;
   Datapoint _currentDatapoint;
   PacketVS1 _currentRequest;
   uint8_t* _responseBuffer;
   uint8_t _allocatedLength;
+  OnResponseCallback _onResponseCallback;
+  OnErrorCallback _onErrorCallback;
 
   void _init();
   void _initAck();
@@ -75,6 +77,9 @@ class VS1 {
   void _sync();
   void _send();
   void _receive();
+
+  void _tryOnResponse();
+  void _tryOnError(OptolinkResult result);
 
   bool _expandResponseBuffer(uint8_t newSize);
 };

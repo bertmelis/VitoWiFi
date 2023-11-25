@@ -18,11 +18,12 @@ VS2::VS2(HardwareSerial* interface)
 , _lastMillis(_currentMillis)
 , _requestTime(0)
 , _bytesSent(0)
-, _loopResult(OptolinkResult::CONTINUE)
 , _interface(nullptr)
 , _parser()
-, _currentDatapoint(emptyDatapoint)
-, _currentPacket() {
+, _currentDatapoint(Datapoint(nullptr, 0, 0, noconv))
+, _currentPacket()
+, _onResponseCallback(nullptr)
+, _onErrorCallback(nullptr) {
   assert(interface != nullptr);
   _interface = new(std::nothrow) VitoWiFiInternals::HardwareSerialInterface(interface);
   if (!_interface) {
@@ -37,11 +38,12 @@ VS2::VS2(SoftwareSerial* interface)
 , _lastMillis(_currentMillis)
 , _requestTime(0)
 , _bytesSent(0)
-, _loopResult(OptolinkResult::CONTINUE)
 , _interface(nullptr)
 , _parser()
-, _currentDatapoint(emptyDatapoint)
-, _currentPacket() {
+, _currentDatapoint(Datapoint(nullptr, 0, 0, noconv))
+, _currentPacket()
+, _onResponseCallback(nullptr)
+, _onErrorCallback(nullptr) {
   assert(interface != nullptr);
   _interface = new(std::nothrow) VitoWiFiInternals::SoftwareSerialInterface(interface);
   if (!_interface) {
@@ -58,8 +60,15 @@ VS2::~VS2() {
   delete _interface;
 }
 
+void VS2::onResponse(OnResponseCallback callback) {
+  _onResponseCallback = callback;
+}
+void VS2::onError(OnErrorCallback callback) {
+  _onErrorCallback = callback;
+}
+
 bool VS2::read(const Datapoint& datapoint) {
-  if (_state > State::IDLE) return false;
+  if (_state > State::IDLE && _state < State::RECEIVE_ACK) return false;
   if (_currentPacket.createPacket(PacketType::REQUEST,
                                   FunctionCode::READ,
                                   0,
@@ -73,15 +82,15 @@ bool VS2::read(const Datapoint& datapoint) {
 }
 
 bool VS2::write(const Datapoint& datapoint, const VariantValue& value) {
-  if (_state > State::IDLE) return false;
+  if (_state > State::IDLE && _state < State::RECEIVE_ACK) return false;
   uint8_t* payload = reinterpret_cast<uint8_t*>(malloc(datapoint.length()));
   if (!payload) return false;
   _currentDatapoint.encode(payload, _currentDatapoint.length(), value);
   if (_currentPacket.createPacket(PacketType::REQUEST,
                                   FunctionCode::WRITE,
                                   0,
-                                   _currentDatapoint.address(),
-                                   _currentDatapoint.length(),
+                                  _currentDatapoint.address(),
+                                  _currentDatapoint.length(),
                                   payload)) {
     _currentDatapoint = datapoint;
     _requestTime = (_currentMillis != 0) ? _currentMillis : _currentMillis + 1;
@@ -90,21 +99,12 @@ bool VS2::write(const Datapoint& datapoint, const VariantValue& value) {
   return false;
 }
 
-const PacketVS2& VS2::response() const {
-  return _parser.packet();
-}
-
-const Datapoint& VS2::datapoint() const {
-  return _currentDatapoint;
-}
-
 bool VS2::begin() {
   _state = State::RESET;
   return _interface->begin();
 }
 
-OptolinkResult VS2::loop() {
-  _loopResult = OptolinkResult::CONTINUE;
+void VS2::loop() {
   _currentMillis = millis();
   switch (_state) {
   case State::RESET:
@@ -142,10 +142,9 @@ OptolinkResult VS2::loop() {
     break;
   }
   if (_requestTime != 0 && _currentMillis - _requestTime > 5000UL) {
-    _loopResult = OptolinkResult::TIMEOUT;
     _state = State::RESET;
+    _tryOnError(OptolinkResult::TIMEOUT);
   }
-  return _loopResult;
 }
 
 void VS2::_reset() {
@@ -221,8 +220,8 @@ void VS2::_sendAck() {
     if (buff == 0x06) {  // transmit succesful, moving to next state
       _state = State::RECEIVE;
     } else if (buff == 0x15) {  // transmit negatively acknowledged, return to IDLE
-      _loopResult = OptolinkResult::NACK;
       _state = State::IDLE;
+      _tryOnError(OptolinkResult::NACK);
       return;
     }
   }
@@ -233,16 +232,16 @@ void VS2::_receive() {
     _lastMillis = _currentMillis;
     VitoWiFiInternals::ParserResult result = _parser.parse(_interface->read());
     if (result == VitoWiFiInternals::ParserResult::COMPLETE) {
-      _loopResult = OptolinkResult::PACKET;
       _state = State::RECEIVE_ACK;
+      _tryOnResponse();
       return;
     } else if (result == VitoWiFiInternals::ParserResult::CS_ERROR) {
-      _loopResult = OptolinkResult::CRC;
       _state = State::RESET;
+      _tryOnError(OptolinkResult::CRC);
       return;
     } else if (result == VitoWiFiInternals::ParserResult::ERROR) {
-      _loopResult = OptolinkResult::ERROR;
       _state = State::RESET;
+      _tryOnError(OptolinkResult::ERROR);
       return;
     }
     // else: continue
@@ -253,6 +252,14 @@ void VS2::_receiveAck() {
   _interface->write(&VitoWiFiInternals::ProtocolBytes.ACK, 1);
   _lastMillis = _currentMillis;
   _state = State::IDLE;
+}
+
+void VS2::_tryOnResponse() {
+  if (_onResponseCallback) _onResponseCallback(_parser.packet(), _currentDatapoint);
+}
+
+void VS2::_tryOnError(OptolinkResult result) {
+  if (_onErrorCallback) _onErrorCallback(result, _currentDatapoint);
 }
 
 }  // end namespace VitoWiFi
