@@ -86,7 +86,7 @@ bool VS2::write(const Datapoint& datapoint, const VariantValue& value) {
   uint8_t* payload = reinterpret_cast<uint8_t*>(malloc(datapoint.length()));
   if (!payload) return false;
   _currentDatapoint.encode(payload, _currentDatapoint.length(), value);
-  return write(datapoint, payload,_currentDatapoint.length());
+  return write(datapoint, payload, _currentDatapoint.length());
 }
 
 bool VS2::write(const Datapoint& datapoint, const uint8_t* data, uint8_t length) {
