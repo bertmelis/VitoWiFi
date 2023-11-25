@@ -98,10 +98,16 @@ bool VS1::write(const Datapoint& datapoint, const VariantValue& value) {
   uint8_t* payload = reinterpret_cast<uint8_t*>(malloc(datapoint.length()));
   if (!payload) return false;
   _currentDatapoint.encode(payload, _currentDatapoint.length(), value);
+  return write(datapoint, payload, _currentDatapoint.length());
+}
+
+bool VS1::write(const Datapoint& datapoint, const uint8_t* data, uint8_t length) {
+  if (_state >= State::SEND) return false;
+  if (length != _currentDatapoint.length()) return false;
   if (_currentRequest.createPacket(PacketVS1Type.WRITE,
                                    _currentDatapoint.address(),
                                    _currentDatapoint.length(),
-                                   payload) &&
+                                   data) &&
       _expandResponseBuffer(_currentDatapoint.length())) {
     _currentDatapoint = datapoint;
     _requestTime = (_currentMillis != 0) ? _currentMillis : _currentMillis + 1;

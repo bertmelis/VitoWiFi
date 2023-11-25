@@ -22,8 +22,10 @@ void tearDown() {}
 
 void test_Converter() {
   VitoWiFi::Converter* myConv = &VitoWiFi::div10;
+  VitoWiFi::Converter* myOtherConv = &VitoWiFi::div3600;
 
   TEST_ASSERT_TRUE(*myConv == VitoWiFi::div10);
+  TEST_ASSERT_FALSE(*myOtherConv == VitoWiFi::div10);
 }
 
 void test_Bool() {

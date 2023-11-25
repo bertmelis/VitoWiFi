@@ -1,2 +1,4 @@
 .pio
 .vscode
+cov
+*cov.info

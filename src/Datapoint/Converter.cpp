@@ -55,7 +55,7 @@ void Div3600Convert::encode(uint8_t* buf, uint8_t len, const VariantValue& val) 
 }
 
 VariantValue NoconvConvert::decode(const uint8_t* data, uint8_t len) const {
-  assert(len == 1 || len == 2 || len == 4 || len == 8);
+  // assert(len == 1 || len == 2 || len == 4);
   if (len == 1) {
     uint8_t retVal = data[0];
     return VariantValue(retVal);
@@ -66,20 +66,14 @@ VariantValue NoconvConvert::decode(const uint8_t* data, uint8_t len) const {
     uint32_t retVal = data[3] << 24 | data[2] << 16 | data[1] << 8 | data[0];
     return VariantValue(retVal);
   } else {
-    uint64_t retVal = ((uint64_t)data[7]) << 56 |
-                      ((uint64_t)data[6]) << 48 |
-                      ((uint64_t)data[5]) << 40 |
-                      ((uint64_t)data[4]) << 32 |
-                      ((uint64_t)data[3]) << 24 |
-                      ((uint64_t)data[2]) << 16 |
-                      ((uint64_t)data[1]) << 8 |
-                      data[0];
+    // decoding should be done in user code
+    uint32_t retVal = 0;
     return VariantValue(retVal);
   }
 }
 
 void NoconvConvert::encode(uint8_t* buf, uint8_t len, const VariantValue& val) const {
-  assert(len == 1 || len == 2 || len == 4 || len == 8);
+  // assert(len == 1 || len == 2 || len == 4);
   if (len == 1) {
     uint8_t srcVal = val;
     buf[0] = srcVal;
@@ -94,31 +88,13 @@ void NoconvConvert::encode(uint8_t* buf, uint8_t len, const VariantValue& val) c
     buf[1] = srcVal >> 8;
     buf[0] = srcVal & 0xFF;
   } else {
-    uint64_t srcVal = val;
-    buf[7] = srcVal >> 56;
-    buf[6] = srcVal >> 48;
-    buf[5] = srcVal >> 40;
-    buf[4] = srcVal >> 32;
-    buf[3] = srcVal >> 24;
-    buf[2] = srcVal >> 16;
-    buf[1] = srcVal >> 8;
-    buf[0] = srcVal & 0xFF;
+    // encoding should be done by user
+    std::memset(buf, 0, len);
   }
 }
 
 Div10Convert div10;
 Div3600Convert div3600;
 NoconvConvert noconv;
-
-void reverse(uint8_t* arr, uint8_t len) {
-  uint8_t start = 0;
-  while (0 < len) {
-    uint8_t temp = arr[start];
-    arr[start] = arr[len];
-    arr[len] = temp;
-    start++;
-    len--;
-  }
-}
 
 }  // end namespace VitoWiFi
