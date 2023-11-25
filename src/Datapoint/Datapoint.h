@@ -21,6 +21,7 @@ class Datapoint {
   const char* name() const;
   uint16_t address() const;
   uint8_t length() const;
+  const Converter& converter() const;
 
   VariantValue decode(const uint8_t* data, uint8_t length) const;
   VariantValue decode(const PacketVS2& packet) const;
@@ -32,7 +33,5 @@ class Datapoint {
   uint8_t _length;
   const Converter* _converter;
 };
-
-extern Datapoint emptyDatapoint;
 
 }  // end namespace VitoWiFi

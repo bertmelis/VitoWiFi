@@ -15,12 +15,8 @@ the LICENSE file.
 #include <SoftwareSerial.h>
 #endif
 
-#include "Constants.h"
-#include "Logging.h"
-#include "Helpers.h"
-
-#include "Datapoint/Datapoint.h"
 #include "VS2/VS2.h"
+#include "VS1/VS1.h"
 
 namespace VitoWiFi {
 
@@ -30,19 +26,17 @@ class VitoWiFi {
   #if defined(ARDUINO)
   template <class IFACE>
   explicit VitoWiFi(IFACE* interface)
-  : _optolink(interface)
-  , _onResponse(nullptr)
-  , _onError(nullptr) {
+  : _optolink(interface) {
     // empty
   }
   #endif
 
   void onResponse(typename PROTOCOLVERSION::OnResponseCallback callback) {
-    _onResponse = callback;
+    _optolink.onResponse(callback);
   }
 
   void onError(typename PROTOCOLVERSION::OnErrorCallback callback) {
-    _onError = callback;
+    _optolink.onError(callback);
   }
 
   bool begin() {
@@ -50,15 +44,7 @@ class VitoWiFi {
   }
 
   void loop() {
-    OptolinkResult result = _optolink.loop();
-    if (result == OptolinkResult::CONTINUE) {
-      // do nothing
-    } else if (result == OptolinkResult::PACKET) {
-      if (_onResponse) _onResponse(_optolink.response(), _optolink.datapoint());
-    } else {
-      // if not CONTINUE or PACKET, it must be an error
-      if (_onError) _onError(result, _optolink.datapoint());
-    }
+    _optolink.loop();
   }
 
   bool read(Datapoint datapoint) {
@@ -73,8 +59,6 @@ class VitoWiFi {
 
  private:
   PROTOCOLVERSION _optolink;
-  typename PROTOCOLVERSION::OnResponseCallback _onResponse;
-  typename PROTOCOLVERSION::OnErrorCallback _onError;
 };
 
 }  // end namespace VitoWiFi

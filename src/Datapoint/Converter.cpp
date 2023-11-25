@@ -10,8 +10,6 @@ the LICENSE file.
 
 namespace VitoWiFi {
 
-VariantValue emptyValue(nullptr);
-
 VariantValue Div10Convert::decode(const uint8_t* data, uint8_t len) const {
   assert(len == 1 || len == 2);
   float retVal = 0;
@@ -108,19 +106,19 @@ void NoconvConvert::encode(uint8_t* buf, uint8_t len, const VariantValue& val) c
   }
 }
 
-VariantValue NoconvRawConvert::decode(const uint8_t* data, uint8_t len) const {
-  (void) len;
-  return VariantValue(data);
-}
-
-void NoconvRawConvert::encode(uint8_t* buf, uint8_t len, const VariantValue& val) const {
-  const uint8_t* data = val;
-  std::memcpy(buf, data, len);
-}
-
 Div10Convert div10;
 Div3600Convert div3600;
 NoconvConvert noconv;
-NoconvRawConvert raw;
+
+void reverse(uint8_t* arr, uint8_t len) {
+  uint8_t start = 0;
+  while (0 < len) {
+    uint8_t temp = arr[start];
+    arr[start] = arr[len];
+    arr[len] = temp;
+    start++;
+    len--;
+  }
+}
 
 }  // end namespace VitoWiFi

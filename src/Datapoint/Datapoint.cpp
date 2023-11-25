@@ -10,8 +10,6 @@ the LICENSE file.
 
 namespace VitoWiFi {
 
-Datapoint emptyDatapoint(nullptr, 0, 0, noconv);
-
 Datapoint::Datapoint(const char* name, uint16_t address, uint8_t length, const Converter& converter)
 : _name(name)
 , _address(address)
@@ -35,6 +33,10 @@ uint16_t Datapoint::address() const {
 
 uint8_t Datapoint::length() const {
   return _length;
+}
+
+const Converter& Datapoint::converter() const {
+  return *_converter;
 }
 
 VariantValue Datapoint::decode(const uint8_t* data, uint8_t length) const {

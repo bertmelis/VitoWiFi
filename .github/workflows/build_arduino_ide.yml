@@ -22,8 +22,10 @@ jobs:
             - name: esp8266:esp8266
               source-url: https://arduino.esp8266.com/stable/package_esp8266com_index.json
           sketch-paths: |
-            - examples/simple-read
-            - examples/simple-write
+            - examples/simple-read-VS1
+            - examples/simple-read-VS2
+            - examples/simple-write-VS1
+            - examples/simple-write-VS2
           libraries: |
             - name: VitoWiFi
               source-path: ./
@@ -47,8 +49,10 @@ jobs:
             - name: esp32:esp32
               source-url: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
           sketch-paths: |
-            - examples/simple-read
-            - examples/simple-write
+            - examples/simple-read-VS1
+            - examples/simple-read-VS2
+            - examples/simple-write-VS1
+            - examples/simple-write-VS2
           libraries: |
             - name: VitoWiFi
               source-path: ./

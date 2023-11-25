@@ -35,18 +35,12 @@ globalCallback uses value.getString(char*,size_t). This method is independent of
 VitoWiFi::VitoWiFi<VitoWiFi::VS2> vitoWiFi(&SERIAL1);
 bool readValues = false;
 uint8_t datapointIndex = 0;
-uint8_t roomTemperature = 20;
-bool writeRoomTemp = false;
 
 VitoWiFi::Datapoint datapoints[] = {
-  VitoWiFi::Datapoint("roomtemp", 0x2306, 1, VitoWiFi::noconv),
-  VitoWiFi::Datapoint("boilertemp", 0x0810, 2, VitoWiFi::div10)
+  VitoWiFi::Datapoint("outsidetemp", 0x5525, 2, VitoWiFi::div10),
+  VitoWiFi::Datapoint("boilertemp", 0x0810, 2, VitoWiFi::div10),
+  VitoWiFi::Datapoint("pump", 0x2906, 1, VitoWiFi::noconv)
 };
-
-void setRoomTemp(uint8_t value) {
-  roomTemperature = value;
-  writeRoomTemp = true;
-}
 
 void onResponse(const VitoWiFi::PacketVS2& response, const VitoWiFi::Datapoint& request) {
   // raw data can be accessed through the 'response' argument
@@ -58,12 +52,14 @@ void onResponse(const VitoWiFi::PacketVS2& response, const VitoWiFi::Datapoint& 
   SERIAL2.print("\n");
 
   // the raw data can be decoded using the datapoint. Be sure to use the correct type
-  if (strcmp(request.name(), datapoints[0].name()) == 0) {
-    uint8_t roomSetTemp = request.decode(response);
-    SERIAL2.printf("Room set temperature is %u\n", roomSetTemp);
-  } else if (strcmp(request.name(), datapoints[1].name()) == 0) {
-    float outsideTemp = request.decode(response);
-    SERIAL2.printf("Boiler temperature is %.1f\n", outsideTemp);
+  SERIAL2.printf("%s: ", request.name());
+  if (request.converter() == VitoWiFi::div10) {
+    float value = request.decode(response);
+    SERIAL2.printf("%.1f\n", value);
+  } else if (request.converter() == VitoWiFi::noconv) {
+    bool value = request.decode(response);
+    // alternatively, we can just cast response.data()[0] to bool
+    SERIAL2.printf("%s\n", value ? "ON" : "OFF");
   }
 }
 
@@ -108,12 +104,6 @@ void loop() {
     }
     if (datapointIndex == 3) {
       readValues = false;
-    }
-  }
-
-  if (writeRoomTemp) {
-    if (vitoWiFi.write(datapoints[0], roomTemperature)) {
-      writeRoomTemp = false;
     }
   }
 

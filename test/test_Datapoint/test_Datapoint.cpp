@@ -20,11 +20,18 @@ using VitoWiFi::VariantValue;
 void setUp() {}
 void tearDown() {}
 
+void test_Converter() {
+  VitoWiFi::Converter* myConv = &VitoWiFi::div10;
+
+  TEST_ASSERT_TRUE(*myConv == VitoWiFi::div10);
+}
+
 void test_Bool() {
   Datapoint dp("temp", 0x0000, 2, VitoWiFi::div10);
+  Datapoint empty(nullptr, 0x0000, 0, VitoWiFi::noconv);
 
   TEST_ASSERT_TRUE(dp);
-  TEST_ASSERT_FALSE(VitoWiFi::emptyDatapoint);
+  TEST_ASSERT_FALSE(empty);
 }
 
 void test_TempDecode() {
@@ -195,20 +202,9 @@ void test_COPEncode() {
   TEST_ASSERT_EQUAL_HEX8_ARRAY(expected, buffer, len);
 }
 
-void test_RawDecode() {
-  Datapoint dp("count", 0x0000, 4, VitoWiFi::raw);
-  const uint8_t data[] = {0x01, 0x02, 0x03, 0x04};
-  const uint8_t len = 4;
-  PacketVS2 packet;
-  packet.createPacket(PacketType::RESPONSE, FunctionCode::READ, 0, 0x0000, len, data);
-
-  const uint8_t* result = dp.decode(packet);
-
-  TEST_ASSERT_EQUAL_HEX8_ARRAY(data, result, len);
-}
-
 int main() {
   UNITY_BEGIN();
+  RUN_TEST(test_Converter);
   RUN_TEST(test_Bool);
   RUN_TEST(test_TempDecode);
   RUN_TEST(test_TempEncode);
@@ -224,6 +220,5 @@ int main() {
   RUN_TEST(test_CountShortEncode);
   RUN_TEST(test_COPDecode);
   RUN_TEST(test_COPEncode);
-  RUN_TEST(test_RawDecode);
   return UNITY_END();
 }
