@@ -78,6 +78,4 @@ extern Div10Convert div10;
 extern Div3600Convert div3600;
 extern NoconvConvert noconv;
 
-void reverse(uint8_t* arr, uint8_t len);
-
 }  // end namespace VitoWiFi
