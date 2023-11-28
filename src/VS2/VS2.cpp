@@ -84,7 +84,7 @@ void VS2::onError(OnErrorCallback callback) {
 }
 
 bool VS2::read(const Datapoint& datapoint) {
-  if (_state > State::IDLE && _state < State::RECEIVE_ACK) {
+  if (_currentDatapoint) {
     vw_log_i("reading not possible, busy");
     return false;
   }
@@ -103,7 +103,7 @@ bool VS2::read(const Datapoint& datapoint) {
 }
 
 bool VS2::write(const Datapoint& datapoint, const VariantValue& value) {
-  if (_state > State::IDLE && _state < State::RECEIVE_ACK) {
+  if (_currentDatapoint) {
     vw_log_i("writing not possible, busy");
     return false;
   }
@@ -114,7 +114,7 @@ bool VS2::write(const Datapoint& datapoint, const VariantValue& value) {
 }
 
 bool VS2::write(const Datapoint& datapoint, const uint8_t* data, uint8_t length) {
-  if (_state > State::IDLE && _state < State::RECEIVE_ACK) {
+  if (_currentDatapoint) {
     vw_log_i("writing not possible, busy");
     return false;
   }
@@ -304,11 +304,17 @@ void VS2::_receiveAck() {
 }
 
 void VS2::_tryOnResponse() {
-  if (_onResponseCallback) _onResponseCallback(_parser.packet(), _currentDatapoint);
+  if (_onResponseCallback) {
+    _onResponseCallback(_parser.packet(), _currentDatapoint);
+  }
+  _currentDatapoint = Datapoint(nullptr, 0, 0, noconv);
 }
 
 void VS2::_tryOnError(OptolinkResult result) {
-  if (_onErrorCallback) _onErrorCallback(result, _currentDatapoint);
+  if (_onErrorCallback) {
+    _onErrorCallback(result, _currentDatapoint);
+  }
+  _currentDatapoint = Datapoint(nullptr, 0, 0, noconv);
 }
 
 }  // end namespace VitoWiFi
