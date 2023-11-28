@@ -103,43 +103,62 @@ void VS1::onError(OnErrorCallback callback) {
 }
 
 bool VS1::read(const Datapoint& datapoint) {
-  if (_state >= State::SEND) return false;
+  if (_state >= State::SEND) {
+    vw_log_i("reading not possible, busy");
+    return false;
+  }
   if (_currentRequest.createPacket(PacketVS1Type.READ,
-                                   _currentDatapoint.address(),
-                                   _currentDatapoint.length()) &&
-      _expandResponseBuffer(_currentDatapoint.length())) {
+                                   datapoint.address(),
+                                   datapoint.length()) &&
+      _expandResponseBuffer(datapoint.length())) {
     _currentDatapoint = datapoint;
     _requestTime = (_currentMillis != 0) ? _currentMillis : _currentMillis + 1;
+    vw_log_i("reading packet OK");
     return true;
   }
+  vw_log_i("reading not possible, packet creation error");
   return false;
 }
 
 bool VS1::write(const Datapoint& datapoint, const VariantValue& value) {
-  if (_state >= State::SEND) return false;
+  if (_state >= State::SEND) {
+    vw_log_i("writing not possible, busy");
+    return false;
+  }
   uint8_t* payload = reinterpret_cast<uint8_t*>(malloc(datapoint.length()));
-  if (!payload) return false;
-  _currentDatapoint.encode(payload, _currentDatapoint.length(), value);
-  return write(datapoint, payload, _currentDatapoint.length());
+  if (!payload) {
+    vw_log_i("writing not possible, packet creation error");
+    return false;
+  }
+  datapoint.encode(payload, datapoint.length(), value);
+  return write(datapoint, payload, datapoint.length());
 }
 
 bool VS1::write(const Datapoint& datapoint, const uint8_t* data, uint8_t length) {
-  if (_state >= State::SEND) return false;
-  if (length != _currentDatapoint.length()) return false;
+  if (_state >= State::SEND) {
+    vw_log_i("writing not possible, busy");
+    return false;
+  }
+  if (length != datapoint.length()) {
+    vw_log_i("writing not possible, length mismatch");
+    return false;
+  }
   if (_currentRequest.createPacket(PacketVS1Type.WRITE,
-                                   _currentDatapoint.address(),
-                                   _currentDatapoint.length(),
+                                   datapoint.address(),
+                                   datapoint.length(),
                                    data) &&
-      _expandResponseBuffer(_currentDatapoint.length())) {
+      _expandResponseBuffer(datapoint.length())) {
     _currentDatapoint = datapoint;
     _requestTime = (_currentMillis != 0) ? _currentMillis : _currentMillis + 1;
+    vw_log_i("writing packet OK");
     return true;
   }
+  vw_log_i("writing not possible, packet creation error");
   return false;
 }
 
 bool VS1::begin() {
-  _state = State::INIT;
+  _setState(State::INIT);
   return _interface->begin();
 }
 
@@ -170,21 +189,26 @@ void VS1::loop() {
   }
   // double timeout to accomodate for connection initialization
   if (_requestTime != 0 && _currentMillis - _requestTime > 4000UL) {
-    _state = State::INIT;
+    _setState(State::INIT);
     _tryOnError(OptolinkResult::TIMEOUT);
   }
 }
 
 void VS1::end() {
   _interface->end();
-  _state = State::UNDEFINED;
+  _setState(State::UNDEFINED);
   _currentDatapoint = Datapoint(nullptr, 0x0000, 0, VitoWiFi::noconv);
+}
+
+void VS1::_setState(State state) {
+  vw_log_i("state %i --> %i", static_cast<std::underlying_type<State>::type>(_state), static_cast<std::underlying_type<State>::type>(state));
+  _state = state;
 }
 
 void VS1::_init() {
   if (_interface->available()) {
     if (_interface->read() == 0x05) {
-      _state = State::IDLE;
+      _setState(State::IDLE);
     }
   } else {
     if (_currentMillis - _lastMillis > 3000UL) {  // reset should Vitotronic be connected with VS2
@@ -196,22 +220,22 @@ void VS1::_init() {
 
 void VS1::_initAck() {
   if (_interface->write(&VitoWiFiInternals::ProtocolBytes.ENQ_ACK, 1) == 1) {
-    _state = State::IDLE;
+    _setState(State::IDLE);
     _lastMillis = _currentMillis;
   } else {
-    _state = State::INIT;
+    _setState(State::INIT);
   }
 }
 
 void VS1::_idle() {
   if (_currentDatapoint) {
-    _state = State::SEND;
+    _setState(State::SEND);
   } else if (_currentMillis - _lastMillis > 500) {
     if (_interface->write(&VitoWiFiInternals::ProtocolBytes.PROBE[0], 4) == 4) {
       _lastMillis = _currentMillis;
-      _state = State::PROBE_ACK;
+      _setState(State::PROBE_ACK;
     } else {
-      _state = State::INIT;
+      _setState(State::INIT);
     }
   }
 }
@@ -220,9 +244,9 @@ void VS1::_probeAck() {
   if (_interface->available() == 2) {
     _interface->read();
     _interface->read();
-    _state = State::IDLE;
+    _setState(State::IDLE);
   } else if (_currentMillis - _lastMillis > 1000UL) {
-    _state = State::INIT;
+    _setState(State::INIT);
   }
 }
 
@@ -231,7 +255,7 @@ void VS1::_send() {
   if (_bytesTransferred == _currentRequest.length()) {
     _bytesTransferred = 0;
     _lastMillis = _currentMillis;
-    _state = State::RECEIVE;
+    _setState(State::RECEIVE);
   }
 }
 
@@ -243,7 +267,7 @@ void VS1::_receive() {
   }
   if (_bytesTransferred == _currentRequest.length()) {
     _bytesTransferred = 0;
-    _state = State::IDLE;
+    _setState(State::IDLE);
     _tryOnResponse();
   }
 }
