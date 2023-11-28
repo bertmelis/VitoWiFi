@@ -104,7 +104,6 @@ void VS1::onError(OnErrorCallback callback) {
 
 bool VS1::read(const Datapoint& datapoint) {
   if (_state >= State::SEND) {
-    vw_log_i("reading not possible, busy");
     return false;
   }
   if (_currentRequest.createPacket(PacketVS1Type.READ,
@@ -122,7 +121,6 @@ bool VS1::read(const Datapoint& datapoint) {
 
 bool VS1::write(const Datapoint& datapoint, const VariantValue& value) {
   if (_state >= State::SEND) {
-    vw_log_i("writing not possible, busy");
     return false;
   }
   uint8_t* payload = reinterpret_cast<uint8_t*>(malloc(datapoint.length()));
@@ -136,7 +134,6 @@ bool VS1::write(const Datapoint& datapoint, const VariantValue& value) {
 
 bool VS1::write(const Datapoint& datapoint, const uint8_t* data, uint8_t length) {
   if (_state >= State::SEND) {
-    vw_log_i("writing not possible, busy");
     return false;
   }
   if (length != datapoint.length()) {
