@@ -87,7 +87,7 @@ bool VS2::read(const Datapoint& datapoint) {
   if (_state > State::IDLE && _state < State::RECEIVE_ACK) {
     vw_log_i("reading not possible, busy");
     return false;
-  {}
+  }
   if (_currentPacket.createPacket(PacketType::REQUEST,
                                   FunctionCode::READ,
                                   0,
