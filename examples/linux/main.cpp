@@ -1,24 +1,13 @@
-#include <Arduino.h>
-
+#include <signal.h>
+#include <iostream>
+#include <iomanip>
+#include <thread>
+#include <chrono>  // is already included by VitoWiFi
 #include <VitoWiFi.h>
 
-#if defined(ARDUINO_ARCH_ESP8266)
-// optolink on full UART, logging output on secondary
-#define SERIAL1 Serial
-#define SERIAL2 Serial1
-#define SERIALBAUDRATE 74880
-#elif defined(ARDUINO_ARCH_ESP32)
-// optolink on UART2, logging output on UART1 (connected to USB)
-#define SERIAL1 Serial1
-#define SERIAL2 Serial
-#define SERIALBAUDRATE 115200
-#endif
+VitoWiFi::VitoWiFi<VitoWiFi::VS2> vitoWiFi("/dev/ttyUSB0");
 
-#ifndef SERIALBAUDRATE
-  #error Target platform not supported
-#endif
-
-VitoWiFi::VitoWiFi<VitoWiFi::VS2> vitoWiFi(&SERIAL1);
+bool exitProgram = false;
 bool readValues = false;
 uint8_t datapointIndex = 0;
 
@@ -28,52 +17,60 @@ VitoWiFi::Datapoint datapoints[] = {
   VitoWiFi::Datapoint("pump", 0x2906, 1, VitoWiFi::noconv)
 };
 
+void signalHandler(int signum) {
+   std::cout << "Caught signal " << signum << std::endl;
+   exitProgram = true;
+}
+
 void onResponse(const VitoWiFi::PacketVS2& response, const VitoWiFi::Datapoint& request) {
   // raw data can be accessed through the 'response' argument
-  SERIAL2.print("Raw data received:");
+  std::cout << "Raw data received: " << std::endl;
   const uint8_t* data = response.data();
   for (uint8_t i = 0; i < response.dataLength(); ++i) {
-    SERIAL2.printf(" %02x", data[i]);
+    std::cout << std::hex << (int)data[i] << " ";
   }
-  SERIAL2.print("\n");
+  std::cout << std::endl;
 
   // the raw data can be decoded using the datapoint. Be sure to use the correct type
-  SERIAL2.printf("%s: ", request.name());
+  std::cout << request.name() <<": ";
   if (request.converter() == VitoWiFi::div10) {
     float value = request.decode(response);
-    SERIAL2.printf("%.1f\n", value);
+    std::cout << std::setprecision(2) << value << std::endl;
   } else if (request.converter() == VitoWiFi::noconv) {
     bool value = request.decode(response);
+    if (value) {
+      std::cout << "ON" << std::endl;
+    } else {
+      std::cout << "OFF" << std::endl;
+    }
     // alternatively, we can just cast response.data()[0] to bool
-    SERIAL2.printf("%s\n", value ? "ON" : "OFF");
   }
 }
 
 void onError(VitoWiFi::OptolinkResult error, const VitoWiFi::Datapoint& request) {
-  SERIAL2.printf("Datapoint \"%s\" error: ", request.name());
+  printf("Datapoint \"%s\" error: ", request.name());
   if (error == VitoWiFi::OptolinkResult::TIMEOUT) {
-    SERIAL2.print("timeout\n");
+    std::cout << "timeout" << std::endl;
   } else if (error == VitoWiFi::OptolinkResult::LENGTH) {
-    SERIAL2.print("length\n");
+    std::cout << "length" << std::endl;
   } else if (error == VitoWiFi::OptolinkResult::NACK) {
-    SERIAL2.print("nack\n");
+    std::cout << "nack" << std::endl;
   } else if (error == VitoWiFi::OptolinkResult::CRC) {
-    SERIAL2.print("crc\n");
+    std::cout << "crc" << std::endl;
   } else if (error == VitoWiFi::OptolinkResult::ERROR) {
-    SERIAL2.print("error\n");
+    std::cout << "error" << std::endl;
   }
 }
 
 void setup() {
-  delay(1000);
-  SERIAL2.begin(SERIALBAUDRATE);
-  SERIAL2.print("Setting up vitoWiFi\n");
+  sleep(2);
+  std::cout << "Setting up vitoWiFi" << std::endl;
 
   vitoWiFi.onResponse(onResponse);
   vitoWiFi.onError(onError);
   vitoWiFi.begin();
 
-  SERIAL2.print("Setup finished\n");
+  std::cout << "Setup finished" << std::endl;
 }
 
 void loop() {
@@ -94,4 +91,16 @@ void loop() {
   }
 
   vitoWiFi.loop();
+}
+
+
+int main() {
+  setup();
+  while(1) {
+    loop();
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    if (exitProgram) break;
+  }
+  vitoWiFi.end();
+  return EXIT_SUCCESS;
 }

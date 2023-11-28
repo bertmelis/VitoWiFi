@@ -10,8 +10,7 @@ the LICENSE file.
 
 namespace VitoWiFi {
 
-#if defined(ARDUINO)
-
+#if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
 VS1::VS1(HardwareSerial* interface)
 : _state(State::UNDEFINED)
 , _currentMillis(millis())
@@ -63,9 +62,32 @@ VS1::VS1(SoftwareSerial* interface)
     vw_abort();
   }
 }
-
 #else
-// implement Linux
+VS1::VS1(const char* interface)
+: _state(State::UNDEFINED)
+, _currentMillis(millis())
+, _lastMillis(_currentMillis)
+, _requestTime(0)
+, _bytesTransferred(0)
+, _interface(nullptr)
+, _currentDatapoint(Datapoint(nullptr, 0x0000, 0, VitoWiFi::noconv))
+, _currentRequest()
+, _responseBuffer(nullptr)
+, _allocatedLength(0)
+, _onResponseCallback(nullptr)
+, _onErrorCallback(nullptr) {
+  assert(interface != nullptr);
+  _interface = new(std::nothrow) VitoWiFiInternals::LinuxSerialInterface(interface);
+  if (!_interface) {
+    vw_log_e("Could not create serial interface");
+    vw_abort();
+  }
+  _responseBuffer = reinterpret_cast<uint8_t*>(malloc(START_PAYLOAD_LENGTH));
+  if (!_responseBuffer) {
+    vw_log_e("Could not create response buffer");
+    vw_abort();
+  }
+}
 #endif
 
 VS1::~VS1() {
@@ -151,6 +173,12 @@ void VS1::loop() {
     _state = State::INIT;
     _tryOnError(OptolinkResult::TIMEOUT);
   }
+}
+
+void VS1::end() {
+  _interface->end();
+  _state = State::UNDEFINED;
+  _currentDatapoint = Datapoint(nullptr, 0x0000, 0, VitoWiFi::noconv);
 }
 
 void VS1::_init() {
