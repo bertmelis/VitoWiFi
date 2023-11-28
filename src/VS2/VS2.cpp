@@ -91,8 +91,8 @@ bool VS2::read(const Datapoint& datapoint) {
   if (_currentPacket.createPacket(PacketType::REQUEST,
                                   FunctionCode::READ,
                                   0,
-                                  _currentDatapoint.address(),
-                                  _currentDatapoint.length())) {
+                                  datapoint.address(),
+                                  datapoint.length())) {
     _currentDatapoint = datapoint;
     _requestTime = (_currentMillis != 0) ? _currentMillis : _currentMillis + 1;
     vw_log_i("reading packet OK");
@@ -125,8 +125,8 @@ bool VS2::write(const Datapoint& datapoint, const uint8_t* data, uint8_t length)
   if (_currentPacket.createPacket(PacketType::REQUEST,
                                   FunctionCode::WRITE,
                                   0,
-                                  _currentDatapoint.address(),
-                                  _currentDatapoint.length(),
+                                  datapoint.address(),
+                                  datapoint.length(),
                                   data)) {
     _currentDatapoint = datapoint;
     _requestTime = (_currentMillis != 0) ? _currentMillis : _currentMillis + 1;
