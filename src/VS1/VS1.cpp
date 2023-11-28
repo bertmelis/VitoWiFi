@@ -233,7 +233,7 @@ void VS1::_idle() {
   } else if (_currentMillis - _lastMillis > 500) {
     if (_interface->write(&VitoWiFiInternals::ProtocolBytes.PROBE[0], 4) == 4) {
       _lastMillis = _currentMillis;
-      _setState(State::PROBE_ACK;
+      _setState(State::PROBE_ACK);
     } else {
       _setState(State::INIT);
     }
