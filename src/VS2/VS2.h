@@ -77,6 +77,8 @@ class VS2 {
   OnResponseCallback _onResponseCallback;
   OnErrorCallback _onErrorCallback;
 
+  inline void _setState(State state);
+
   void _reset();
   void _resetAck();
   void _init();

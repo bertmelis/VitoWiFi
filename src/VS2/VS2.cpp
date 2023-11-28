@@ -122,7 +122,7 @@ bool VS2::write(const Datapoint& datapoint, const uint8_t* data, uint8_t length)
 }
 
 bool VS2::begin() {
-  _state = State::RESET;
+  _setState(State::RESET);
   return _interface->begin();
 }
 
@@ -164,32 +164,37 @@ void VS2::loop() {
     break;
   }
   if (_requestTime != 0 && _currentMillis - _requestTime > 5000UL) {
-    _state = State::RESET;
+    _setState(State::RESET);
     _tryOnError(OptolinkResult::TIMEOUT);
   }
 }
 
 void VS2::end() {
   _interface->end();
-  _state = State::UNDEFINED;
+  _setState(State::UNDEFINED);
   _currentDatapoint = Datapoint(nullptr, 0, 0, noconv);
+}
+
+void VS2::_setState(State state) {
+  vw_log_i("state %i --> %i", _state, state);
+  _state = state;
 }
 
 void VS2::_reset() {
   while (_interface->available()) _interface->read();
   if (_interface->write(&VitoWiFiInternals::ProtocolBytes.EOT, 1) == 1) {
     _lastMillis = _currentMillis;
-    _state = State::RESET_ACK;
+    _setState(State::RESET_ACK);
   }
 }
 
 void VS2::_resetAck() {
   if (_interface->available() && _interface->read() == VitoWiFiInternals::ProtocolBytes.ENQ) {
     _lastMillis = _currentMillis;
-    _state = State::INIT;
+    _setState(State::INIT);
   } else {
     if (_currentMillis - _lastMillis > 1000) {
-      _state = State::RESET;
+      _setState(State::RESET);
     }
   }
 }
@@ -200,36 +205,36 @@ void VS2::_init() {
   if (_bytesSent == sizeof(VitoWiFiInternals::ProtocolBytes.SYNC)) {
     _bytesSent = 0;
     _lastMillis = _currentMillis;
-    _state = State::INIT_ACK;
+    _setState(State::INIT_ACK);
   }
 }
 
 void VS2::_initAck() {
   if (_interface->available()) {
     if (_interface->read() == VitoWiFiInternals::ProtocolBytes.ACK) {
-      _state = State::IDLE;
+      _setState(State::IDLE);
     } else {
-      _state = State::RESET;
+      _setState(State::RESET);
     }
   } else if (_currentMillis - _lastMillis > 1000) {
-    _state = State::RESET;
+    _setState(State::RESET);
   }
 }
 
 void VS2::_idle() {
   if (_currentDatapoint) {
-    _state = State::SENDSTART;
+    _setState(State::SENDSTART);
   }
   // send INIT every 3 seconds to keep communication alive
   if (_currentMillis - _lastMillis > 3000UL) {
-    _state = State::INIT;
+    _setState(State::INIT);
   }
 }
 
 void VS2::_sendStart() {
   if (_interface->write(&VitoWiFiInternals::ProtocolBytes.PACKETSTART, 1) == 1) {
     _lastMillis = _currentMillis;
-    _state = State::SENDPACKET;
+    _setState(State::SENDPACKET);
   }
 }
 
@@ -238,7 +243,7 @@ void VS2::_sendPacket() {
   if (_bytesSent == _currentPacket.length()) {
     _bytesSent = 0;
     _lastMillis = _currentMillis;
-    _state = State::SEND_ACK;
+    _setState(State::SEND_ACK);
   }
 }
 
@@ -246,9 +251,9 @@ void VS2::_sendAck() {
   if (_interface->available()) {
     uint8_t buff = _interface->read();
     if (buff == 0x06) {  // transmit succesful, moving to next state
-      _state = State::RECEIVE;
+      _setState(State::RECEIVE);
     } else if (buff == 0x15) {  // transmit negatively acknowledged, return to IDLE
-      _state = State::IDLE;
+      _setState(State::IDLE);
       _tryOnError(OptolinkResult::NACK);
       return;
     }
@@ -260,15 +265,15 @@ void VS2::_receive() {
     _lastMillis = _currentMillis;
     VitoWiFiInternals::ParserResult result = _parser.parse(_interface->read());
     if (result == VitoWiFiInternals::ParserResult::COMPLETE) {
-      _state = State::RECEIVE_ACK;
+      _setState(State::RECEIVE_ACK);
       _tryOnResponse();
       return;
     } else if (result == VitoWiFiInternals::ParserResult::CS_ERROR) {
-      _state = State::RESET;
+      _setState(State::RESET);
       _tryOnError(OptolinkResult::CRC);
       return;
     } else if (result == VitoWiFiInternals::ParserResult::ERROR) {
-      _state = State::RESET;
+      _setState(State::RESET);
       _tryOnError(OptolinkResult::ERROR);
       return;
     }
@@ -279,7 +284,7 @@ void VS2::_receive() {
 void VS2::_receiveAck() {
   _interface->write(&VitoWiFiInternals::ProtocolBytes.ACK, 1);
   _lastMillis = _currentMillis;
-  _state = State::IDLE;
+  _setState(State::IDLE);
 }
 
 void VS2::_tryOnResponse() {
