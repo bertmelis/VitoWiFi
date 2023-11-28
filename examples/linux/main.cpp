@@ -64,7 +64,7 @@ void onError(VitoWiFi::OptolinkResult error, const VitoWiFi::Datapoint& request)
 
 void setup() {
   sleep(2);
-  std::cout << "Setting up vitoWiFi" << std::endl;
+  std::cout << "Setting up VitoWiFi" << std::endl;
 
   vitoWiFi.onResponse(onResponse);
   vitoWiFi.onError(onError);
@@ -76,6 +76,7 @@ void setup() {
 void loop() {
   static uint32_t lastMillis = 0;
   if (millis() - lastMillis > 60000UL) {  // read all values every 60 seconds
+    std::cout << "reading datapoints" << std::endl;
     lastMillis = millis();
     readValues = true;
     datapointIndex = 0;
@@ -83,6 +84,7 @@ void loop() {
 
   if (readValues) {
     if (vitoWiFi.read(datapoints[datapointIndex])) {
+      std::cout << "datapoint \"" << datapoints[datapointIndex].name() << "\" requested" << std::endl;
       ++datapointIndex;
     }
     if (datapointIndex == 3) {

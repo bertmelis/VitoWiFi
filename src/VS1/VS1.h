@@ -74,6 +74,8 @@ class VS1 {
   OnResponseCallback _onResponseCallback;
   OnErrorCallback _onErrorCallback;
 
+  inline void _setState(State state);
+
   void _init();
   void _initAck();
   void _idle();
