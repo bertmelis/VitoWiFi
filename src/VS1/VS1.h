@@ -15,12 +15,13 @@ the LICENSE file.
 #include "../Helpers.h"
 #include "PacketVS1.h"
 #include "../Datapoint/Datapoint.h"
-#include "../Interface/SerialInterface.h"
-#if defined(ARDUINO)
+#if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
 #include "../Interface/HardwareSerialInterface.h"
 #include "../Interface/SoftwareSerialInterface.h"
+#elif defined(__linux__)
+#include "../Interface/LinuxSerialInterface.h"
 #else
-// to include
+#error "platform not supported"
 #endif
 
 namespace VitoWiFi {
@@ -30,14 +31,15 @@ class VS1 {
   typedef std::function<void(const uint8_t* data, uint8_t length, const Datapoint& request)> OnResponseCallback;
   typedef std::function<void(OptolinkResult error, const Datapoint& request)> OnErrorCallback;
 
-  #if defined(ARDUINO)
+  #if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
   explicit VS1(HardwareSerial* interface);
   explicit VS1(SoftwareSerial* interface);
   #else
-  // explicit VS1(LinuxSerial* interface);
+  explicit VS1(const char* interface);
   #endif
   ~VS1();
   VS1(const VS1&) = delete;
+  VS1 & operator=(const VS1&) = delete;
 
   void onResponse(OnResponseCallback callback);
   void onError(OnErrorCallback callback);
@@ -48,6 +50,7 @@ class VS1 {
 
   bool begin();
   void loop();
+  void end();
 
  private:
   enum class State {

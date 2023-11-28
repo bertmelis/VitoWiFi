@@ -8,13 +8,6 @@ the LICENSE file.
 
 #pragma once
 
-#include <cassert>
-
-#ifdef ARDUINO
-#include <HardwareSerial.h>
-#include <SoftwareSerial.h>
-#endif
-
 #include "VS2/VS2.h"
 #include "VS1/VS1.h"
 
@@ -23,13 +16,11 @@ namespace VitoWiFi {
 template<class PROTOCOLVERSION>
 class VitoWiFi {
  public:
-  #if defined(ARDUINO)
   template <class IFACE>
   explicit VitoWiFi(IFACE* interface)
   : _optolink(interface) {
     // empty
   }
-  #endif
 
   void onResponse(typename PROTOCOLVERSION::OnResponseCallback callback) {
     _optolink.onResponse(callback);
@@ -41,6 +32,10 @@ class VitoWiFi {
 
   bool begin() {
     return _optolink.begin();
+  }
+
+  void end() {
+    return _optolink.end();
   }
 
   void loop() {
