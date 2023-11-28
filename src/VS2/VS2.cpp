@@ -84,7 +84,10 @@ void VS2::onError(OnErrorCallback callback) {
 }
 
 bool VS2::read(const Datapoint& datapoint) {
-  if (_state > State::IDLE && _state < State::RECEIVE_ACK) return false;
+  if (_state > State::IDLE && _state < State::RECEIVE_ACK) {
+    vw_log_i("reading not possible, busy");
+    return false;
+  {}
   if (_currentPacket.createPacket(PacketType::REQUEST,
                                   FunctionCode::READ,
                                   0,
@@ -92,13 +95,18 @@ bool VS2::read(const Datapoint& datapoint) {
                                   _currentDatapoint.length())) {
     _currentDatapoint = datapoint;
     _requestTime = (_currentMillis != 0) ? _currentMillis : _currentMillis + 1;
+    vw_log_i("reading packet OK");
     return true;
   }
+  vw_log_i("reading not possible, packet creation error");
   return false;
 }
 
 bool VS2::write(const Datapoint& datapoint, const VariantValue& value) {
-  if (_state > State::IDLE && _state < State::RECEIVE_ACK) return false;
+  if (_state > State::IDLE && _state < State::RECEIVE_ACK) {
+    vw_log_i("writing not possible, busy");
+    return false;
+  }
   uint8_t* payload = reinterpret_cast<uint8_t*>(malloc(datapoint.length()));
   if (!payload) return false;
   _currentDatapoint.encode(payload, _currentDatapoint.length(), value);
@@ -106,8 +114,14 @@ bool VS2::write(const Datapoint& datapoint, const VariantValue& value) {
 }
 
 bool VS2::write(const Datapoint& datapoint, const uint8_t* data, uint8_t length) {
-  if (_state > State::IDLE && _state < State::RECEIVE_ACK) return false;
-  if (length != _currentDatapoint.length()) return false;
+  if (_state > State::IDLE && _state < State::RECEIVE_ACK) {
+    vw_log_i("writing not possible, busy");
+    return false;
+  }
+  if (length != _currentDatapoint.length()) {
+    vw_log_i("writing not possible, length error");
+    return false;
+  }
   if (_currentPacket.createPacket(PacketType::REQUEST,
                                   FunctionCode::WRITE,
                                   0,
@@ -116,8 +130,10 @@ bool VS2::write(const Datapoint& datapoint, const uint8_t* data, uint8_t length)
                                   data)) {
     _currentDatapoint = datapoint;
     _requestTime = (_currentMillis != 0) ? _currentMillis : _currentMillis + 1;
+    vw_log_i("writing packet OK");
     return true;
   }
+  vw_log_i("writing not possible, packet creation error");
   return false;
 }
 
