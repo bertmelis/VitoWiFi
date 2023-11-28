@@ -93,7 +93,7 @@ bool VS2::read(const Datapoint& datapoint) {
                                   datapoint.address(),
                                   datapoint.length())) {
     _currentDatapoint = datapoint;
-    _requestTime = (_currentMillis != 0) ? _currentMillis : _currentMillis + 1;
+    _requestTime = _currentMillis;
     vw_log_i("reading packet OK");
     return true;
   }
@@ -126,7 +126,7 @@ bool VS2::write(const Datapoint& datapoint, const uint8_t* data, uint8_t length)
                                   datapoint.length(),
                                   data)) {
     _currentDatapoint = datapoint;
-    _requestTime = (_currentMillis != 0) ? _currentMillis : _currentMillis + 1;
+    _requestTime = _currentMillis;
     vw_log_i("writing packet OK");
     return true;
   }
@@ -176,7 +176,7 @@ void VS2::loop() {
     // begin() not yet called
     break;
   }
-  if (_requestTime != 0 && _currentMillis - _requestTime > 5000UL) {
+  if (_currentDatapoint && _currentMillis - _requestTime > 5000UL) {
     _setState(State::RESET);
     _tryOnError(OptolinkResult::TIMEOUT);
   }

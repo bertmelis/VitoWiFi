@@ -111,7 +111,7 @@ bool VS1::read(const Datapoint& datapoint) {
                                    datapoint.length()) &&
       _expandResponseBuffer(datapoint.length())) {
     _currentDatapoint = datapoint;
-    _requestTime = (_currentMillis != 0) ? _currentMillis : _currentMillis + 1;
+    _requestTime = _currentMillis;
     vw_log_i("reading packet OK");
     return true;
   }
@@ -146,7 +146,7 @@ bool VS1::write(const Datapoint& datapoint, const uint8_t* data, uint8_t length)
                                    data) &&
       _expandResponseBuffer(datapoint.length())) {
     _currentDatapoint = datapoint;
-    _requestTime = (_currentMillis != 0) ? _currentMillis : _currentMillis + 1;
+    _requestTime = _currentMillis;
     vw_log_i("writing packet OK");
     return true;
   }
@@ -185,7 +185,7 @@ void VS1::loop() {
     break;
   }
   // double timeout to accomodate for connection initialization
-  if (_requestTime != 0 && _currentMillis - _requestTime > 4000UL) {
+  if (_currentDatapoint && _currentMillis - _requestTime > 4000UL) {
     _setState(State::INIT);
     _tryOnError(OptolinkResult::TIMEOUT);
   }
