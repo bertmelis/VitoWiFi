@@ -46,6 +46,7 @@ class VS1 {
 
   bool read(const Datapoint& datapoint);
   bool write(const Datapoint& datapoint, const VariantValue& value);
+  bool write(const Datapoint& datapoint, const uint8_t* data, uint8_t length);
 
   bool begin();
   void loop();
