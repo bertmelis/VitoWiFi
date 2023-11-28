@@ -52,6 +52,10 @@ class VitoWiFi {
     return _optolink.write(datapoint, v);
   }
 
+  bool write(Datapoint datapoint, const uint8_t* data, uint8_t length) {
+    return _optolink.write(datapoint, data, length);
+  }
+
  private:
   PROTOCOLVERSION _optolink;
 };
