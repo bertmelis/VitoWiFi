@@ -1,34 +1,38 @@
 {
-    "name": "VitoWiFi",
-    "version": "3.0.0",
-    "keywords": "iot, home, automation, Arduino, esp8266, esp32, Viessmann, serial, optolink",
-    "description": "Communicate with Viessmann boilers using the optolink for ESP8266 and ESP32",
-    "homepage": "https://github.com/bertmelis/VitoWiFi",
-    "license": "MIT",
-    "authors": {
-      "name": "Bert Melis",
-      "url": "https://github.com/bertmelis",
-      "maintainer": true
-    },
-    "repository": {
-      "type": "git",
-      "url": "https://github.com/bertmelis/VitoWiFi.git",
-      "branch": "master"
-    },
-    "frameworks": "arduino",
-    "platforms": [
-      "espressif8266",
-      "espressif32"
-    ],
-    "dependencies": [
-      {
-        "owner": "plerup",
-        "name": "EspSoftwareSerial",
-        "version": ">=1.2.2",
-        "platforms": [
-          "espressif8266",
-          "espressif32"
-        ]
-      }
-    ]
-  }
+  "name": "VitoWiFi",
+  "version": "3.0.0",
+  "keywords": "iot, home, automation, Arduino, esp8266, esp32, Viessmann, serial, optolink",
+  "description": "Communicate with Viessmann boilers using the optolink for ESP8266 and ESP32",
+  "homepage": "https://github.com/bertmelis/VitoWiFi",
+  "license": "MIT",
+  "authors": {
+    "name": "Bert Melis",
+    "url": "https://github.com/bertmelis",
+    "maintainer": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bertmelis/VitoWiFi.git",
+    "branch": "master"
+  },
+  "frameworks": [
+    "arduino",
+    "*"
+  ],
+  "platforms": [
+    "espressif8266",
+    "espressif32",
+    "native"
+  ],
+  "dependencies": [
+    {
+      "owner": "plerup",
+      "name": "EspSoftwareSerial",
+      "version": ">=1.2.2",
+      "platforms": [
+        "espressif8266",
+        "espressif32"
+      ]
+    }
+  ]
+}

@@ -1,27 +1,13 @@
-/*
-
-This example defines three datapoints.
-The first two are TEMPL type datapoints and have their own callback.
-When no specific callback is attached to a datapoint, it uses the global callback.
-
-Note the difference in return value between the callbacks:
-for tempCallback uses value.getFloat() as TEMPL datapoints return a float.
-globalCallback uses value.getString(char*,size_t). This method is independent of the returned type.
-
-*/
-
 #include <Arduino.h>
 
 #include <VitoWiFi.h>
 
-#ifdef ESP8266
+#if defined(ARDUINO_ARCH_ESP8266)
 // optolink on full UART, logging output on secondary
 #define SERIAL1 Serial
 #define SERIAL2 Serial1
 #define SERIALBAUDRATE 74880
-#endif
-
-#ifdef ESP32
+#elif defined(ARDUINO_ARCH_ESP32)
 // optolink on UART2, logging output on UART1 (connected to USB)
 #define SERIAL1 Serial1
 #define SERIAL2 Serial

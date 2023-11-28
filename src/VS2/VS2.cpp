@@ -10,8 +10,7 @@ the LICENSE file.
 
 namespace VitoWiFi {
 
-#if defined(ARDUINO)
-
+#if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
 VS2::VS2(HardwareSerial* interface)
 : _state(State::UNDEFINED)
 , _currentMillis(millis())
@@ -51,9 +50,26 @@ VS2::VS2(SoftwareSerial* interface)
     vw_abort();
   }
 }
-
 #else
-// implement Linux
+VS2::VS2(const char* interface)
+: _state(State::UNDEFINED)
+, _currentMillis(millis())
+, _lastMillis(_currentMillis)
+, _requestTime(0)
+, _bytesSent(0)
+, _interface(nullptr)
+, _parser()
+, _currentDatapoint(Datapoint(nullptr, 0, 0, noconv))
+, _currentPacket()
+, _onResponseCallback(nullptr)
+, _onErrorCallback(nullptr) {
+  assert(interface != nullptr);
+  _interface = new(std::nothrow) VitoWiFiInternals::LinuxSerialInterface(interface);
+  if (!_interface) {
+    vw_log_e("Could not create serial interface");
+    vw_abort();
+  }
+}
 #endif
 
 VS2::~VS2() {
@@ -151,6 +167,12 @@ void VS2::loop() {
     _state = State::RESET;
     _tryOnError(OptolinkResult::TIMEOUT);
   }
+}
+
+void VS2::end() {
+  _interface->end();
+  _state = State::UNDEFINED;
+  _currentDatapoint = Datapoint(nullptr, 0, 0, noconv);
 }
 
 void VS2::_reset() {
