@@ -203,7 +203,7 @@ void VS2::_reset() {
 
 void VS2::_resetAck() {
   if (_interface->available()) {
-    uint8_t buff = _interface.read();
+    uint8_t buff = _interface->read();
     if (buff == VitoWiFiInternals::ProtocolBytes.ENQ) {
       _lastMillis = _currentMillis;
       _setState(State::INIT);
