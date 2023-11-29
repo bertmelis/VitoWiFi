@@ -1,5 +1,16 @@
 # VitoWiFi
 
+***
+___
+## **ATTENTION**
+
+Version 1 (current `master` branch) and version 2 will be deprecated soon. I'm working on v3 of this library which will be simpler, more versatile and more compact. You can follow development in the `v3` branch.
+
+***
+___
+
+
+
 [![Build Status](https://travis-ci.org/bertmelis/VitoWiFi.svg?branch=master)](https://travis-ci.org/bertmelis/VitoWiFi) 
 [![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/VitoWiFi/VitoWiFi)
 
