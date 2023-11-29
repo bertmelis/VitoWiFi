@@ -72,17 +72,17 @@ void VitoWiFiClass<P>::readGroup(const char* group, void* arg) {
 }
 
 template <class P>
-void VitoWiFiClass<P>::readDatapoint(IDatapoint& dp, void* arg) {  // NOLINT TODO(@bertmelis) make it a const reference
-  _readDatapoint(&dp, arg);
+bool VitoWiFiClass<P>::readDatapoint(IDatapoint& dp, void* arg) {  // NOLINT TODO(@bertmelis) make it a const reference
+  return _readDatapoint(&dp, arg);
 }
 
 template <class P>
-void VitoWiFiClass<P>::writeDatapoint(IDatapoint& dp, DPValue value, void* arg) {  // NOLINT TODO(@bertmelis) make it a const reference
-  _writeDatapoint(&dp, value, arg);
+bool VitoWiFiClass<P>::writeDatapoint(IDatapoint& dp, DPValue value, void* arg) {  // NOLINT TODO(@bertmelis) make it a const reference
+  return _writeDatapoint(&dp, value, arg);
 }
 
 template <class P>
-void VitoWiFiClass<P>::_readDatapoint(IDatapoint* dp, void* arg) {
+bool VitoWiFiClass<P>::_readDatapoint(IDatapoint* dp, void* arg) {
   if (_queue.size() < (IDatapoint::_dps.size() * 2)) {
     Action action = {dp, false, arg};
     _queue.push(action);
@@ -90,19 +90,20 @@ void VitoWiFiClass<P>::_readDatapoint(IDatapoint* dp, void* arg) {
       _printer->print("READ ");
       _printer->println(dp->getName());
     }
-  } else {
-    if (_enablePrinter && _printer) {
-      _printer->print("queue full");
-    }
+    return true;
   }
+  if (_enablePrinter && _printer) {
+    _printer->print("queue full");
+  }
+  return false;
 }
 
 template <class P>
-void VitoWiFiClass<P>::_writeDatapoint(IDatapoint* dp, DPValue value, void* arg) {
+bool VitoWiFiClass<P>::_writeDatapoint(IDatapoint* dp, DPValue value, void* arg) {
   if (!dp->isWriteable()) {
     if (_enablePrinter && _printer)
       _printer->println("DP is readonly, skipping");
-    return;
+    return false;
   }
   if (_queue.size() < (IDatapoint::_dps.size() * 2)) {
     uint8_t value_enc[MAX_DP_LENGTH] = {0};
@@ -110,11 +111,12 @@ void VitoWiFiClass<P>::_writeDatapoint(IDatapoint* dp, DPValue value, void* arg)
     Action action = {dp, true, arg};
     memcpy(action.value, value_enc, MAX_DP_LENGTH);
     _queue.push(action);
-  } else {
-    if (_enablePrinter && _printer) {
-      _printer->print("queue full");
-    }
+    return true;
   }
+  if (_enablePrinter && _printer) {
+    _printer->print("queue full");
+  }
+  return false;
 }
 
 template <class P>
@@ -169,4 +171,9 @@ template <class P>
 void VitoWiFiClass<P>::disableLogger() {
   _enablePrinter = false;
   _optolink.setLogger(nullptr);
+}
+
+template <class P>
+size_t VitoWiFiClass<P>::queueSize() const {
+  return _queue.size();
 }

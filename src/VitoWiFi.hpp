@@ -53,11 +53,12 @@ class VitoWiFiClass {
   void setGlobalCallback(Callback globalCallback);
   void readAll(void* arg = nullptr);
   void readGroup(const char* group, void* arg = nullptr);
-  void readDatapoint(IDatapoint& dp, void* arg = nullptr);  // NOLINT TODO(bertmelis) make it a const reference
-  void writeDatapoint(IDatapoint& dp, DPValue value, void* arg = nullptr);  // NOLINT TODO(bertmelis) make it a const reference
+  bool readDatapoint(IDatapoint& dp, void* arg = nullptr);  // NOLINT TODO(bertmelis) make it a const reference
+  bool writeDatapoint(IDatapoint& dp, DPValue value, void* arg = nullptr);  // NOLINT TODO(bertmelis) make it a const reference
   void enableLogger();
   void disableLogger();
   void setLogger(Print* printer);
+  size_t queueSize() const;
 
  private:
   struct Action {
