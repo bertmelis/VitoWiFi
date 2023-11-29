@@ -202,9 +202,12 @@ void VS2::_reset() {
 }
 
 void VS2::_resetAck() {
-  if (_interface->available() && _interface->read() == VitoWiFiInternals::ProtocolBytes.ENQ) {
-    _lastMillis = _currentMillis;
-    _setState(State::INIT);
+  if (_interface->available()) {
+    uint8_t buff = _interface.read();
+    if (buff == VitoWiFiInternals::ProtocolBytes.ENQ) {
+      _lastMillis = _currentMillis;
+      _setState(State::INIT);
+    }
   } else {
     if (_currentMillis - _lastMillis > 1000) {
       _setState(State::RESET);
@@ -224,7 +227,9 @@ void VS2::_init() {
 
 void VS2::_initAck() {
   if (_interface->available()) {
-    if (_interface->read() == VitoWiFiInternals::ProtocolBytes.ACK) {
+    uint8_t buff = _interface->read();
+    vw_log_i("rcv: 0x%02x", buff);
+    if (buff == VitoWiFiInternals::ProtocolBytes.ACK) {
       _setState(State::IDLE);
     } else {
       _setState(State::RESET);
@@ -263,9 +268,10 @@ void VS2::_sendPacket() {
 void VS2::_sendAck() {
   if (_interface->available()) {
     uint8_t buff = _interface->read();
-    if (buff == 0x06) {  // transmit succesful, moving to next state
+    vw_log_i("rcv: 0x%02x", buff);
+    if (buff == VitoWiFiInternals::ProtocolBytes.ACK) {  // transmit succesful, moving to next state
       _setState(State::RECEIVE);
-    } else if (buff == 0x15) {  // transmit negatively acknowledged, return to IDLE
+    } else if (buff == VitoWiFiInternals::ProtocolBytes.NACK) {  // transmit negatively acknowledged, return to IDLE
       _setState(State::IDLE);
       _tryOnError(OptolinkResult::NACK);
       return;
