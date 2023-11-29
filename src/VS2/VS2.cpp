@@ -163,6 +163,9 @@ void VS2::loop() {
   case State::SENDPACKET:
     _sendPacket();
     break;
+  case State::SEND_CRC:
+    _sendCRC();
+    break;
   case State::SEND_ACK:
     _sendAck();
     break;
@@ -260,6 +263,14 @@ void VS2::_sendPacket() {
   _bytesSent += _interface->write(&_currentPacket[_bytesSent], _currentPacket.length() - _bytesSent);
   if (_bytesSent == _currentPacket.length()) {
     _bytesSent = 0;
+    _lastMillis = _currentMillis;
+    _setState(State::SEND_CRC);
+  }
+}
+
+void VS2::_sendCRC() {
+  uint8_t crc = _currentPacket.checksum();
+  if (_interface->write(&crc, 1) == 1) {
     _lastMillis = _currentMillis;
     _setState(State::SEND_ACK);
   }
