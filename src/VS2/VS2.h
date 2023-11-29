@@ -61,6 +61,7 @@ class VS2 {
     IDLE,
     SENDSTART,
     SENDPACKET,
+    SEND_CRC,
     SEND_ACK,
     RECEIVE,
     RECEIVE_ACK,
@@ -86,6 +87,7 @@ class VS2 {
   void _idle();
   void _sendStart();
   void _sendPacket();
+  void _sendCRC();
   void _sendAck();
   void _receive();
   void _receiveAck();
