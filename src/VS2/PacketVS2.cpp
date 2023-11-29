@@ -45,9 +45,11 @@ bool PacketVS2::createPacket(PacketType pt, FunctionCode fc, uint8_t id, uint16_
 
   // check arguments
   if (len == 0) {
+    vw_log_i("Length error: %u", len);
     return false;
   }
   if (fc == FunctionCode::WRITE && !data) {
+    vw_log_i("Function code - data mismatch");
     return false;
   }
   if (id > 7) {
@@ -59,6 +61,7 @@ bool PacketVS2::createPacket(PacketType pt, FunctionCode fc, uint8_t id, uint16_
   if (toAllocate > _allocatedLength) {
     uint8_t* newBuffer = reinterpret_cast<uint8_t*>(realloc(_buffer, toAllocate));
     if (!newBuffer) {
+      vw_log_i("buffer not available");
       return false;
     }
     _buffer = newBuffer;
