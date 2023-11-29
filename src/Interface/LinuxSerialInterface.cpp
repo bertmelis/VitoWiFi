@@ -75,6 +75,11 @@ std::size_t LinuxSerialInterface::write(const uint8_t* data, uint8_t length) {
     vw_log_w("Error writing serial port");
     return 0;
   }
+  std::cout << "tx (" << unsigned(length) << "): 0x";
+  for (uint8_t i = 0; i < retVal; ++i) {
+    std::cout << std::setfill('0') << std::setw(2) << std::hex << unsigned(data[i]);
+  }
+  std::cout << std::endl;
   return retVal;
 }
 
