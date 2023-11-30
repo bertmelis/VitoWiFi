@@ -10,6 +10,7 @@ the LICENSE file.
 
 #include "VS2/VS2.h"
 #include "VS1/VS1.h"
+#include "GWG/GWG.h"
 
 namespace VitoWiFi {
 
