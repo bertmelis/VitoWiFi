@@ -253,7 +253,7 @@ Returns a pointer to the payload.
 
 ##### `VitoWiFi<PROTOCOL_VERSION>(IFACE* interface)`
 
-Constructor of the VitoWiFi class. `PROTOCOL_VERSION` can be `VS1` or `VS2`. If your Viessmann device is somewhat modern, you should use `VS2`.
+Constructor of the VitoWiFi class. `PROTOCOL_VERSION` can be  `GWG`, `VS1` or `VS2`. If your Viessmann device is somewhat modern, you should use `VS2`.
 `interface` can be any of the `HardwareSerial` interfaces (`Serial`, `Serial1`...), `SoftwareSerial` or if you are on Linux, pass the c-string depicting your device (for example `"/dev/ttyUSB0"`).
 
 ##### `void onResponse(typename PROTOCOLVERSION::OnResponseCallback callback)`
