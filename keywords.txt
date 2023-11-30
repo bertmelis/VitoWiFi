@@ -27,7 +27,6 @@ encode	KEYWORD2
 
 #PacketVS2 public methods
 createPacket	KEYWORD2
-#setLength	KEYWORD2
 length	KEYWORD2
 packetType	KEYWORD2
 functionCode	KEYWORD2
@@ -42,8 +41,20 @@ checksum	KEYWORD2
 # Constants (LITERAL1)
 #######################################
 
+#Protocols
+GWG	LITERAL1
+VS1	LITERAL1
+VS2	LITERAL1
+
+#Enums
+TIMEOUT	LITERAL1
+LENGTH	LITERAL1
+NACK	LITERAL1
+CRC	LITERAL1
+ERROR	LITERAL1
+
 #Transformation
+div2	LITERAL2
 div10	LITERAL2
 div3600	LITERAL2
 noconv	LITERAL2
-raw	LITERAL2
