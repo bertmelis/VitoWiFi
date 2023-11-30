@@ -6,12 +6,12 @@ For a copy, see <https://opensource.org/licenses/MIT> or
 the LICENSE file.
 */
 
-#include "VS1.h"
+#include "GWG.h"
 
 namespace VitoWiFi {
 
 #if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
-VS1::VS1(HardwareSerial* interface)
+GWG::GWG(HardwareSerial* interface)
 : _state(State::UNDEFINED)
 , _currentMillis(millis())
 , _lastMillis(_currentMillis)
@@ -37,7 +37,7 @@ VS1::VS1(HardwareSerial* interface)
   }
 }
 
-VS1::VS1(SoftwareSerial* interface)
+GWG::GWG(SoftwareSerial* interface)
 : _state(State::UNDEFINED)
 , _currentMillis(millis())
 , _lastMillis(_currentMillis)
@@ -63,7 +63,7 @@ VS1::VS1(SoftwareSerial* interface)
   }
 }
 #else
-VS1::VS1(const char* interface)
+GWG::GWG(const char* interface)
 : _state(State::UNDEFINED)
 , _currentMillis(millis())
 , _lastMillis(_currentMillis)
@@ -90,23 +90,23 @@ VS1::VS1(const char* interface)
 }
 #endif
 
-VS1::~VS1() {
+GWG::~GWG() {
   delete _interface;
   free(_responseBuffer);
 }
 
-void VS1::onResponse(OnResponseCallback callback) {
+void GWG::onResponse(OnResponseCallback callback) {
   _onResponseCallback = callback;
 }
-void VS1::onError(OnErrorCallback callback) {
+void GWG::onError(OnErrorCallback callback) {
   _onErrorCallback = callback;
 }
 
-bool VS1::read(const Datapoint& datapoint) {
+bool GWG::read(const Datapoint& datapoint) {
   if (_currentDatapoint) {
     return false;
   }
-  if (_currentRequest.createPacket(PacketVS1Type.READ,
+  if (_currentRequest.createPacket(PacketGWGType.READ,
                                    datapoint.address(),
                                    datapoint.length()) &&
       _expandResponseBuffer(datapoint.length())) {
@@ -119,7 +119,7 @@ bool VS1::read(const Datapoint& datapoint) {
   return false;
 }
 
-bool VS1::write(const Datapoint& datapoint, const VariantValue& value) {
+bool GWG::write(const Datapoint& datapoint, const VariantValue& value) {
   if (_currentDatapoint) {
     return false;
   }
@@ -132,7 +132,7 @@ bool VS1::write(const Datapoint& datapoint, const VariantValue& value) {
   return write(datapoint, payload, datapoint.length());
 }
 
-bool VS1::write(const Datapoint& datapoint, const uint8_t* data, uint8_t length) {
+bool GWG::write(const Datapoint& datapoint, const uint8_t* data, uint8_t length) {
   if (_currentDatapoint) {
     return false;
   }
@@ -140,7 +140,7 @@ bool VS1::write(const Datapoint& datapoint, const uint8_t* data, uint8_t length)
     vw_log_i("writing not possible, length mismatch");
     return false;
   }
-  if (_currentRequest.createPacket(PacketVS1Type.WRITE,
+  if (_currentRequest.createPacket(PacketGWGType.WRITE,
                                    datapoint.address(),
                                    datapoint.length(),
                                    data) &&
@@ -154,25 +154,16 @@ bool VS1::write(const Datapoint& datapoint, const uint8_t* data, uint8_t length)
   return false;
 }
 
-bool VS1::begin() {
+bool GWG::begin() {
   _setState(State::INIT);
   return _interface->begin();
 }
 
-void VS1::loop() {
+void GWG::loop() {
   _currentMillis = millis();
   switch (_state) {
   case State::INIT:
     _init();
-    break;
-  case State::INIT_ACK:
-    _initAck();
-    break;
-  case State::IDLE:
-    _idle();
-    break;
-  case State::PROBE_ACK:
-    _probeAck();
     break;
   case State::SEND:
     _send();
@@ -185,69 +176,32 @@ void VS1::loop() {
     break;
   }
   // double timeout to accomodate for connection initialization
-  if (_currentDatapoint && _currentMillis - _requestTime > 4000UL) {
+  if (_currentDatapoint && _currentMillis - _requestTime > 3000UL) {
     _setState(State::INIT);
     _tryOnError(OptolinkResult::TIMEOUT);
   }
 }
 
-void VS1::end() {
+void GWG::end() {
   _interface->end();
   _setState(State::UNDEFINED);
   _currentDatapoint = Datapoint(nullptr, 0x0000, 0, VitoWiFi::noconv);
 }
 
-void VS1::_setState(State state) {
+void GWG::_setState(State state) {
   vw_log_i("state %i --> %i", static_cast<std::underlying_type<State>::type>(_state), static_cast<std::underlying_type<State>::type>(state));
   _state = state;
 }
 
-void VS1::_init() {
+void GWG::_init() {
   if (_interface->available()) {
-    if (_interface->read() == VitoWiFiInternals::ProtocolBytes.ENQ) {
-      _setState(State::IDLE);
-    }
-  } else {
-    if (_currentMillis - _lastMillis > 3000UL) {  // reset should Vitotronic be connected with VS2
-      _lastMillis = _currentMillis;
-      _interface->write(&VitoWiFiInternals::ProtocolBytes.EOT, 1);
+    if (_interface->read() == VitoWiFiInternals::ProtocolBytes.ENQ && _currentDatapoint) {
+      _setState(State::SEND);
     }
   }
 }
 
-void VS1::_initAck() {
-  if (_interface->write(&VitoWiFiInternals::ProtocolBytes.ENQ_ACK, 1) == 1) {
-    _setState(State::IDLE);
-    _lastMillis = _currentMillis;
-  } else {
-    _setState(State::INIT);
-  }
-}
-
-void VS1::_idle() {
-  if (_currentDatapoint) {
-    _setState(State::SEND);
-  } else if (_currentMillis - _lastMillis > 500) {
-    if (_interface->write(&VitoWiFiInternals::ProtocolBytes.PROBE[0], 4) == 4) {
-      _lastMillis = _currentMillis;
-      _setState(State::PROBE_ACK);
-    } else {
-      _setState(State::INIT);
-    }
-  }
-}
-
-void VS1::_probeAck() {
-  if (_interface->available() == 2) {
-    _interface->read();
-    _interface->read();
-    _setState(State::IDLE);
-  } else if (_currentMillis - _lastMillis > 1000UL) {
-    _setState(State::INIT);
-  }
-}
-
-void VS1::_send() {
+void GWG::_send() {
   _bytesTransferred += _interface->write(&_currentRequest[_bytesTransferred], _currentRequest.length() - _bytesTransferred);
   if (_bytesTransferred == _currentRequest.length()) {
     _bytesTransferred = 0;
@@ -256,7 +210,7 @@ void VS1::_send() {
   }
 }
 
-void VS1::_receive() {
+void GWG::_receive() {
   while (_interface->available()) {
     _responseBuffer[_bytesTransferred] = _interface->read();
     ++_bytesTransferred;
@@ -269,21 +223,20 @@ void VS1::_receive() {
   }
 }
 
-void VS1::_tryOnResponse() {
+void GWG::_tryOnResponse() {
   if (_onResponseCallback) {
     _onResponseCallback(_responseBuffer, _currentRequest.length(), _currentDatapoint);
   }
-  _currentDatapoint = Datapoint(nullptr, 0, 0, noconv);
 }
 
-void VS1::_tryOnError(OptolinkResult result) {
+void GWG::_tryOnError(OptolinkResult result) {
   if (_onErrorCallback) {
     _onErrorCallback(result, _currentDatapoint);
   }
   _currentDatapoint = Datapoint(nullptr, 0, 0, noconv);
 }
 
-bool VS1::_expandResponseBuffer(uint8_t newSize) {
+bool GWG::_expandResponseBuffer(uint8_t newSize) {
   if (newSize > _allocatedLength) {
     uint8_t* newBuffer = reinterpret_cast<uint8_t*>(realloc(_responseBuffer, newSize));
     if (!newBuffer) {

@@ -188,7 +188,7 @@ In the table below you can find how to define your datapoints:
 |---|---|---|---|---|
 |Temperature|2|div10|float||
 |Temperature short|1|noconv|uint8_t|equivalent to Mode|
-|Power|1|div2|float||
+|Power|1|div2|float|also used for temperature in GWG|
 |Status|1|noconv|bool|this is the same as 'Temperature short' and 'Mode'. The  `uint8_t` value will be implicitely converted to bool.|
 |Hours|4|div3600|float|this is in fact a `Count` datapoint (seconds) converted to hours.|
 |Count|4|noconv|uint32_t||
