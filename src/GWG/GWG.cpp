@@ -218,7 +218,7 @@ void GWG::_receive() {
   }
   if (_bytesTransferred == _currentRequest.length()) {
     _bytesTransferred = 0;
-    _setState(State::IDLE);
+    _setState(State::INIT);
     _tryOnResponse();
   }
 }

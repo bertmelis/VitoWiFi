@@ -65,7 +65,7 @@ class GWG {
   uint8_t _bytesTransferred;
   VitoWiFiInternals::SerialInterface* _interface;
   Datapoint _currentDatapoint;
-  PacketVS1 _currentRequest;
+  PacketGWG _currentRequest;
   uint8_t* _responseBuffer;
   uint8_t _allocatedLength;
   OnResponseCallback _onResponseCallback;
