@@ -37,6 +37,11 @@ constexpr struct {
   uint8_t WRITE = 0xF4;
 } PacketVS1Type;
 
+constexpr struct {
+  uint8_t READ  = 0xCB;
+  uint8_t WRITE = 0xC8;
+} PacketGWGType;
+
 enum class OptolinkResult {
   CONTINUE,
   PACKET,

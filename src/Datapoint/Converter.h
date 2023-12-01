@@ -62,6 +62,12 @@ class Div10Convert : public Converter {
   void encode(uint8_t* buf, uint8_t len, const VariantValue& val) const override;
 };
 
+class Div2Convert : public Converter {
+ public:
+  VariantValue decode(const uint8_t* data, uint8_t len) const override;
+  void encode(uint8_t* buf, uint8_t len, const VariantValue& val) const override;
+};
+
 class Div3600Convert : public Converter {
  public:
   VariantValue decode(const uint8_t* data, uint8_t len) const override;
@@ -75,6 +81,7 @@ class NoconvConvert : public Converter {
 };
 
 extern Div10Convert div10;
+extern Div2Convert div2;
 extern Div3600Convert div3600;
 extern NoconvConvert noconv;
 

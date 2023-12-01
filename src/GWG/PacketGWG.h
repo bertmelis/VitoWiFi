@@ -19,12 +19,12 @@ the LICENSE file.
 
 namespace VitoWiFi {
 
-class PacketVS1 {
+class PacketGWG {
  public:
-  PacketVS1();
-  ~PacketVS1();
-  PacketVS1 (const PacketVS1&) = delete;
-  PacketVS1& operator =(const PacketVS1&) = delete;
+  PacketGWG();
+  ~PacketGWG();
+  PacketGWG (const PacketGWG&) = delete;
+  PacketGWG& operator =(const PacketGWG&) = delete;
   operator bool() const;
   /* uint8_t operator[](std::size_t index) const; */
   uint8_t& operator[](std::size_t index);

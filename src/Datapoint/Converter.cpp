@@ -35,6 +35,22 @@ void Div10Convert::encode(uint8_t* buf, uint8_t len, const VariantValue& val) co
   buf[0] = tmp & 0xFF;
 }
 
+VariantValue Div2Convert::decode(const uint8_t* data, uint8_t len) const {
+  assert(len == 1);
+  float retVal = 0;
+  int8_t val = data[0];
+  retVal = val / 2.f;
+    return VariantValue(retVal);
+}
+
+void Div2Convert::encode(uint8_t* buf, uint8_t len, const VariantValue& val) const {
+  assert(len == 1);
+  (void) len;
+  float srcVal = val;
+  int8_t tmp = floor((srcVal * 2.f) + 0.5);
+  buf[0] = tmp;
+}
+
 VariantValue Div3600Convert::decode(const uint8_t* data, uint8_t len) const {
   assert(len == 4);
   (void) len;
@@ -94,6 +110,7 @@ void NoconvConvert::encode(uint8_t* buf, uint8_t len, const VariantValue& val) c
 }
 
 Div10Convert div10;
+Div2Convert div2;
 Div3600Convert div3600;
 NoconvConvert noconv;
 
