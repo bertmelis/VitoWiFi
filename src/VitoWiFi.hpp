@@ -67,8 +67,8 @@ class VitoWiFiClass {
     void* arg;
     uint8_t value[MAX_DP_LENGTH];
   };
-  void _readDatapoint(IDatapoint* dp, void* arg);
-  void _writeDatapoint(IDatapoint* dp, DPValue value, void* arg);
+  bool _readDatapoint(IDatapoint* dp, void* arg);
+  bool _writeDatapoint(IDatapoint* dp, DPValue value, void* arg);
   P _optolink;
   std::queue<Action> _queue;
   bool _enablePrinter;
