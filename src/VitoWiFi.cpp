@@ -93,7 +93,7 @@ bool VitoWiFiClass<P>::_readDatapoint(IDatapoint* dp, void* arg) {
     return true;
   }
   if (_enablePrinter && _printer) {
-    _printer->print("queue full");
+    _printer->println("queue full");
   }
   return false;
 }
@@ -114,7 +114,7 @@ bool VitoWiFiClass<P>::_writeDatapoint(IDatapoint* dp, DPValue value, void* arg)
     return true;
   }
   if (_enablePrinter && _printer) {
-    _printer->print("queue full");
+    _printer->println("queue full");
   }
   return false;
 }
