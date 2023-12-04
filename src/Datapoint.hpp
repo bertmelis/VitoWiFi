@@ -73,7 +73,7 @@ class IDatapoint {
 
  public:
   // better not use this publicly
-  static const std::vector<IDatapoint*>& getCollection() const { return _dps; }
+  static const std::vector<IDatapoint*>& getCollection() { return _dps; }
 };
 
 template <class T>
