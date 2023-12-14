@@ -14,7 +14,9 @@ the LICENSE file.
 
 #if defined(__linux__)
   #include <chrono>  // NOLINT [build/c++11]
-  #define millis() std::chrono::duration_cast<std::chrono::duration<uint32_t, std::milli>>(std::chrono::system_clock::now().time_since_epoch()).count()
+  #define vw_millis() std::chrono::duration_cast<std::chrono::duration<uint32_t, std::milli>>(std::chrono::system_clock::now().time_since_epoch()).count()
+#else
+  #define vw_millis() millis()
 #endif
 
 #define vw_abort() abort()

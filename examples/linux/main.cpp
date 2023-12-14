@@ -75,9 +75,9 @@ void setup() {
 
 void loop() {
   static uint32_t lastMillis = 0;
-  if (millis() - lastMillis > 60000UL) {  // read all values every 60 seconds
+  if (vw_millis() - lastMillis > 60000UL) {  // read all values every 60 seconds
     std::cout << "reading datapoints" << std::endl;
-    lastMillis = millis();
+    lastMillis = vw_millis();
     readValues = true;
     datapointIndex = 0;
   }
