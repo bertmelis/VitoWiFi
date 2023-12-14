@@ -13,7 +13,7 @@ namespace VitoWiFi {
 #if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
 VS2::VS2(HardwareSerial* interface)
 : _state(State::UNDEFINED)
-, _currentMillis(millis())
+, _currentMillis(vw_millis())
 , _lastMillis(_currentMillis)
 , _requestTime(0)
 , _bytesSent(0)
@@ -33,7 +33,7 @@ VS2::VS2(HardwareSerial* interface)
 
 VS2::VS2(SoftwareSerial* interface)
 : _state(State::UNDEFINED)
-, _currentMillis(millis())
+, _currentMillis(vw_millis())
 , _lastMillis(_currentMillis)
 , _requestTime(0)
 , _bytesSent(0)
@@ -53,7 +53,7 @@ VS2::VS2(SoftwareSerial* interface)
 #else
 VS2::VS2(const char* interface)
 : _state(State::UNDEFINED)
-, _currentMillis(millis())
+, _currentMillis(vw_millis())
 , _lastMillis(_currentMillis)
 , _requestTime(0)
 , _bytesSent(0)
@@ -140,7 +140,7 @@ bool VS2::begin() {
 }
 
 void VS2::loop() {
-  _currentMillis = millis();
+  _currentMillis = vw_millis();
   switch (_state) {
   case State::RESET:
     _reset();
