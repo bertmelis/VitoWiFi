@@ -13,7 +13,7 @@ namespace VitoWiFi {
 #if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
 GWG::GWG(HardwareSerial* interface)
 : _state(State::UNDEFINED)
-, _currentMillis(millis())
+, _currentMillis(vw_millis())
 , _lastMillis(_currentMillis)
 , _requestTime(0)
 , _bytesTransferred(0)
@@ -39,7 +39,7 @@ GWG::GWG(HardwareSerial* interface)
 
 GWG::GWG(SoftwareSerial* interface)
 : _state(State::UNDEFINED)
-, _currentMillis(millis())
+, _currentMillis(vw_millis())
 , _lastMillis(_currentMillis)
 , _requestTime(0)
 , _bytesTransferred(0)
@@ -65,7 +65,7 @@ GWG::GWG(SoftwareSerial* interface)
 #else
 GWG::GWG(const char* interface)
 : _state(State::UNDEFINED)
-, _currentMillis(millis())
+, _currentMillis(vw_millis())
 , _lastMillis(_currentMillis)
 , _requestTime(0)
 , _bytesTransferred(0)
@@ -160,7 +160,7 @@ bool GWG::begin() {
 }
 
 void GWG::loop() {
-  _currentMillis = millis();
+  _currentMillis = vw_millis();
   switch (_state) {
   case State::INIT:
     _init();
