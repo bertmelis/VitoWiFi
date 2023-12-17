@@ -212,7 +212,7 @@ void VS2::_resetAck() {
       _setState(State::INIT);
     }
   } else {
-    if (_currentMillis - _lastMillis > 1000) {
+    if (_currentMillis - _lastMillis > 3000) {
       _setState(State::RESET);
     }
   }
@@ -237,7 +237,7 @@ void VS2::_initAck() {
     } else {
       _setState(State::RESET);
     }
-  } else if (_currentMillis - _lastMillis > 1000) {
+  } else if (_currentMillis - _lastMillis > 3000) {
     _setState(State::RESET);
   }
 }
@@ -312,9 +312,10 @@ void VS2::_receive() {
 }
 
 void VS2::_receiveAck() {
-  _interface->write(&VitoWiFiInternals::ProtocolBytes.ACK, 1);
+  if (_interface->write(&VitoWiFiInternals::ProtocolBytes.ACK, 1) == 1) {
   _lastMillis = _currentMillis;
   _setState(State::IDLE);
+  }
 }
 
 void VS2::_tryOnResponse() {
