@@ -313,8 +313,8 @@ void VS2::_receive() {
 
 void VS2::_receiveAck() {
   if (_interface->write(&VitoWiFiInternals::ProtocolBytes.ACK, 1) == 1) {
-  _lastMillis = _currentMillis;
-  _setState(State::IDLE);
+    _lastMillis = _currentMillis;
+    _setState(State::IDLE);
   }
 }
 
