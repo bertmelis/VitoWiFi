@@ -8,7 +8,7 @@ the LICENSE file.
 
 #pragma once
 
-#if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
+#if defined(ARDUINO_ARCH_ESP8266)
 
 #include <cassert>
 
