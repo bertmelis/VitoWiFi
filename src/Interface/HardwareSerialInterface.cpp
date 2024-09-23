@@ -22,11 +22,7 @@ bool HardwareSerialInterface::begin() {
 }
 
 void HardwareSerialInterface::end() {
-  #if defined(ARDUINO_ARCH_ESP32)
-  _interface->end(true);
-  #else
   _interface->end();
-  #endif
 }
 
 std::size_t HardwareSerialInterface::write(const uint8_t* data, uint8_t length) {
