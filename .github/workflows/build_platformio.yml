@@ -12,7 +12,7 @@ jobs:
           examples/simple-read-VS2/simple-read-VS2.ino,
           examples/simple-write-VS1/simple-write-VS1.ino,
           examples/simple-write-VS2/simple-write-VS2.ino,
-          examples/simple-read-GWG/simple-read-GWG.ino
+          examples/simple-read-GWG/simple-read-GWG.ino,
           examples/softwareserial/softwareserial.ino
         ]
     steps:
