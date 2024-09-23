@@ -17,7 +17,9 @@ the LICENSE file.
 #include "../Datapoint/Datapoint.h"
 #if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
 #include "../Interface/HardwareSerialInterface.h"
+#if defined(ARDUINO_ARCH_ESP8266)
 #include "../Interface/SoftwareSerialInterface.h"
+#endif
 #elif defined(__linux__)
 #include "../Interface/LinuxSerialInterface.h"
 #else
@@ -33,7 +35,9 @@ class VS2 {
 
   #if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
   explicit VS2(HardwareSerial* interface);
+  #if defined(ARDUINO_ARCH_ESP8266)
   explicit VS2(SoftwareSerial* interface);
+  #endif
   #else
   explicit VS2(const char* interface);
   #endif

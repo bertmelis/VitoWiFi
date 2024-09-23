@@ -37,6 +37,7 @@ VS1::VS1(HardwareSerial* interface)
   }
 }
 
+#if defined(ARDUINO_ARCH_ESP8266)
 VS1::VS1(SoftwareSerial* interface)
 : _state(State::UNDEFINED)
 , _currentMillis(vw_millis())
@@ -62,6 +63,8 @@ VS1::VS1(SoftwareSerial* interface)
     vw_abort();
   }
 }
+#endif
+
 #else
 VS1::VS1(const char* interface)
 : _state(State::UNDEFINED)
