@@ -13,7 +13,7 @@ Based on the fantastic work on [openv](https://github.com/openv/openv/wiki).
 - VS1 (KW) and VS2 (P300) support. Older systems using the GWG protocol are not supported
 - Non-blocking API calls
 - For the Arduino framework and POSIX systems (Linux, tested on a Raspberry Pi 1B)
-- Possible to use `SoftwareSerial`
+- Possible to use `SoftwareSerial` on esp8266.
 
 ## Contents
 
@@ -254,7 +254,7 @@ Returns a pointer to the payload.
 ##### `VitoWiFi<PROTOCOL_VERSION>(IFACE* interface)`
 
 Constructor of the VitoWiFi class. `PROTOCOL_VERSION` can be  `GWG`, `VS1` or `VS2`. If your Viessmann device is somewhat modern, you should use `VS2`.
-`interface` can be any of the `HardwareSerial` interfaces (`Serial`, `Serial1`...), `SoftwareSerial` or if you are on Linux, pass the c-string depicting your device (for example `"/dev/ttyUSB0"`).
+`interface` can be any of the `HardwareSerial` interfaces (`Serial`, `Serial1`...), `SoftwareSerial` on ESP8266 or if you are on Linux, pass the c-string depicting your device (for example `"/dev/ttyUSB0"`).
 
 ##### `void onResponse(typename PROTOCOLVERSION::OnResponseCallback callback)`
 

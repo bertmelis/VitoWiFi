@@ -27,6 +27,7 @@ jobs:
             - examples/simple-write-VS1
             - examples/simple-write-VS2
             - examples/simple-read-GWG
+            - examples/softwareserial
           libraries: |
             - name: VitoWiFi
               source-path: ./

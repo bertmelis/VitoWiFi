@@ -13,6 +13,7 @@ jobs:
           examples/simple-write-VS1/simple-write-VS1.ino,
           examples/simple-write-VS2/simple-write-VS2.ino,
           examples/simple-read-GWG/simple-read-GWG.ino
+          examples/softwareserial/softwareserial.ino
         ]
     steps:
       - uses: actions/checkout@v3
