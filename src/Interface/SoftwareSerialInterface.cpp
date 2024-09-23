@@ -18,7 +18,7 @@ SoftwareSerialInterface::SoftwareSerialInterface(SoftwareSerial* interface)
 }
 
 bool SoftwareSerialInterface::begin() {
-  _interface->begin(4800, SWSERIAL_8E2);
+  _interface->begin(4800, EspSoftwareSerial::SWSERIAL_8E2);
   return (*_interface);
 }
 
