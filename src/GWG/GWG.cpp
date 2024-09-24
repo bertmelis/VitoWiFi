@@ -37,6 +37,7 @@ GWG::GWG(HardwareSerial* interface)
   }
 }
 
+#if defined(ARDUINO_ARCH_ESP8266)
 GWG::GWG(SoftwareSerial* interface)
 : _state(State::UNDEFINED)
 , _currentMillis(vw_millis())
@@ -62,6 +63,8 @@ GWG::GWG(SoftwareSerial* interface)
     vw_abort();
   }
 }
+#endif
+
 #else
 GWG::GWG(const char* interface)
 : _state(State::UNDEFINED)

@@ -17,7 +17,9 @@ the LICENSE file.
 #include "../Datapoint/Datapoint.h"
 #if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
 #include "../Interface/HardwareSerialInterface.h"
+#if defined(ARDUINO_ARCH_ESP8266)
 #include "../Interface/SoftwareSerialInterface.h"
+#endif
 #elif defined(__linux__)
 #include "../Interface/LinuxSerialInterface.h"
 #else
@@ -33,7 +35,9 @@ class GWG {
 
   #if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
   explicit GWG(HardwareSerial* interface);
+  #if defined(ARDUINO_ARCH_ESP8266)
   explicit GWG(SoftwareSerial* interface);
+  #endif
   #else
   explicit GWG(const char* interface);
   #endif
