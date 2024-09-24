@@ -95,7 +95,10 @@ uint8_t LinuxSerialInterface::read() {
 
 size_t LinuxSerialInterface::available() {
   int bytesAvailable;
-  ioctl(_fd, FIONREAD, &bytesAvailable);
+  if (ioctl(_fd, FIONREAD, &bytesAvailable) < 0) {
+    vw_log_e("Error reading serial port");
+    return 0;
+  }
   return bytesAvailable;
 }
 

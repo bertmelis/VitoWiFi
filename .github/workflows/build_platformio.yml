@@ -12,7 +12,8 @@ jobs:
           examples/simple-read-VS2/simple-read-VS2.ino,
           examples/simple-write-VS1/simple-write-VS1.ino,
           examples/simple-write-VS2/simple-write-VS2.ino,
-          examples/simple-read-GWG/simple-read-GWG.ino
+          examples/simple-read-GWG/simple-read-GWG.ino,
+          examples/softwareserial/softwareserial.ino
         ]
     steps:
       - uses: actions/checkout@v3
@@ -27,8 +28,6 @@ jobs:
           python-version: '3.9'
       - name: Install PlatformIO Core
         run: pip install --upgrade platformio
-      - name: Download external libraries
-        run: pio pkg install --global --library plerup/EspSoftwareSerial
       - name: Build PlatformIO examples
         run: pio ci --lib="." --board=d1_mini
         env:
@@ -58,8 +57,6 @@ jobs:
           python-version: '3.9'
       - name: Install PlatformIO Core
         run: pip install --upgrade platformio
-      - name: Download external libraries
-        run: pio pkg install --global --library plerup/EspSoftwareSerial
       - name: Build PlatformIO examples
         run: pio ci --lib="." --board=lolin32
         env:
