@@ -5,6 +5,7 @@ on: [push, pull_request]
 jobs:
   build-for-esp8266:
     runs-on: ubuntu-latest
+    container: ghcr.io/bertmelis/pio-test-container
     strategy:
       matrix:
         example: [
@@ -16,18 +17,13 @@ jobs:
           examples/softwareserial/softwareserial.ino
         ]
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/cache@v3
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
         with:
           path: |
             ~/.cache/pip
             ~/.platformio/.cache
           key: ${{ runner.os }}-pio
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
-      - name: Install PlatformIO Core
-        run: pip install --upgrade platformio
       - name: Build PlatformIO examples
         run: pio ci --lib="." --board=d1_mini
         env:
@@ -35,6 +31,7 @@ jobs:
 
   build-for-esp32:
     runs-on: ubuntu-latest
+    container: ghcr.io/bertmelis/pio-test-container
     strategy:
       matrix:
         example: [
@@ -45,18 +42,13 @@ jobs:
           examples/simple-read-GWG/simple-read-GWG.ino
         ]
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/cache@v3
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
         with:
           path: |
             ~/.cache/pip
             ~/.platformio/.cache
           key: ${{ runner.os }}-pio
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
-      - name: Install PlatformIO Core
-        run: pip install --upgrade platformio
       - name: Build PlatformIO examples
         run: pio ci --lib="." --board=lolin32
         env:
@@ -64,24 +56,20 @@ jobs:
 
   build-for-linux:
     runs-on: ubuntu-latest
+    container: ghcr.io/bertmelis/pio-test-container
     strategy:
       matrix:
         example: [
           examples/linux/main.cpp
         ]
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/cache@v3
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
         with:
           path: |
             ~/.cache/pip
             ~/.platformio/.cache
           key: ${{ runner.os }}-pio
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
-      - name: Install PlatformIO Core
-        run: pip install --upgrade platformio
       - name: Build PlatformIO examples
         run: pio ci --lib="." --project-conf="./examples/linux/platformio.ini"
         env:
