@@ -5,7 +5,6 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: ghcr.io/bertmelis/pio-test-container
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python
