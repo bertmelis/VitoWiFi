@@ -208,7 +208,7 @@ void VS1::_setState(State state) {
 void VS1::_init() {
   if (_interface->available()) {
     if (_interface->read() == VitoWiFiInternals::ProtocolBytes.ENQ) {
-      _setState(State::IDLE);
+      _setState(State::INIT_ACK);
     }
   } else {
     if (_currentMillis - _lastMillis > 3000UL) {  // reset should Vitotronic be connected with VS2
