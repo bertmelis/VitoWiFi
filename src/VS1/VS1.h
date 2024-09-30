@@ -60,8 +60,7 @@ class VS1 {
   enum class State {
     INIT,
     INIT_ACK,
-    IDLE,
-    PROBE_ACK,
+    WAIT,
     SEND,
     RECEIVE,
     UNDEFINED

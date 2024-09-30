@@ -158,24 +158,24 @@ bool VS1::write(const Datapoint& datapoint, const uint8_t* data, uint8_t length)
 }
 
 bool VS1::begin() {
-  _setState(State::INIT);
-  return _interface->begin();
+  if (_interface->begin()) {
+    _setState(State::INIT);
+    return true;
+  }
+  return false;
 }
 
 void VS1::loop() {
   _currentMillis = vw_millis();
   switch (_state) {
   case State::INIT:
-    _init();
+    _idle();
     break;
   case State::INIT_ACK:
     _initAck();
     break;
-  case State::IDLE:
-    _idle();
-    break;
-  case State::PROBE_ACK:
-    _probeAck();
+  case State::WAIT:
+    _wait();
     break;
   case State::SEND:
     _send();
@@ -223,29 +223,16 @@ void VS1::_initAck() {
     _setState(State::IDLE);
     _lastMillis = _currentMillis;
   } else {
-    _setState(State::INIT);
+    _setState(State::WAIT);
   }
 }
 
-void VS1::_idle() {
-  if (_currentDatapoint) {
-    _setState(State::SEND);
-  } else if (_currentMillis - _lastMillis > 500) {
-    if (_interface->write(&VitoWiFiInternals::ProtocolBytes.PROBE[0], 4) == 4) {
-      _lastMillis = _currentMillis;
-      _setState(State::PROBE_ACK);
-    } else {
-      _setState(State::INIT);
+void VS1::_wait() {
+  if (_currentMillis - _lastMillis < 50) {  // don't reinitialize if within 50 msec
+    if (_currentDatapoint) {
+      _setState(State::SEND);
     }
-  }
-}
-
-void VS1::_probeAck() {
-  if (_interface->available() == 2) {
-    _interface->read();
-    _interface->read();
-    _setState(State::IDLE);
-  } else if (_currentMillis - _lastMillis > 1000UL) {
+  } else {
     _setState(State::INIT);
   }
 }
@@ -267,7 +254,7 @@ void VS1::_receive() {
   }
   if (_bytesTransferred == _currentRequest.length()) {
     _bytesTransferred = 0;
-    _setState(State::IDLE);
+    _setState(State::WAIT);
     _tryOnResponse();
   }
 }
