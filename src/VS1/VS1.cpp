@@ -169,7 +169,7 @@ void VS1::loop() {
   _currentMillis = vw_millis();
   switch (_state) {
   case State::INIT:
-    _idle();
+    _init();
     break;
   case State::INIT_ACK:
     _initAck();
