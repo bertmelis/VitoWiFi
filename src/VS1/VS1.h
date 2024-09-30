@@ -81,9 +81,7 @@ class VS1 {
 
   void _init();
   void _initAck();
-  void _idle();
-  void _probeAck();
-  void _sync();
+  void _wait();
   void _send();
   void _receive();
 
