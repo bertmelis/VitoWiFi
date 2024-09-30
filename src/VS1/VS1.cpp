@@ -220,10 +220,10 @@ void VS1::_init() {
 
 void VS1::_initAck() {
   if (_interface->write(&VitoWiFiInternals::ProtocolBytes.ENQ_ACK, 1) == 1) {
-    _setState(State::IDLE);
+    _setState(State::WAIT);
     _lastMillis = _currentMillis;
   } else {
-    _setState(State::WAIT);
+    _setState(State::INIT);
   }
 }
 
