@@ -59,8 +59,8 @@ class VS1 {
  private:
   enum class State {
     INIT,
-    INIT_ACK,
-    WAIT,
+    SYNC_ENQ,
+    SYNC_RECV,
     SEND,
     RECEIVE,
     UNDEFINED
@@ -80,8 +80,8 @@ class VS1 {
   inline void _setState(State state);
 
   void _init();
-  void _initAck();
-  void _wait();
+  void _syncEnq();
+  void _syncRecv();
   void _send();
   void _receive();
 

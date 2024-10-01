@@ -171,11 +171,11 @@ void VS1::loop() {
   case State::INIT:
     _init();
     break;
-  case State::INIT_ACK:
-    _initAck();
+  case State::SYNC_ENQ:
+    _syncEnq();
     break;
-  case State::WAIT:
-    _wait();
+  case State::SYNC_RECV:
+    _syncRecv();
     break;
   case State::SEND:
     _send();
@@ -205,10 +205,12 @@ void VS1::_setState(State state) {
   _state = state;
 }
 
+// wait for ENQ or reset connection if ENQ is not coming
 void VS1::_init() {
   if (_interface->available()) {
     if (_interface->read() == VitoWiFiInternals::ProtocolBytes.ENQ) {
-      _setState(State::INIT_ACK);
+      _lastMillis = _currentMillis;
+      _setState(State::SYNC_ENQ);
     }
   } else {
     if (_currentMillis - _lastMillis > 3000UL) {  // reset should Vitotronic be connected with VS2
@@ -218,17 +220,22 @@ void VS1::_init() {
   }
 }
 
-void VS1::_initAck() {
-  if (_interface->write(&VitoWiFiInternals::ProtocolBytes.ENQ_ACK, 1) == 1) {
-    _setState(State::WAIT);
-    _lastMillis = _currentMillis;
+// if we want to send something within 50msec of receiving the ENQ, send ENQ_ACK and move to SEND
+// if > 50msec, return to INIT
+void VS1::_syncEnq() {
+  if (_currentMillis - _lastMillis < 50) {
+    if (_currentDatapoint && _interface->write(&VitoWiFiInternals::ProtocolBytes.ENQ_ACK, 1) == 1) {
+      _setState(State::SEND);
+    }
   } else {
     _setState(State::INIT);
   }
 }
 
-void VS1::_wait() {
-  if (_currentMillis - _lastMillis < 50) {  // don't reinitialize if within 50 msec
+// if we want to send something within 50msec of previous SEND, send again
+// if > 50msec, return to INIT
+void VS1::_syncRecv() {
+  if (_currentMillis - _lastMillis < 50) {
     if (_currentDatapoint) {
       _setState(State::SEND);
     }
@@ -237,6 +244,7 @@ void VS1::_wait() {
   }
 }
 
+// send request and move to RECEIVE
 void VS1::_send() {
   _bytesTransferred += _interface->write(&_currentRequest[_bytesTransferred], _currentRequest.length() - _bytesTransferred);
   if (_bytesTransferred == _currentRequest.length()) {
@@ -246,6 +254,8 @@ void VS1::_send() {
   }
 }
 
+// wait for data to receive
+// when done, move to SYN_RECV
 void VS1::_receive() {
   while (_interface->available()) {
     _responseBuffer[_bytesTransferred] = _interface->read();
@@ -254,7 +264,7 @@ void VS1::_receive() {
   }
   if (_bytesTransferred == _currentRequest.length()) {
     _bytesTransferred = 0;
-    _setState(State::WAIT);
+    _setState(State::SYNC_RECV);
     _tryOnResponse();
   }
 }
