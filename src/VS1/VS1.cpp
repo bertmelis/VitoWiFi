@@ -236,7 +236,7 @@ void VS1::_syncEnq() {
 // if we want to send something within 50msec of previous SEND, send again
 // if > 50msec, return to INIT
 void VS1::_syncRecv() {
-  if (_currentMillis - _lastMillis < 50) {
+  if (_currentMillis - _lastMillis < 100) {
     if (_currentDatapoint) {
       _setState(State::SEND);
     }
