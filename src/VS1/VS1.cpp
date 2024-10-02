@@ -228,7 +228,6 @@ void VS1::_syncEnq() {
       _setState(State::SEND);
     }
   } else {
-    vw_log_i("no time to send");
     _setState(State::INIT);
   }
 }
@@ -241,7 +240,6 @@ void VS1::_syncRecv() {
       _setState(State::SEND);
     }
   } else {
-    vw_log_i("no time to send");
     _setState(State::INIT);
   }
 }
