@@ -159,6 +159,9 @@ bool VS1::write(const Datapoint& datapoint, const uint8_t* data, uint8_t length)
 
 bool VS1::begin() {
   if (_interface->begin()) {
+    while (_interface->available()) {
+      _interface->read();  // clear rx buffer
+    }
     _setState(State::INIT);
     return true;
   }
