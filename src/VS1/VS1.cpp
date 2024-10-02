@@ -227,7 +227,7 @@ void VS1::_init() {
 // if we want to send something within 50msec of receiving the ENQ, send ENQ_ACK and move to SEND
 // if > 50msec, return to INIT
 void VS1::_syncEnq() {
-  if (_currentMillis - _lastMillis > 50) {
+  if (_currentMillis - _lastMillis < 50) {
     if (_currentDatapoint && _interface->write(&VitoWiFiInternals::ProtocolBytes.ENQ_ACK, 1) == 1) {
       _setState(State::SEND);
       _send();  // speed up things
@@ -240,7 +240,7 @@ void VS1::_syncEnq() {
 // if we want to send something within 50msec of previous SEND, send again
 // if > 50msec, return to INIT
 void VS1::_syncRecv() {
-  if (_currentMillis - _lastMillis > 50) {
+  if (_currentMillis - _lastMillis < 50) {
     if (_currentDatapoint) {
       _setState(State::SEND);
     }
