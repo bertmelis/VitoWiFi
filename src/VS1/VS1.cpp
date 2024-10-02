@@ -188,7 +188,7 @@ void VS1::loop() {
     break;
   }
   // double timeout to accomodate for connection initialization
-  if (_currentDatapoint && _currentMillis - _requestTime > 4000UL) {
+  if (_currentDatapoint && _currentMillis - _requestTime > 5000UL) {
     _setState(State::INIT);
     _tryOnError(OptolinkResult::TIMEOUT);
   }
