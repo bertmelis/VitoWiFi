@@ -277,7 +277,7 @@ void VS1::_receive() {
 
 void VS1::_tryOnResponse() {
   if (_onResponseCallback) {
-    _onResponseCallback(_responseBuffer, _currentRequest.length(), _currentDatapoint);
+    _onResponseCallback(_responseBuffer, _currentDatapoint.length(), _currentDatapoint);
   }
   _currentDatapoint = Datapoint(nullptr, 0, 0, noconv);
 }
