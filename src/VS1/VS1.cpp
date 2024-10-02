@@ -226,6 +226,7 @@ void VS1::_syncEnq() {
   if (_currentMillis - _lastMillis > 50) {
     if (_currentDatapoint && _interface->write(&VitoWiFiInternals::ProtocolBytes.ENQ_ACK, 1) == 1) {
       _setState(State::SEND);
+      _send();  // speed up things
     }
   } else {
     _setState(State::INIT);
