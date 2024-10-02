@@ -263,9 +263,9 @@ void VS1::_receive() {
     _responseBuffer[_bytesTransferred] = _interface->read();
     ++_bytesTransferred;
     _lastMillis = _currentMillis;
-    vw_log_i("rcv %u / %u", _bytesTransferred, _currentRequest.length());
+    vw_log_i("rcv %u / %u", _bytesTransferred, _currentDatapoint.length());
   }
-  if (_bytesTransferred == _currentRequest.length()) {
+  if (_bytesTransferred == _currentDatapoint.length()) {
     _bytesTransferred = 0;
     _setState(State::SYNC_RECV);
     _tryOnResponse();
