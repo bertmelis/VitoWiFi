@@ -90,7 +90,6 @@ uint8_t LinuxSerialInterface::read() {
     vw_log_e("Error reading serial port");
     return 0;
   }
-  std::cout << "rx: 0x" << std::setfill('0') << std::setw(2) << std::hex << unsigned(buf) << std::endl;
   return buf;
 }
 
