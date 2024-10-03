@@ -158,8 +158,14 @@ bool VS1::write(const Datapoint& datapoint, const uint8_t* data, uint8_t length)
 }
 
 bool VS1::begin() {
-  _setState(State::INIT);
-  return _interface->begin();
+  if (_interface->begin()) {
+    while (_interface->available()) {
+      _interface->read();  // clear rx buffer
+    }
+    _setState(State::INIT);
+    return true;
+  }
+  return false;
 }
 
 void VS1::loop() {
@@ -168,14 +174,11 @@ void VS1::loop() {
   case State::INIT:
     _init();
     break;
-  case State::INIT_ACK:
-    _initAck();
+  case State::SYNC_ENQ:
+    _syncEnq();
     break;
-  case State::IDLE:
-    _idle();
-    break;
-  case State::PROBE_ACK:
-    _probeAck();
+  case State::SYNC_RECV:
+    _syncRecv();
     break;
   case State::SEND:
     _send();
@@ -189,6 +192,7 @@ void VS1::loop() {
   }
   // double timeout to accomodate for connection initialization
   if (_currentDatapoint && _currentMillis - _requestTime > 4000UL) {
+    _bytesTransferred = 0;
     _setState(State::INIT);
     _tryOnError(OptolinkResult::TIMEOUT);
   }
@@ -205,10 +209,12 @@ void VS1::_setState(State state) {
   _state = state;
 }
 
+// wait for ENQ or reset connection if ENQ is not coming
 void VS1::_init() {
   if (_interface->available()) {
     if (_interface->read() == VitoWiFiInternals::ProtocolBytes.ENQ) {
-      _setState(State::IDLE);
+      _lastMillis = _currentMillis;
+      _setState(State::SYNC_ENQ);
     }
   } else {
     if (_currentMillis - _lastMillis > 3000UL) {  // reset should Vitotronic be connected with VS2
@@ -218,38 +224,32 @@ void VS1::_init() {
   }
 }
 
-void VS1::_initAck() {
-  if (_interface->write(&VitoWiFiInternals::ProtocolBytes.ENQ_ACK, 1) == 1) {
-    _setState(State::IDLE);
-    _lastMillis = _currentMillis;
+// if we want to send something within 50msec of receiving the ENQ, send ENQ_ACK and move to SEND
+// if > 50msec, return to INIT
+void VS1::_syncEnq() {
+  if (_currentMillis - _lastMillis < 50) {
+    if (_currentDatapoint && _interface->write(&VitoWiFiInternals::ProtocolBytes.ENQ_ACK, 1) == 1) {
+      _setState(State::SEND);
+      _send();  // speed up things
+    }
   } else {
     _setState(State::INIT);
   }
 }
 
-void VS1::_idle() {
-  if (_currentDatapoint) {
-    _setState(State::SEND);
-  } else if (_currentMillis - _lastMillis > 500) {
-    if (_interface->write(&VitoWiFiInternals::ProtocolBytes.PROBE[0], 4) == 4) {
-      _lastMillis = _currentMillis;
-      _setState(State::PROBE_ACK);
-    } else {
-      _setState(State::INIT);
+// if we want to send something within 50msec of previous SEND, send again
+// if > 50msec, return to INIT
+void VS1::_syncRecv() {
+  if (_currentMillis - _lastMillis < 50) {
+    if (_currentDatapoint) {
+      _setState(State::SEND);
     }
-  }
-}
-
-void VS1::_probeAck() {
-  if (_interface->available() == 2) {
-    _interface->read();
-    _interface->read();
-    _setState(State::IDLE);
-  } else if (_currentMillis - _lastMillis > 1000UL) {
+  } else {
     _setState(State::INIT);
   }
 }
 
+// send request and move to RECEIVE
 void VS1::_send() {
   _bytesTransferred += _interface->write(&_currentRequest[_bytesTransferred], _currentRequest.length() - _bytesTransferred);
   if (_bytesTransferred == _currentRequest.length()) {
@@ -259,22 +259,24 @@ void VS1::_send() {
   }
 }
 
+// wait for data to receive
+// when done, move to SYN_RECV
 void VS1::_receive() {
   while (_interface->available()) {
     _responseBuffer[_bytesTransferred] = _interface->read();
     ++_bytesTransferred;
     _lastMillis = _currentMillis;
   }
-  if (_bytesTransferred == _currentRequest.length()) {
+  if (_bytesTransferred == _currentDatapoint.length()) {
     _bytesTransferred = 0;
-    _setState(State::IDLE);
+    _setState(State::SYNC_RECV);
     _tryOnResponse();
   }
 }
 
 void VS1::_tryOnResponse() {
   if (_onResponseCallback) {
-    _onResponseCallback(_responseBuffer, _currentRequest.length(), _currentDatapoint);
+    _onResponseCallback(_responseBuffer, _currentDatapoint.length(), _currentDatapoint);
   }
   _currentDatapoint = Datapoint(nullptr, 0, 0, noconv);
 }
