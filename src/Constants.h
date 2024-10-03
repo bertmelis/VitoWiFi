@@ -64,7 +64,6 @@ constexpr struct {
   uint8_t ENQ         = 0x05;
   uint8_t EOT         = 0x04;
   uint8_t SYNC[3]     = {0x16, 0x00, 0x00};
-  uint8_t PROBE[4]    = {0xF7, 0x00, 0xF8, 0x02};
 } ProtocolBytes;
 
 enum class ParserResult {
