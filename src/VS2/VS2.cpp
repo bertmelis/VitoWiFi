@@ -16,7 +16,7 @@ VS2::VS2(HardwareSerial* interface)
 , _currentMillis(vw_millis())
 , _lastMillis(_currentMillis)
 , _requestTime(0)
-, _bytesSent(0)
+, _bytesTransferred(0)
 , _interface(nullptr)
 , _parser()
 , _currentDatapoint(Datapoint(nullptr, 0, 0, noconv))
@@ -37,7 +37,7 @@ VS2::VS2(SoftwareSerial* interface)
 , _currentMillis(vw_millis())
 , _lastMillis(_currentMillis)
 , _requestTime(0)
-, _bytesSent(0)
+, _bytesTransferred(0)
 , _interface(nullptr)
 , _parser()
 , _currentDatapoint(Datapoint(nullptr, 0, 0, noconv))
@@ -59,7 +59,7 @@ VS2::VS2(const char* interface)
 , _currentMillis(vw_millis())
 , _lastMillis(_currentMillis)
 , _requestTime(0)
-, _bytesSent(0)
+, _bytesTransferred(0)
 , _interface(nullptr)
 , _parser()
 , _currentDatapoint(Datapoint(nullptr, 0, 0, noconv))
@@ -182,7 +182,7 @@ void VS2::loop() {
     // begin() not yet called
     break;
   }
-  if (_currentDatapoint && _currentMillis - _requestTime > 5000UL) {
+  if (_currentDatapoint && _currentMillis - _requestTime > 4000UL) {
     _setState(State::RESET);
     _tryOnError(OptolinkResult::TIMEOUT);
   }
@@ -222,10 +222,10 @@ void VS2::_resetAck() {
 }
 
 void VS2::_init() {
-  _bytesSent += _interface->write(&VitoWiFiInternals::ProtocolBytes.SYNC[_bytesSent],
-                                  sizeof(VitoWiFiInternals::ProtocolBytes.SYNC) - _bytesSent);
-  if (_bytesSent == sizeof(VitoWiFiInternals::ProtocolBytes.SYNC)) {
-    _bytesSent = 0;
+  _bytesTransferred += _interface->write(&VitoWiFiInternals::ProtocolBytes.SYNC[_bytesTransferred],
+                                  sizeof(VitoWiFiInternals::ProtocolBytes.SYNC) - _bytesTransferred);
+  if (_bytesTransferred == sizeof(VitoWiFiInternals::ProtocolBytes.SYNC)) {
+    _bytesTransferred = 0;
     _lastMillis = _currentMillis;
     _setState(State::INIT_ACK);
   }
@@ -263,9 +263,9 @@ void VS2::_sendStart() {
 }
 
 void VS2::_sendPacket() {
-  _bytesSent += _interface->write(&_currentPacket[_bytesSent], _currentPacket.length() - _bytesSent);
-  if (_bytesSent == _currentPacket.length()) {
-    _bytesSent = 0;
+  _bytesTransferred += _interface->write(&_currentPacket[_bytesTransferred], _currentPacket.length() - _bytesTransferred);
+  if (_bytesTransferred == _currentPacket.length()) {
+    _bytesTransferred = 0;
     _lastMillis = _currentMillis;
     _setState(State::SEND_CRC);
   }
