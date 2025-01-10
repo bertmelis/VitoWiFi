@@ -32,10 +32,11 @@ Valid:
   - 07:30 8:30 15:00 23:50
 
 Invalid:
-  - hours not specified in pairs
+  - time not specified in pairs
   - (hours not ordered earliest to latest)
-  - no colons or spaces used
+  - other formatting than colons or spaces
   - minutes not rounded to multiples of 10
+  - whitespace not trimmed
 */
 std::size_t encodeSchedule(const char* schedule, std::size_t len, uint8_t* output);
 std::size_t encodeSchedule(const char* schedule, uint8_t* output);
