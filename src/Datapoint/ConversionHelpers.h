@@ -40,6 +40,8 @@ Invalid:
 std::size_t encodeSchedule(const char* schedule, std::size_t len, uint8_t* output);
 std::size_t encodeSchedule(const char* schedule, uint8_t* output);
 
+/*
 std::size_t decodeSchedule(const uint8_t* data, std::size_t len, char* output, std::size_t maxLen);
+*/
 
 };  // end namespace VitoWiFi

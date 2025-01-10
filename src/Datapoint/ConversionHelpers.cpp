@@ -80,6 +80,7 @@ std::size_t encodeSchedule(const char* schedule, uint8_t* output) {
   return encodeSchedule(schedule, strlen(schedule), output);
 }
 
+/*
 std::size_t decodeSchedule(const uint8_t* data, std::size_t len, char* output, std::size_t maxLen) {
   assert(len == 8);
   assert(maxLen >= 48);  // 8 times 07:30, 7 spaces and 0-terminator --> 8 * 5 + 7 * 1 + 1
@@ -88,10 +89,12 @@ std::size_t decodeSchedule(const uint8_t* data, std::size_t len, char* output, s
   for (std::size_t i = 0; i < 8; ++i) {
     unsigned int hour = std::min(23, data[i] >> 3);
     unsigned int minutes = std::min(59, (data[i] & 0x07) * 10);
-    int res = snprintf("%u.02:%u.02");
-    if (i < 7)
-  }
+    int res = snprintf("%u.02:%u.02", hour, minutes);
+    if (i < 7) {
 
+    }
+  }
 }
+*/
 
 }  // end namespace VitoWiFi
