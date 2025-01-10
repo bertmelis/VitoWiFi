@@ -23,6 +23,8 @@ std::size_t encodeSchedule(const char* schedule, std::size_t len, uint8_t* outpu
     Space,
   };
 
+  std::memset(output, 0x00, 8);
+
   std::size_t i = 0 - 1;  // first operation in iteration is ++i
   std::size_t scheduleIndex = 0;
   ScheduleParserStep step = ScheduleParserStep::Hours1;
@@ -80,7 +82,6 @@ std::size_t encodeSchedule(const char* schedule, uint8_t* output) {
   return encodeSchedule(schedule, strlen(schedule), output);
 }
 
-/*
 std::size_t decodeSchedule(const uint8_t* data, std::size_t len, char* output, std::size_t maxLen) {
   assert(len == 8);
   assert(maxLen >= 48);  // 8 times 07:30, 7 spaces and 0-terminator --> 8 * 5 + 7 * 1 + 1
@@ -89,12 +90,13 @@ std::size_t decodeSchedule(const uint8_t* data, std::size_t len, char* output, s
   for (std::size_t i = 0; i < 8; ++i) {
     unsigned int hour = std::min(23, data[i] >> 3);
     unsigned int minutes = std::min(59, (data[i] & 0x07) * 10);
-    int res = snprintf("%u.02:%u.02", hour, minutes);
+    res = snprintf(&output[pos], maxLen - res, "%u.02:%u.02", hour, minutes);
+    if (res < 0) return 0;
+    pos += res;
     if (i < 7) {
-
+      &output[pos++] = ' ';
     }
   }
 }
-*/
 
 }  // end namespace VitoWiFi

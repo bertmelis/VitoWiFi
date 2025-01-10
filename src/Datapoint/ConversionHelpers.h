@@ -42,7 +42,12 @@ std::size_t encodeSchedule(const char* schedule, std::size_t len, uint8_t* outpu
 std::size_t encodeSchedule(const char* schedule, uint8_t* output);
 
 /*
-std::size_t decodeSchedule(const uint8_t* data, std::size_t len, char* output, std::size_t maxLen);
+Decodes a byte series to a human-readable schedule consisting of time pairs.
+
+Although passed as variables, the function fails when
+- len < 8
+- maxLen < 
 */
+std::size_t decodeSchedule(const uint8_t* data, std::size_t len, char* output, std::size_t maxLen);
 
 };  // end namespace VitoWiFi
