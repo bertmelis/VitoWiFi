@@ -14,6 +14,7 @@ the LICENSE file.
 #include <cstring>
 
 #include "../Logging.h"
+#include "ConversionHelpers.h"
 
 namespace VitoWiFi {
 
