@@ -94,7 +94,7 @@ std::size_t decodeSchedule(const uint8_t* data, std::size_t len, char* output, s
       hour = 0;
       minutes = 0;
     }
-    int result = snprintf(&output[pos], maxLen - pos, "%u.02:%u.02", hour, minutes);
+    int result = snprintf(&output[pos], maxLen - pos, "%ou.2:%u.2", hour, minutes);
     if (result < 0) return 0;
     pos += result;
     if (i < 7) {
