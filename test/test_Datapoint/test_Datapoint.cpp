@@ -227,7 +227,7 @@ void test_ScheduleDecode() {
   std::size_t result = VitoWiFi::decodeSchedule(data, len, buffer, bufferLen);
 
   TEST_ASSERT_EQUAL(bufferLen, result);
-  TEST_ASSERT_EQUAL_STRING_LEN(expected, buffer, bufferLen)
+  TEST_ASSERT_EQUAL_STRING_LEN(expected, buffer, bufferLen);
 }
 
 int main() {
