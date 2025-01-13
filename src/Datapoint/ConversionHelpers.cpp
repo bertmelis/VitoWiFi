@@ -92,15 +92,16 @@ std::size_t decodeSchedule(const uint8_t* data, std::size_t len, char* output, s
     unsigned int minutes = (data[i] & 0x07) * 10;
     if (hour > 23 || minutes > 59) {
       hour = 0;
-      minutes  0;
+      minutes = 0;
     }
-    std::size_t result = snprintf(&output[pos], maxLen - result, "%u.02:%u.02", hour, minutes);
+    int result = snprintf(&output[pos], maxLen - result, "%u.02:%u.02", hour, minutes);
     if (result < 0) return 0;
     pos += result;
     if (i < 7) {
-      &output[pos++] = ' ';
+      output[pos++] = ' ';
     }
   }
+  return pos;
 }
 
 }  // end namespace VitoWiFi
