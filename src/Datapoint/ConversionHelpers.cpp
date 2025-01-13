@@ -89,12 +89,12 @@ std::size_t decodeSchedule(const uint8_t* data, std::size_t len, char* output, s
   std::size_t pos = 0;
   for (std::size_t i = 0; i < 8; ++i) {
     unsigned int hour = data[i] >> 3;
-    unsigned int minutes = sdata[i] & 0x07) * 10;
+    unsigned int minutes = (data[i] & 0x07) * 10;
     if (hour > 23 || minutes > 59) {
       hour = 0;
       minutes  0;
     }
-    std::size_t result = snprintf(&output[pos], maxLen - res, "%u.02:%u.02", hour, minutes);
+    std::size_t result = snprintf(&output[pos], maxLen - result, "%u.02:%u.02", hour, minutes);
     if (result < 0) return 0;
     pos += result;
     if (i < 7) {

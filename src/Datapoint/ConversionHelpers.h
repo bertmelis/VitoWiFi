@@ -11,7 +11,8 @@ the LICENSE file.
 #include <cassert>
 #include <cstdint>
 #include <cstddef>
-#include <cstring>
+#include <cstring>  // strlen
+#include <cstdio>  // snprintf
 
 namespace VitoWiFi {
 
