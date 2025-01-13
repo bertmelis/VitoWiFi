@@ -204,7 +204,7 @@ void test_COPEncode() {
   TEST_ASSERT_EQUAL_HEX8_ARRAY(expected, buffer, len);
 }
 
-void test_Schedule() {
+void test_ScheduleEncode() {
   const char* schedule = "7:30 08:30 16:20 23:10";
   const uint8_t expected[] = {0x3B, 0x43, 0x82, 0xB9, 0x00, 0x00, 0x00, 0x00};
   const size_t numSchedules = 2;
@@ -235,6 +235,6 @@ int main() {
   RUN_TEST(test_CountShortEncode);
   RUN_TEST(test_COPDecode);
   RUN_TEST(test_COPEncode);
-  RUN_TEST(test_Schedule);
+  RUN_TEST(test_ScheduleEncode);
   return UNITY_END();
 }
