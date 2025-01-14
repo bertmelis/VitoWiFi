@@ -35,6 +35,7 @@ jobs:
     strategy:
       matrix:
         example: [
+          examples/generic-interface/generic-interface.ino
           examples/simple-read-VS1/simple-read-VS1.ino,
           examples/simple-read-VS2/simple-read-VS2.ino,
           examples/simple-write-VS1/simple-write-VS1.ino,

@@ -22,9 +22,8 @@ the LICENSE file.
 #endif
 #elif defined(__linux__)
 #include "../Interface/LinuxSerialInterface.h"
-#else
-#error "platform not supported"
 #endif
+#include "../Interface/GenericInterface.h"
 
 namespace VitoWiFi {
 
@@ -41,6 +40,26 @@ class VS2 {
   #else
   explicit VS2(const char* interface);
   #endif
+  template<class C>
+  VS2(C* interface)
+  : _state(State::UNDEFINED)
+  , _currentMillis(vw_millis())
+  , _lastMillis(_currentMillis)
+  , _requestTime(0)
+  , _bytesSent(0)
+  , _interface(nullptr)
+  , _parser()
+  , _currentDatapoint(Datapoint(nullptr, 0, 0, noconv))
+  , _currentPacket()
+  , _onResponseCallback(nullptr)
+  , _onErrorCallback(nullptr) {
+    assert(interface != nullptr);
+    _interface = new(std::nothrow) VitoWiFiInternals::GenericInterface<C>(interface);
+    if (!_interface) {
+      vw_log_e("Could not create serial interface");
+      vw_abort();
+    }
+  }
   ~VS2();
   VS2(const VS2&) = delete;
   VS2 & operator=(const VS2&) = delete;

@@ -22,9 +22,8 @@ the LICENSE file.
 #endif
 #elif defined(__linux__)
 #include "../Interface/LinuxSerialInterface.h"
-#else
-#error "platform not supported"
 #endif
+#include "../Interface/GenericInterface.h"
 
 namespace VitoWiFi {
 
@@ -41,6 +40,32 @@ class GWG {
   #else
   explicit GWG(const char* interface);
   #endif
+  template<class C>
+  GWG(C* interface)
+  : _state(State::UNDEFINED)
+  , _currentMillis(vw_millis())
+  , _lastMillis(_currentMillis)
+  , _requestTime(0)
+  , _bytesTransferred(0)
+  , _interface(nullptr)
+  , _currentDatapoint(Datapoint(nullptr, 0x0000, 0, VitoWiFi::noconv))
+  , _currentRequest()
+  , _responseBuffer(nullptr)
+  , _allocatedLength(0)
+  , _onResponseCallback(nullptr)
+  , _onErrorCallback(nullptr) {
+    assert(interface != nullptr);
+    _interface = new(std::nothrow) VitoWiFiInternals::GenericInterface(interface);
+    if (!_interface) {
+      vw_log_e("Could not create serial interface");
+      vw_abort();
+    }
+    _responseBuffer = reinterpret_cast<uint8_t*>(malloc(START_PAYLOAD_LENGTH));
+    if (!_responseBuffer) {
+      vw_log_e("Could not create response buffer");
+      vw_abort();
+    }
+  }
   ~GWG();
   GWG(const GWG&) = delete;
   GWG & operator=(const GWG&) = delete;
