@@ -1,0 +1,5 @@
+dependencies:
+  arduino-esp32: ">=3"
+description: Communicate with Viessmann boilers using the optolink for ESP8266 and ESP32
+url: https://github.com/bertmelis/VitoWiFi
+version: 3.0.0
