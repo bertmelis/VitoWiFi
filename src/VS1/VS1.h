@@ -22,9 +22,8 @@ the LICENSE file.
 #endif
 #elif defined(__linux__)
 #include "../Interface/LinuxSerialInterface.h"
-#else
-#error "platform not supported"
 #endif
+#include "../Interface/GenericInterface.h"
 
 namespace VitoWiFi {
 
