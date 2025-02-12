@@ -1,5 +1,5 @@
 set(COMPONENT_SRCDIRS
-    "src" "src/Datapoint" "src/GWG" "src/VS1" "src/VS2" "src/Interface"
+    "src/Datapoint" "src/GWG" "src/VS1" "src/VS2" "src/Interface"
 )
 
 set(COMPONENT_ADD_INCLUDEDIRS
