@@ -11,6 +11,7 @@ the LICENSE file.
 #include <cassert>
 #include <cmath>
 #include <cstring>
+#include <cstdint>
 
 #include "../Logging.h"
 
