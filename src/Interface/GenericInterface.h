@@ -8,6 +8,8 @@ the LICENSE file.
 
 #pragma once
 
+#include <cassert>
+
 #include "SerialInterface.h"
 
 namespace VitoWiFiInternals {
@@ -16,8 +18,10 @@ template <class C>
 class GenericInterface : public SerialInterface {
  public:
   explicit GenericInterface(C* interface)
-  : _interface() {
-    // empty
+  : _interface(interface) {
+    if (!interface) {
+      abort();
+    }
   }
   bool begin() override {
     return _interface->begin();

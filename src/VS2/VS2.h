@@ -41,7 +41,7 @@ class VS2 {
   explicit VS2(const char* interface);
   #endif
   template<class C>
-  VS2(C* interface)
+  explicit VS2(C* interface)
   : _state(State::UNDEFINED)
   , _currentMillis(vw_millis())
   , _lastMillis(_currentMillis)
