@@ -75,6 +75,8 @@ class VS2 {
   void loop();
   void end();
 
+  int getState() const;
+
  private:
   enum class State {
     RESET,

@@ -194,6 +194,10 @@ void VS2::end() {
   _currentDatapoint = Datapoint(nullptr, 0, 0, noconv);
 }
 
+int VS2::getState() const {
+  return static_cast<std::underlying_type<State>::type>(_state);
+}
+
 void VS2::_setState(State state) {
   vw_log_i("state %i --> %i", static_cast<std::underlying_type<State>::type>(_state), static_cast<std::underlying_type<State>::type>(state));
   _state = state;
