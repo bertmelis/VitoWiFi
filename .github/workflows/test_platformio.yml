@@ -21,7 +21,3 @@ jobs:
       - name: Test
         run: |
           pio test -e native -v
-      - uses: actions/upload-artifact@v3
-        with:
-          name: codecov
-          path: cov/
