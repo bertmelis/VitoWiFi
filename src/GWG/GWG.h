@@ -41,7 +41,7 @@ class GWG {
   explicit GWG(const char* interface);
   #endif
   template<class C>
-  GWG(C* interface)
+  explicit GWG(C* interface)
   : _state(State::UNDEFINED)
   , _currentMillis(vw_millis())
   , _lastMillis(_currentMillis)
