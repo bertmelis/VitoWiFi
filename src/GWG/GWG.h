@@ -55,7 +55,7 @@ class GWG {
   , _onResponseCallback(nullptr)
   , _onErrorCallback(nullptr) {
     assert(interface != nullptr);
-    _interface = new(std::nothrow) VitoWiFiInternals::GenericInterface(interface);
+    _interface = new(std::nothrow) VitoWiFiInternals::GenericInterface<C>(interface);
     if (!_interface) {
       vw_log_e("Could not create serial interface");
       vw_abort();
