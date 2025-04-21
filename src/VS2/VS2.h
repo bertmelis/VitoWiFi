@@ -95,7 +95,7 @@ class VS2 {
   uint32_t _currentMillis;
   uint32_t _lastMillis;
   uint32_t _requestTime;
-  uint8_t _bytesSent;
+  uint8_t _bytesTransferred;
   VitoWiFiInternals::SerialInterface* _interface;
   VitoWiFiInternals::ParserVS2 _parser;
   Datapoint _currentDatapoint;

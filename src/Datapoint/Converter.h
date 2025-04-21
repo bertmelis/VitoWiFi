@@ -9,11 +9,13 @@ the LICENSE file.
 #pragma once
 
 #include <cassert>
+#include <cstdint>
 #include <cmath>
 #include <cstring>
 #include <cstdint>
 
 #include "../Logging.h"
+#include "ConversionHelpers.h"
 
 namespace VitoWiFi {
 
