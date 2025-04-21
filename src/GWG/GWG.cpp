@@ -127,12 +127,11 @@ bool GWG::write(const Datapoint& datapoint, const VariantValue& value) {
     return false;
   }
   uint8_t* payload = reinterpret_cast<uint8_t*>(malloc(datapoint.length()));
-  if (!payload) {
-    vw_log_i("writing not possible, packet creation error");
-    return false;
-  }
+  if (!payload) return false;
   datapoint.encode(payload, datapoint.length(), value);
-  return write(datapoint, payload, datapoint.length());
+  bool result = write(datapoint, payload, datapoint.length());
+  free(payload);
+  return result;
 }
 
 bool GWG::write(const Datapoint& datapoint, const uint8_t* data, uint8_t length) {
