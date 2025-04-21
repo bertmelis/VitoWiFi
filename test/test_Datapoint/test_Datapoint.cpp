@@ -204,6 +204,32 @@ void test_COPEncode() {
   TEST_ASSERT_EQUAL_HEX8_ARRAY(expected, buffer, len);
 }
 
+void test_ScheduleEncode() {
+  const char* schedule = "7:30 08:30 16:20 23:10";
+  const uint8_t expected[] = {0x3B, 0x43, 0x82, 0xB9, 0x00, 0x00, 0x00, 0x00};
+  const size_t numSchedules = 2;
+  const std::size_t len = 8;
+  uint8_t buffer[len];
+
+  std::size_t result = VitoWiFi::encodeSchedule(schedule, buffer);
+
+  TEST_ASSERT_EQUAL(numSchedules, result);
+  TEST_ASSERT_EQUAL_HEX8_ARRAY(expected, buffer, len);
+}
+
+void test_ScheduleDecode() {
+  const uint8_t data[] = {0x3B, 0x43, 0x82, 0xB9, 0x00, 0x00, 0x00, 0x00};
+  const std::size_t len = 8;
+  const char* expected = "07:30 08:30 16:20 23:10 00:00 00:00 00:00 00:00";
+  const std::size_t bufferLen = 48;
+  char buffer[bufferLen];
+
+  std::size_t result = VitoWiFi::decodeSchedule(data, len, buffer, bufferLen);
+
+  TEST_ASSERT_EQUAL(bufferLen, result);
+  TEST_ASSERT_EQUAL_STRING_LEN(expected, buffer, bufferLen);
+}
+
 int main() {
   UNITY_BEGIN();
   RUN_TEST(test_Converter);
@@ -222,5 +248,7 @@ int main() {
   RUN_TEST(test_CountShortEncode);
   RUN_TEST(test_COPDecode);
   RUN_TEST(test_COPEncode);
+  RUN_TEST(test_ScheduleEncode);
+  RUN_TEST(test_ScheduleDecode);
   return UNITY_END();
 }

@@ -199,6 +199,7 @@ void GWG::_setState(State state) {
 void GWG::_init() {
   if (_interface->available()) {
     if (_interface->read() == VitoWiFiInternals::ProtocolBytes.ENQ && _currentDatapoint) {
+      _bytesTransferred = 0;
       _setState(State::SEND);
     }
   }
@@ -220,7 +221,6 @@ void GWG::_receive() {
     _lastMillis = _currentMillis;
   }
   if (_bytesTransferred == _currentRequest.length()) {
-    _bytesTransferred = 0;
     _setState(State::INIT);
     _tryOnResponse();
   }

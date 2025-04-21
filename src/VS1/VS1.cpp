@@ -192,7 +192,6 @@ void VS1::loop() {
   }
   // double timeout to accomodate for connection initialization
   if (_currentDatapoint && _currentMillis - _requestTime > 4000UL) {
-    _bytesTransferred = 0;
     _setState(State::INIT);
     _tryOnError(OptolinkResult::TIMEOUT);
   }
@@ -214,6 +213,7 @@ void VS1::_init() {
   if (_interface->available()) {
     if (_interface->read() == VitoWiFiInternals::ProtocolBytes.ENQ) {
       _lastMillis = _currentMillis;
+      _bytesTransferred = 0;
       _setState(State::SYNC_ENQ);
     }
   } else {
@@ -229,6 +229,7 @@ void VS1::_init() {
 void VS1::_syncEnq() {
   if (_currentMillis - _lastMillis < 50) {
     if (_currentDatapoint && _interface->write(&VitoWiFiInternals::ProtocolBytes.ENQ_ACK, 1) == 1) {
+      _bytesTransferred = 0;
       _setState(State::SEND);
       _send();  // speed up things
     }
@@ -242,6 +243,7 @@ void VS1::_syncEnq() {
 void VS1::_syncRecv() {
   if (_currentMillis - _lastMillis < 50) {
     if (_currentDatapoint) {
+      _bytesTransferred = 0;
       _setState(State::SEND);
     }
   } else {
@@ -268,7 +270,6 @@ void VS1::_receive() {
     _lastMillis = _currentMillis;
   }
   if (_bytesTransferred == _currentDatapoint.length()) {
-    _bytesTransferred = 0;
     _setState(State::SYNC_RECV);
     _tryOnResponse();
   }

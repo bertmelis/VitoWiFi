@@ -1,6 +1,6 @@
 # VitoWiFi
 
-Library for ESP8266 to communicate with Viessmann systems using a (DIY) serial optolink.
+Library for ESP32, ESP8266 and Linux to communicate with Viessmann systems using a (DIY) serial optolink.
 
 Based on the fantastic work on [openv](https://github.com/openv/openv/wiki).
 
@@ -10,7 +10,7 @@ Based on the fantastic work on [openv](https://github.com/openv/openv/wiki).
 
 ## Features
 
-- VS1 (KW) and VS2 (P300) support. Older systems using the GWG protocol are not supported
+- VS1 (KW) and VS2 (P300) support. The older GWG protocol is also supported.
 - Non-blocking API calls
 - For the Arduino framework and POSIX systems (Linux, tested on a Raspberry Pi 1B)
 - Possible to use `SoftwareSerial` on ESP8266
@@ -32,7 +32,7 @@ Based on the fantastic work on [openv](https://github.com/openv/openv/wiki).
 
 ## Hardware
 
-The optolink hardware for ESP8266 and ESP32 is simple. Using the circuit below you can build your own optolink.
+The optolink hardware can be really simple. Using the circuit below you can build your own optolink.
 Please also check the [openv wiki, in German](https://github.com/openv/openv/wiki/Die-Optolink-Schnittstelle) for more implementations.
 
 ```
@@ -75,7 +75,7 @@ The canonical way to use this library is simple and straightforward. A few steps
     - attach the callbacks
     - start VitoWiFi
 5. in `void loop()`:
-    - call `loop()` regularly. It keeps VitoWiFi running.
+    - call `loop()` regularly. It keeps VitoWiFi running. Ideally it is called more than once every 10ms.
 
 A simple program for ESP32 to test and query your devicetype looks like this:
 
@@ -160,11 +160,11 @@ if (currentIndex > 0) {
 
 ### More examples
 
-you can find more examples in the `examples` directory in this repo.
+You can find more examples in the `examples` directory in this repo.
 
 ## Datapoints
 
-When defining your datapoints, you need to specify the name, address, length and converion type. Datapoints in C++ looks like this:
+When defining your datapoints, you need to specify the name, address, length and conversion type. Datapoints in C++ looks like this:
 
 ```cpp
 VitoWiFi::Datapoint datapoint1("outside temp", 0x5525, 2, VitoWiFi::div10);
@@ -178,23 +178,25 @@ While name, address and length are self-explanatory, conversion type is a bit mo
 
 ### Conversion types
 
-Data is stored in binary and often needs a conversion function to transform into a more readable type. This is specified by the conversion type, the last argument in the datapoint definition.
+Data is stored in binary and often needs a conversion function to transform into a more usable type. This is specified by the conversion type, the last argument in the datapoint definition.
 
-Since C++ is a strongly typed programming language so using the right type is important (read: mandatory). Each conversion type corresponds with a certain type. Reading or writing has to be done using this specific type and failure to do so will not work or will lead to undefined results.
+C++ is a strongly typed programming language so using the right type is important (read: mandatory). Each conversion type corresponds to a certain type. Reading or writing has to be done using this specific type and failure to do so will not work or will lead to undefined results.
 
 In the table below you can find how to define your datapoints:
 
 |name|size|converter|return type|remarks|
 |---|---|---|---|---|
 |Temperature|2|div10|float||
-|Temperature short|1|noconv|uint8_t|equivalent to Mode|
-|Power|1|div2|float|also used for temperature in GWG|
-|Status|1|noconv|bool|this is the same as 'Temperature short' and 'Mode'. The  `uint8_t` value will be implicitely converted to bool.|
-|Hours|4|div3600|float|this is in fact a `Count` datapoint (seconds) converted to hours.|
+|Temperature short|1|noconv|uint8_t|Equivalent to Mode|
+|Power|1|div2|float|Also used for temperature in GWG|
+|Status|1|noconv|bool|This is the same as 'Temperature short' and 'Mode'. The  `uint8_t` value will be implicitely converted to bool.|
+|Hours|4|div3600|float|This is in fact a `Count` datapoint (seconds) converted to hours.|
 |Count|4|noconv|uint32_t||
 |Count short|2|noconv|uint16_t||
-|Mode|1|noconv|uint8_t|possibly castable to ENUM|
+|Mode|1|noconv|uint8_t|Possibly castable to ENUM|
 |CoP|1|div10|float|Also used for heating curve slope|
+
+Mind that the converters are declared within the `VitoWiFi` namespace.
 
 ## Bugs and feature requests
 
@@ -204,9 +206,9 @@ Please use Github's facilities to get in touch. While the issue template is not 
 
 Below is an overview of all commonly used methods. For extra functions you can consult the source code.
 
-### Datapoint
+### `VitoWiFi::Datapoint`
 
-##### `Datapoint(const char* name, uint16_t address, uint8_t length, const Converter& converter)`
+##### `VitoWiFi::Datapoint(const char* name, uint16_t address, uint8_t length, const Converter& converter)`
 
 Constructor for datapoints.
 
@@ -227,16 +229,16 @@ Returns `VariantValue` which is implicitely castable to the correct datatype. Co
 
 ##### `VariantValue decode(const uint8_t* data, uint8_t length) const`
 
-Decodes the data in the supplied `data`-buffer using the converter class attached.
+Decodes the data in the supplied `data`-buffer using the Converter class attached.
 Returns `VariantValue` which is implicitely castable to the correct datatype. Consult the table above.
 
 ##### `void encode(uint8_t* buf, uint8_t len, const VariantValue& value) const`
 
-Encodes `value` into the supplied `buf` with maximum size `len`. The size should obviously be at least the length of the datapoint.
+Encodes `value` into the supplied `buf` with maximum size `len`. The size must be at least the length of the datapoint.
 
 `VariantValue` is a type to implicitely convert datatypes for use in VitoWiFi. Make sure to use the type that matches your Converter type.
 
-### `PacketVS2`
+### `VitoWiFi::PacketVS2`
 
 Only used in VS2. This type is used in the onResponse callback and contains the returned data.
 Most users will only use the following two methods and only if they want to access the raw data. Otherwise, the data can be decoded using the corresponding `Datapoint`.
@@ -249,25 +251,27 @@ Returns the number of bytes in the payload.
 
 Returns a pointer to the payload.
 
-### VitoWiFi
+### `VitoWiFi::VitoWiFi`
 
-##### `VitoWiFi<PROTOCOL_VERSION>(IFACE* interface)`
+##### `VitoWiFi::VitoWiFi<PROTOCOL_VERSION>(IFACE* interface)`
 
-Constructor of the VitoWiFi class. `PROTOCOL_VERSION` can be  `GWG`, `VS1` or `VS2`. If your Viessmann device is somewhat modern, you should use `VS2`.
+Constructor of the VitoWiFi class. `PROTOCOL_VERSION` can be  `VitoWiFi::GWG`, `VitoWiFi::VS1` or `VitoWiFi::VS2`. If your Viessmann device is somewhat modern, you should use `VitoWiFi::VS2`.
 `interface` can be any of the `HardwareSerial` interfaces (`Serial`, `Serial1`...) on Arduino boards, `SoftwareSerial` (on ESP8266) or if you are on Linux, pass the c-string depicting your device (for example `"/dev/ttyUSB0"`).
 
 ##### `void onResponse(typename PROTOCOLVERSION::OnResponseCallback callback)`
 
-Attach an onResponse callback. You can only attack one and will overwrite the previously attached callback.
+Attach an onResponse callback. You can only attach one and will overwrite the previously attached callback.
 The callback has the following signature:
-`VS1`: `void (const uint8_t*, uint8_t, const VitoWiFi::Datapoint&)`
-`VS2`: `void (const VitoWiFi::PacketVS2&, const VitoWiFi::Datapoint&)`
+
+- `VitoWiFi::VS1`: `void (const uint8_t*, uint8_t, const VitoWiFi::Datapoint&)`
+- `VitoWiFi::VS2`: `void (const VitoWiFi::PacketVS2&, const VitoWiFi::Datapoint&)`
 
 ##### `void onError(typename PROTOCOLVERSION::OnErrorCallback callback)`
 
 Attach an onError callback. You can only attack one and will overwrite the previously attached callback.
 The callback has the following signature:
-`void (VitoWiFi::OptolinkResult, const VitoWiFi::Datapoint&)`
+
+- `void (VitoWiFi::OptolinkResult, const VitoWiFi::Datapoint&)`
 
 ##### `bool begin()`
 
@@ -287,7 +291,7 @@ Read `datapoint`. Returns `true` on success.
 
 ##### `bool write(Datapoint datapoint, T value)`
 
-Write `value` with type `T` to `datapoint`. Make sure to use the correct type. consult the table with types in the "Datapoints" section.
+Write `value` with type `T` to `datapoint`. Make sure to use the correct type. Consult the table with types in the "Datapoints" section.
 
 ##### `write(Datapoint datapoint, const uint8_t* data, uint8_t length)`
 
@@ -308,11 +312,11 @@ Used in the onError callback. Possible returned values are:
 
 ##### `VW_START_PAYLOAD_LENGTH`
 
-This macro sets the initial payload (data) length VitoWiFi allocates for incoming packets. If you know beforehand the maximum data length you are going to request, you can set this to that value to prevent reallocation of dynamic memory. The default is 10 bytes.
+This macro sets the initial payload (data) length for incoming packets. VitoWiFi will increased the buffer if needed. If you know the maximum data length you are going to request beforehand, use this set to prevent dynamic memory reallocation. The default is 10 bytes.
 
 ## Bugs and feature requests
 
-Please use Github's facilities, issues and discussions, to get in touch.
+Please use Githubs facilities, issues and discussions, to get in touch.
 When creating a bug report, please use the provided template. In any case, better to include too much info than too little.
 
 ## License
