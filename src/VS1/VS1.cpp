@@ -204,6 +204,10 @@ void VS1::end() {
   _currentDatapoint = Datapoint(nullptr, 0x0000, 0, VitoWiFi::noconv);
 }
 
+int VS1::getState() const {
+  return static_cast<std::underlying_type<State>::type>(_state);
+}
+
 void VS1::_setState(State state) {
   vw_log_i("state %i --> %i", static_cast<std::underlying_type<State>::type>(_state), static_cast<std::underlying_type<State>::type>(state));
   _state = state;
