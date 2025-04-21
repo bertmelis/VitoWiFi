@@ -61,6 +61,10 @@ class VitoWiFi {
     return static_cast<int>(_optolink.getState());
   }
 
+  bool isBusy() {
+    return _optolink.isBusy();
+  }
+
  private:
   PROTOCOLVERSION _optolink;
 };

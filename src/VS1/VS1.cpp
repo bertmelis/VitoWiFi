@@ -208,6 +208,13 @@ int VS1::getState() const {
   return static_cast<std::underlying_type<State>::type>(_state);
 }
 
+bool VS1::isBusy() const {
+  if (_currentDatapoint) {
+    return true;
+  }
+  return false;
+}
+
 void VS1::_setState(State state) {
   vw_log_i("state %i --> %i", static_cast<std::underlying_type<State>::type>(_state), static_cast<std::underlying_type<State>::type>(state));
   _state = state;

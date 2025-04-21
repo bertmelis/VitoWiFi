@@ -82,6 +82,7 @@ class VS1 {
   void end();
 
   int getState() const;
+  bool isBusy() const;
 
  private:
   enum class State {
