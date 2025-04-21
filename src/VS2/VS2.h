@@ -46,7 +46,7 @@ class VS2 {
   , _currentMillis(vw_millis())
   , _lastMillis(_currentMillis)
   , _requestTime(0)
-  , _bytesSent(0)
+  , _bytesTransferred(0)
   , _interface(nullptr)
   , _parser()
   , _currentDatapoint(Datapoint(nullptr, 0, 0, noconv))
