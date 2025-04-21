@@ -82,6 +82,7 @@ class GWG {
   void end();
 
   int getState() const;
+  bool isBusy() const;
 
  private:
   enum class State {
