@@ -18,12 +18,6 @@ jobs:
         ]
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/pip
-            ~/.platformio/.cache
-          key: ${{ runner.os }}-pio
       - name: Build PlatformIO examples
         run: pio ci --lib="." --board=d1_mini
         env:
@@ -35,6 +29,7 @@ jobs:
     strategy:
       matrix:
         example: [
+          examples/generic-interface/generic-interface.ino,
           examples/simple-read-VS1/simple-read-VS1.ino,
           examples/simple-read-VS2/simple-read-VS2.ino,
           examples/simple-write-VS1/simple-write-VS1.ino,
@@ -43,12 +38,6 @@ jobs:
         ]
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/pip
-            ~/.platformio/.cache
-          key: ${{ runner.os }}-pio
       - name: Build PlatformIO examples
         run: pio ci --lib="." --board=lolin32
         env:
@@ -64,12 +53,6 @@ jobs:
         ]
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/pip
-            ~/.platformio/.cache
-          key: ${{ runner.os }}-pio
       - name: Build PlatformIO examples
         run: pio ci --lib="." --project-conf="./examples/linux/platformio.ini"
         env:

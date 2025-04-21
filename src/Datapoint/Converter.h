@@ -12,6 +12,7 @@ the LICENSE file.
 #include <cstdint>
 #include <cmath>
 #include <cstring>
+#include <cstdint>
 
 #include "../Logging.h"
 #include "ConversionHelpers.h"

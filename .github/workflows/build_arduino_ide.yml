@@ -46,6 +46,7 @@ jobs:
             - name: esp32:esp32
               source-url: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
           sketch-paths: |
+            - examples/generic-interface
             - examples/simple-read-VS1
             - examples/simple-read-VS2
             - examples/simple-write-VS1

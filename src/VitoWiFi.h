@@ -57,6 +57,10 @@ class VitoWiFi {
     return _optolink.write(datapoint, data, length);
   }
 
+  int getState() {
+    return static_cast<int>(_optolink.getState());
+  }
+
  private:
   PROTOCOLVERSION _optolink;
 };
