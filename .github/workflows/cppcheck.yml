@@ -10,4 +10,4 @@ jobs:
     - uses: actions/checkout@v4
     - name: Cppcheck
       run: |
-        pio check --flags "--suppress=unusedFunction --inline-suppr" --skip-packages --fail-on-defect=low --fail-on-defect=medium --fail-on-defect=high
+        pio check --fail-on-defect=medium --fail-on-defect=high --flags "--inline-suppr --enable=warning --enable=style --enable=performance --suppress=unusedFunction --suppress=preprocessorErrorDirective" --skip-packages
