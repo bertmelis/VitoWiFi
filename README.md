@@ -13,7 +13,7 @@ Based on the fantastic work on [openv](https://github.com/openv/openv/wiki).
 - VS1 (KW) and VS2 (P300) support. The older GWG protocol is also supported.
 - Non-blocking API calls
 - For the Arduino framework and POSIX systems (Linux, tested on a Raspberry Pi 1B)
-- Possible to use `SoftwareSerial` on ESP8266
+- Maximum flexibility for communication by supporting standard UART interfaces (HardwareSerial, `SoftwareSerial` on ESP8266) as well as a custom user-created interface.
 
 ## Contents
 
@@ -148,7 +148,7 @@ int numberDatapoints = 3;
 int currentIndex = -1;
 
 // to start reading, set currentIndex to 0
-if (currentIndex > 0) {
+if (currentIndex >= 0) {
   // reading will return `true` when successful.
   // as long as VitoWiFi is busy it will return `false`
   if (myVitoWiFi.read(datapoints[currentIndex])) {
@@ -195,6 +195,13 @@ In the table below you can find how to define your datapoints:
 |Count short|2|noconv|uint16_t||
 |Mode|1|noconv|uint8_t|Possibly castable to ENUM|
 |CoP|1|div10|float|Also used for heating curve slope|
+
+To use schedules, helper functions are available
+
+```cpp
+std::size_t encodeSchedule(const char* schedule, std::size_t len, uint8_t* output);
+std::size_t encodeSchedule(const char* schedule, uint8_t* output);
+```
 
 Mind that the converters are declared within the `VitoWiFi` namespace.
 
