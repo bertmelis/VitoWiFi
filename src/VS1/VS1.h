@@ -81,6 +81,8 @@ class VS1 {
   void loop();
   void end();
 
+  int getState() const;
+
  private:
   enum class State {
     INIT,

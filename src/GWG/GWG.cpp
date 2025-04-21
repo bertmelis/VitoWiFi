@@ -191,6 +191,10 @@ void GWG::end() {
   _currentDatapoint = Datapoint(nullptr, 0x0000, 0, VitoWiFi::noconv);
 }
 
+int GWG::getState() const {
+  return static_cast<std::underlying_type<State>::type>(_state);
+}
+
 void GWG::_setState(State state) {
   vw_log_i("state %i --> %i", static_cast<std::underlying_type<State>::type>(_state), static_cast<std::underlying_type<State>::type>(state));
   _state = state;
