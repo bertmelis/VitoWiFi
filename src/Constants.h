@@ -52,6 +52,8 @@ enum class OptolinkResult {
   ERROR
 };
 
+const char* errorToString(OptolinkResult error);
+
 }  // end namespace VitoWiFi
 
 namespace VitoWiFiInternals {
