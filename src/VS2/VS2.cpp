@@ -110,15 +110,17 @@ bool VS2::write(const Datapoint& datapoint, const VariantValue& value) {
   }
   uint8_t* payload = reinterpret_cast<uint8_t*>(malloc(datapoint.length()));
   if (!payload) return false;
-  _currentDatapoint.encode(payload, _currentDatapoint.length(), value);
-  return write(datapoint, payload, _currentDatapoint.length());
+  datapoint.encode(payload, datapoint.length(), value);
+  bool result = write(datapoint, payload, datapoint.length());
+  free(payload);
+  return result;
 }
 
 bool VS2::write(const Datapoint& datapoint, const uint8_t* data, uint8_t length) {
   if (_currentDatapoint) {
     return false;
   }
-  if (length != _currentDatapoint.length()) {
+  if (length != datapoint.length()) {
     vw_log_i("writing not possible, length error");
     return false;
   }
