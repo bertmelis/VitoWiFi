@@ -125,10 +125,12 @@ uint16_t PacketVS2::address() const {
 }
 
 uint8_t PacketVS2::dataLength() const {
+  if (functionCode() == FunctionCode::WRITE) return 0;
   return _buffer[5];
 }
 
 const uint8_t* PacketVS2::data() const {
+  if (functionCode() == FunctionCode::WRITE) return nullptr;
   return &_buffer[6];
 }
 

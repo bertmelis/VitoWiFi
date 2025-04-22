@@ -87,7 +87,11 @@ ParserResult ParserVS2::parse(const uint8_t b) {
       _payloadLength = b;
       _step = ParserStep::PAYLOAD;
     } else {
-      _step = ParserStep::CHECKSUM;
+      if (_packet.packetType() == VitoWiFi::PacketType::RESPONSE) {
+        _step = ParserStep::CHECKSUM;
+      } else {
+        _step = ParserStep::CHECKSUM;
+      }
     }
     break;
 
