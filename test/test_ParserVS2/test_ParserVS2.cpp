@@ -81,7 +81,7 @@ void test_ok_readresponse() {
     }
   }
 
-  TEST_ASSERT_EQUAL(ParserResult::COMPLETE,  result);
+  TEST_ASSERT_EQUAL(ParserResult::COMPLETE, result);
   TEST_ASSERT_EQUAL_UINT(length, bytesRead);
   TEST_ASSERT_EQUAL_UINT8(packetLength, parser.packet().length());
   TEST_ASSERT_EQUAL_UINT8(PacketType::RESPONSE, parser.packet().packetType());
@@ -116,7 +116,7 @@ void test_ok_writeresponse() {
     }
   }
 
-  TEST_ASSERT_EQUAL(ParserResult::COMPLETE,  result);
+  TEST_ASSERT_EQUAL(ParserResult::COMPLETE, result);
   TEST_ASSERT_EQUAL_UINT(length, bytesRead);
   TEST_ASSERT_EQUAL_UINT8(packetLength, parser.packet().length());
   TEST_ASSERT_EQUAL_UINT8(PacketType::RESPONSE, parser.packet().packetType());
