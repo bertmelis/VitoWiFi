@@ -95,16 +95,16 @@ void test_ok_readresponse() {
 void test_ok_writeresponse() {
   const uint8_t stream[] = {
     0x41,  // start byte
-    0x06,  // length
+    0x05,  // length
     0x01,  // packet type (response)
     0x02,  // flags: id + function code (0 + write)
     0x23,  // address 1
     0x23,  // address 2
     0x01,  // payload length
-    0x50   // cs
+    0x4F   // cs
   };
   const std::size_t length = 8;
-  const std::size_t packetLength = 7;
+  const std::size_t packetLength = 6;
 
   std::size_t bytesRead = 0;
   ParserResult result = ParserResult::ERROR;
