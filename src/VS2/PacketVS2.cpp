@@ -125,7 +125,6 @@ uint16_t PacketVS2::address() const {
 }
 
 uint8_t PacketVS2::dataLength() const {
-  if (functionCode() == FunctionCode::WRITE) return 0;
   return _buffer[5];
 }
 
