@@ -85,7 +85,6 @@ class NoconvConvert : public Converter {
  public:
   VariantValue decode(const uint8_t* data, uint8_t len) const override;
   void encode(uint8_t* buf, uint8_t len, const VariantValue& val) const override;
-  int toString(char* buf, std::size_t maxLen, VariantValue value) const override;
 };
 
 extern Div10Convert div10;
