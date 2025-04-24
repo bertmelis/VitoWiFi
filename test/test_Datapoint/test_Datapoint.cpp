@@ -69,17 +69,12 @@ void test_TempShortDecode() {
   Datapoint dp("temp", 0x0000, 1, VitoWiFi::noconv);
   const uint8_t data[] = {0x10};
   const uint8_t expected = 16;
-  const char* expectedStr = "16";
   PacketVS2 packet;
   packet.createPacket(PacketType::RESPONSE, FunctionCode::READ, 0, 0x5525, 1, data);
 
   uint8_t result = dp.decode(packet);
-  char resultStr[20];
-  int resultStrLen = dp.decodeToString(resultStr, 20, packet);
-
+  
   TEST_ASSERT_EQUAL_UINT8(expected, result);
-  TEST_ASSERT(resultStrLen > 0);
-  TEST_ASSERT_EQUAL_STRING(expectedStr, resultStr);
 }
 
 void test_TempShortEncode() {

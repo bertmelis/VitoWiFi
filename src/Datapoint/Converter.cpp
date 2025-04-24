@@ -86,7 +86,7 @@ void Div3600Convert::encode(uint8_t* buf, uint8_t len, const VariantValue& val) 
 }
 
 int Div3600Convert::toString(char* buf, std::size_t maxLen, VariantValue value) const {
-  return snprintf(buf, maxLen, "%.2f", static_cast<float>(value));
+  return snprintf(buf, maxLen, "%.4f", static_cast<float>(value));
 }
 
 VariantValue NoconvConvert::decode(const uint8_t* data, uint8_t len) const {
