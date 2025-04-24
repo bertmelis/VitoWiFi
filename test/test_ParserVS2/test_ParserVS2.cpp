@@ -54,7 +54,7 @@ void test_ok_request() {
   TEST_ASSERT_EQUAL_UINT8(0x02, parser.packet().dataLength());
 }
 
-void test_ok_response() {
+void test_ok_readresponse() {
   const uint8_t stream[] = {
     0x41,  // start byte
     0x07,  // length
@@ -81,7 +81,7 @@ void test_ok_response() {
     }
   }
 
-  TEST_ASSERT_EQUAL(ParserResult::COMPLETE,  result);
+  TEST_ASSERT_EQUAL(ParserResult::COMPLETE, result);
   TEST_ASSERT_EQUAL_UINT(length, bytesRead);
   TEST_ASSERT_EQUAL_UINT8(packetLength, parser.packet().length());
   TEST_ASSERT_EQUAL_UINT8(PacketType::RESPONSE, parser.packet().packetType());
@@ -90,6 +90,41 @@ void test_ok_response() {
   TEST_ASSERT_EQUAL_UINT16(0x5525, parser.packet().address());
   TEST_ASSERT_EQUAL_UINT8(0x02, parser.packet().dataLength());
   TEST_ASSERT_EQUAL_UINT8_ARRAY(data, parser.packet().data(), 2);
+}
+
+void test_ok_writeresponse() {
+  const uint8_t stream[] = {
+    0x41,  // start byte
+    0x05,  // length
+    0x01,  // packet type (response)
+    0x02,  // flags: id + function code (0 + write)
+    0x23,  // address 1
+    0x23,  // address 2
+    0x01,  // payload length
+    0x4F   // cs
+  };
+  const std::size_t length = 8;
+  const std::size_t packetLength = 6;
+
+  std::size_t bytesRead = 0;
+  ParserResult result = ParserResult::ERROR;
+
+  while (bytesRead < length) {
+    result = parser.parse(stream[bytesRead++]);
+    if (result != ParserResult::CONTINUE) {
+      break;
+    }
+  }
+
+  TEST_ASSERT_EQUAL(ParserResult::COMPLETE, result);
+  TEST_ASSERT_EQUAL_UINT(length, bytesRead);
+  TEST_ASSERT_EQUAL_UINT8(packetLength, parser.packet().length());
+  TEST_ASSERT_EQUAL_UINT8(PacketType::RESPONSE, parser.packet().packetType());
+  TEST_ASSERT_EQUAL_UINT8(0x00, parser.packet().id());
+  TEST_ASSERT_EQUAL_UINT8(FunctionCode::WRITE, parser.packet().functionCode());
+  TEST_ASSERT_EQUAL_UINT16(0x2323, parser.packet().address());
+  TEST_ASSERT_EQUAL_UINT8(0x01, parser.packet().dataLength());
+  TEST_ASSERT_NULL(parser.packet().data());
 }
 
 void test_spuriousbytes() {
@@ -251,7 +286,8 @@ void test_invalidChecksum() {
 int main() {
   UNITY_BEGIN();
   RUN_TEST(test_ok_request);
-  RUN_TEST(test_ok_response);
+  RUN_TEST(test_ok_readresponse);
+  RUN_TEST(test_ok_writeresponse);
   RUN_TEST(test_spuriousbytes);
   RUN_TEST(test_invalidLength);
   RUN_TEST(test_invalidPacketType);

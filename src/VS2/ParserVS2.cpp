@@ -77,8 +77,13 @@ ParserResult ParserVS2::parse(const uint8_t b) {
 
   case ParserStep::PAYLOADLENGTH:
     _packet[5] = b;
-    if (_packet.functionCode() == VitoWiFi::FunctionCode::WRITE ||
-        _packet.packetType() == VitoWiFi::PacketType::RESPONSE) {
+    if ((_packet.functionCode() == VitoWiFi::FunctionCode::READ &&
+        _packet.packetType() == VitoWiFi::PacketType::REQUEST) ||
+        (_packet.functionCode() == VitoWiFi::FunctionCode::WRITE &&
+        _packet.packetType() == VitoWiFi::PacketType::RESPONSE)) {
+      // read requests and write responses don't have a data payload
+      _step = ParserStep::CHECKSUM;
+    } else {
       if (b != _packet.length() - 6U) {
         vw_log_w("Invalid payload length: %u (expected %u)", b, _packet.length() - 6U);
         _step = ParserStep::STARTBYTE;
@@ -86,8 +91,6 @@ ParserResult ParserVS2::parse(const uint8_t b) {
       }
       _payloadLength = b;
       _step = ParserStep::PAYLOAD;
-    } else {
-      _step = ParserStep::CHECKSUM;
     }
     break;
 
