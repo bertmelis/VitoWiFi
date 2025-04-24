@@ -25,8 +25,8 @@ class Datapoint {
 
   VariantValue decode(const uint8_t* data, uint8_t length) const;
   VariantValue decode(const PacketVS2& packet) const;
-  int decodeToString(char* buffer, std::size_t maxLen, const uint8_t* data, uint8_t length);
-  int decodeToString(char* buffer, std::size_t maxLen, const PacketVS2& packet);
+  int decodeToString(char* buffer, std::size_t maxLen, const uint8_t* data, uint8_t length) const;
+  int decodeToString(char* buffer, std::size_t maxLen, const PacketVS2& packet) const;
   void encode(uint8_t* buf, uint8_t len, const VariantValue& value) const;
 
  protected:

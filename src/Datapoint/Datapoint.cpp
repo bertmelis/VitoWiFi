@@ -51,11 +51,11 @@ void Datapoint::encode(uint8_t* buf, uint8_t len, const VariantValue& value) con
   return (*_converter).encode(buf, len, value);
 }
 
-int Datapoint::decodeToString(char* buffer, std::size_t maxLen, const uint8_t* data, uint8_t length) {
+int Datapoint::decodeToString(char* buffer, std::size_t maxLen, const uint8_t* data, uint8_t length) const {
   return (*_converter).toString(buffer, maxLen, (*_converter).decode(data, length));
 }
 
-int Datapoint::decodeToString(char* buffer, std::size_t maxLen, const PacketVS2& packet) {
+int Datapoint::decodeToString(char* buffer, std::size_t maxLen, const PacketVS2& packet) const {
   return (*_converter).toString(buffer, maxLen, (*_converter).decode(packet.data(), packet.dataLength()));
 }
 
