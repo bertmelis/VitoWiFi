@@ -10,6 +10,10 @@ the LICENSE file.
 
 namespace VitoWiFi {
 
+int Converter::toString(char* buf, std::size_t maxLen, VariantValue value) {
+  return 0;
+}
+
 VariantValue Div10Convert::decode(const uint8_t* data, uint8_t len) const {
   assert(len == 1 || len == 2);
   float retVal = 0;
@@ -35,6 +39,10 @@ void Div10Convert::encode(uint8_t* buf, uint8_t len, const VariantValue& val) co
   buf[0] = tmp & 0xFF;
 }
 
+int Div10Convert::toString(char* buf, std::size_t maxLen, VariantValue value) {
+  return snprintf(buf, maxLen, "%.1f", (float)value);
+}
+
 VariantValue Div2Convert::decode(const uint8_t* data, uint8_t len) const {
   assert(len == 1);
   float retVal = 0;
@@ -49,6 +57,10 @@ void Div2Convert::encode(uint8_t* buf, uint8_t len, const VariantValue& val) con
   float srcVal = val;
   int8_t tmp = floor((srcVal * 2.f) + 0.5);
   buf[0] = tmp;
+}
+
+int Div2Convert::toString(char* buf, std::size_t maxLen, VariantValue value) {
+  return snprintf(buf, maxLen, "%.1f", (float)value);
 }
 
 VariantValue Div3600Convert::decode(const uint8_t* data, uint8_t len) const {
@@ -68,6 +80,10 @@ void Div3600Convert::encode(uint8_t* buf, uint8_t len, const VariantValue& val) 
   buf[2] = tmp >> 16;
   buf[1] = tmp >> 8;
   buf[0] = tmp & 0xFF;
+}
+
+int Div3600Convert::toString(char* buf, std::size_t maxLen, VariantValue value) {
+  return snprintf(buf, maxLen, "%.2f", (float)value);
 }
 
 VariantValue NoconvConvert::decode(const uint8_t* data, uint8_t len) const {

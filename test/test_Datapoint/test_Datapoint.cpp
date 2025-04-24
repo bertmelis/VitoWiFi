@@ -40,12 +40,17 @@ void test_TempDecode() {
   Datapoint dp("temp", 0x0000, 2, VitoWiFi::div10);
   const uint8_t data[] = {0x07, 0x01};
   const float expected = 26.3;
+  const char* expectedStr = "26.3";
   PacketVS2 packet;
   packet.createPacket(PacketType::RESPONSE, FunctionCode::READ, 0, 0x5525, 2, data);
 
   float result = dp.decode(packet);
+  char resultStr[20];
+  int resultStrLen = dp.decodeToString(resultStr, 20, packet);
 
   TEST_ASSERT_EQUAL_FLOAT(expected, result);
+  TEST_ASSERT(resultStrLen > 0);
+  TEST_ASSERT_EQUAL_STRING(expectedStr, resultStr);
 }
 
 void test_TempEncode() {
@@ -64,12 +69,17 @@ void test_TempShortDecode() {
   Datapoint dp("temp", 0x0000, 1, VitoWiFi::noconv);
   const uint8_t data[] = {0x10};
   const uint8_t expected = 16;
+  const char* expectedStr = "16";
   PacketVS2 packet;
   packet.createPacket(PacketType::RESPONSE, FunctionCode::READ, 0, 0x5525, 1, data);
 
   uint8_t result = dp.decode(packet);
+  char resultStr[20];
+  int resultStrLen = dp.decodeToString(resultStr, 20, packet);
 
   TEST_ASSERT_EQUAL_UINT8(expected, result);
+  TEST_ASSERT(resultStrLen > 0);
+  TEST_ASSERT_EQUAL_STRING(expectedStr, resultStr);
 }
 
 void test_TempShortEncode() {
@@ -111,12 +121,17 @@ void test_HourDecode() {
   Datapoint dp("hour", 0x0000, 4, VitoWiFi::div3600);
   const uint8_t data[] = {0x80, 0x8F, 0x21, 0x61};
   const float expected = 452663.72;
+  const char* expectedStr = "452663.7200";
   PacketVS2 packet;
   packet.createPacket(PacketType::RESPONSE, FunctionCode::READ, 0, 0x0000, 4, data);
 
   float result = dp.decode(packet);
+  char resultStr[20];
+  int resultStrLen = dp.decodeToString(resultStr, 20, packet);
 
   TEST_ASSERT_EQUAL_FLOAT(expected, result);
+  TEST_ASSERT(resultStrLen > 0);
+  TEST_ASSERT_EQUAL_STRING(expectedStr, resultStr);
 }
 
 void test_HourEncode() {
@@ -184,12 +199,18 @@ void test_COPDecode() {
   Datapoint dp("count", 0x0000, 1, VitoWiFi::div10);
   const uint8_t data[] = {0x1A};
   const float expected = 2.6;
+  const char* expectedStr = "2.6";
   PacketVS2 packet;
   packet.createPacket(PacketType::RESPONSE, FunctionCode::READ, 0, 0x0000, 1, data);
 
   float result = dp.decode(packet);
 
+  char resultStr[20];
+  int resultStrLen = dp.decodeToString(resultStr, 20, packet);
+
   TEST_ASSERT_EQUAL_FLOAT(expected, result);
+  TEST_ASSERT(resultStrLen > 0);
+  TEST_ASSERT_EQUAL_STRING(expectedStr, resultStr);
 }
 
 void test_COPEncode() {

@@ -12,7 +12,7 @@ the LICENSE file.
 #include <cstdint>
 #include <cmath>
 #include <cstring>
-#include <cstdint>
+#include <cstddef>
 
 #include "../Logging.h"
 #include "ConversionHelpers.h"
@@ -54,6 +54,7 @@ class Converter {
  public:
   virtual VariantValue decode(const uint8_t* data, uint8_t len) const = 0;
   virtual void encode(uint8_t* buf, uint8_t len, const VariantValue& val) const = 0;
+  virtual int toString(char* buf, std::size_t maxLen, VariantValue value);
   bool operator==(const Converter& rhs) const {
     return (this == &rhs);
   }
@@ -63,24 +64,27 @@ class Div10Convert : public Converter {
  public:
   VariantValue decode(const uint8_t* data, uint8_t len) const override;
   void encode(uint8_t* buf, uint8_t len, const VariantValue& val) const override;
+  virtual int toString(char* buf, std::size_t maxLen, VariantValue value);
 };
 
 class Div2Convert : public Converter {
  public:
   VariantValue decode(const uint8_t* data, uint8_t len) const override;
   void encode(uint8_t* buf, uint8_t len, const VariantValue& val) const override;
+  virtual int toString(char* buf, std::size_t maxLen, VariantValue value);
 };
 
 class Div3600Convert : public Converter {
  public:
   VariantValue decode(const uint8_t* data, uint8_t len) const override;
   void encode(uint8_t* buf, uint8_t len, const VariantValue& val) const override;
-};
+  virtual int toString(char* buf, std::size_t maxLen, VariantValue value);
 
 class NoconvConvert : public Converter {
  public:
   VariantValue decode(const uint8_t* data, uint8_t len) const override;
   void encode(uint8_t* buf, uint8_t len, const VariantValue& val) const override;
+  virtual int toString(char* buf, std::size_t maxLen, VariantValue value);
 };
 
 extern Div10Convert div10;
