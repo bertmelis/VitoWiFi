@@ -73,7 +73,7 @@ void test_TempShortDecode() {
   packet.createPacket(PacketType::RESPONSE, FunctionCode::READ, 0, 0x5525, 1, data);
 
   uint8_t result = dp.decode(packet);
-  
+
   TEST_ASSERT_EQUAL_UINT8(expected, result);
 }
 
@@ -116,7 +116,7 @@ void test_HourDecode() {
   Datapoint dp("hour", 0x0000, 4, VitoWiFi::div3600);
   const uint8_t data[] = {0x80, 0x8F, 0x21, 0x61};
   const float expected = 452663.72;
-  const char* expectedStr = "452663.7200";
+  const char* expectedStr = "452663.7xxx";  // take float inaccuracy into account
   PacketVS2 packet;
   packet.createPacket(PacketType::RESPONSE, FunctionCode::READ, 0, 0x0000, 4, data);
 
@@ -126,7 +126,7 @@ void test_HourDecode() {
 
   TEST_ASSERT_EQUAL_FLOAT(expected, result);
   TEST_ASSERT(resultStrLen > 0);
-  TEST_ASSERT_EQUAL_STRING(expectedStr, resultStr);
+  TEST_ASSERT_EQUAL_STRING_LEN(expectedStr, resultStr, 8);
 }
 
 void test_HourEncode() {
