@@ -48,7 +48,7 @@ ParserResult ParserVS2::parse(const uint8_t b) {
       _step = ParserStep::STARTBYTE;
       return ParserResult::ERROR;
     }
-    _packet[1] = b;
+    _packet[VS2_PACKET_TYPE] = b;
     _step = ParserStep::FLAGS;
     break;
 
@@ -61,22 +61,22 @@ ParserResult ParserVS2::parse(const uint8_t b) {
       return ParserResult::ERROR;
     }
     }
-    _packet[2] = b;
+    _packet[VS2_FUNCTION_CODE_ID] = b;
     _step = ParserStep::ADDRESS1;
     break;
 
   case ParserStep::ADDRESS1:
-    _packet[3] = b;
+    _packet[VS2_ADDRESS_HIGH] = b;
     _step = ParserStep::ADDRESS2;
     break;
 
   case ParserStep::ADDRESS2:
-    _packet[4] = b;
+    _packet[VS2_ADDRESS_LOW] = b;
     _step = ParserStep::PAYLOADLENGTH;
     break;
 
   case ParserStep::PAYLOADLENGTH:
-    _packet[5] = b;
+    _packet[VS2_DATA_LENGTH] = b;
     if ((_packet.functionCode() == VitoWiFi::FunctionCode::READ &&
         _packet.packetType() == VitoWiFi::PacketType::REQUEST) ||
         (_packet.functionCode() == VitoWiFi::FunctionCode::WRITE &&
@@ -95,7 +95,7 @@ ParserResult ParserVS2::parse(const uint8_t b) {
     break;
 
   case ParserStep::PAYLOAD:
-    _packet[6 + _packet.dataLength() - _payloadLength--] = b;
+    _packet[VS2_DATA_LENGTH + _packet.dataLength() - _payloadLength--] = b;
     if (_payloadLength == 0) {
       _step = ParserStep::CHECKSUM;
     }
