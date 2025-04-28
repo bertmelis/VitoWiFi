@@ -339,7 +339,7 @@ void VS2::_tryOnResponse() {
     // if response is for write request, inject written data into response
     if (_currentPacket.functionCode() == FunctionCode::WRITE) {
         if (_parser.packet().setLength(_parser.packet().length() + _parser.packet().dataLength())) {
-          std::memcpy(&_parser.packet()[VS2_DATA], &_currentPacket[VS2_DATA], _currentPacket.dataLength()) {
+          std::memcpy(&_parser.packet()[VS2_DATA], &_currentPacket[VS2_DATA], _currentPacket.dataLength());
         } else {
           vw_log_e("Could not inject payload");
         }
