@@ -26,7 +26,7 @@ PacketVS2::~PacketVS2() {
 }
 
 PacketVS2::operator bool() const {
-  if (_buffer && _buffer[0] != 0) return true;
+  if (_buffer && _buffer[VS2_PACKET_LENGTH] != 0) return true;
   return false;
 }
 
@@ -69,20 +69,19 @@ bool PacketVS2::createPacket(PacketType pt, FunctionCode fc, uint8_t id, uint16_
   }
 
   // 2. Serialize into buffer
-  size_t step = 0;
   if (fc == FunctionCode::WRITE) {
-    _buffer[step++] = 0x05 + len;  // 0x05 = standard length: mt, fc, addr(2), len + data
+    _buffer[VS2_PACKET_LENGTH] = 0x05 + len;  // 0x05 = standard length: mt, fc, addr(2), len + data
   } else {
-    _buffer[step++] = 0x05;
+    _buffer[VS2_PACKET_LENGTH++] = 0x05;
   }
-  _buffer[step++] = static_cast<uint8_t>(pt);
-  _buffer[step++] = static_cast<uint8_t>(fc) | id << 5;
-  _buffer[step++] = (addr >> 8) & 0xFF;
-  _buffer[step++] = addr & 0xFF;
-  _buffer[step++] = len;
+  _buffer[VS2_PACKET_TYPE] = static_cast<uint8_t>(pt);
+  _buffer[VS2_FUNCTION_CODE_ID] = static_cast<uint8_t>(fc) | id << 5;
+  _buffer[VS2_ADDRESS_HIGH] = (addr >> 8) & 0xFF;
+  _buffer[VS2_ADDRESS_LOW] = addr & 0xFF;
+  _buffer[VS2_DATA_LENGTH] = len;
   if (fc == FunctionCode::WRITE || pt == PacketType::RESPONSE) {
     for (uint8_t i = 0; i < len; ++i) {
-      _buffer[step++] = data[i];
+      _buffer[VS2_DATA + i] = data[i];
     }
   }
   return true;
@@ -103,46 +102,46 @@ bool PacketVS2::setLength(uint8_t length) {
 }
 
 uint8_t PacketVS2::length() const {
-  return _buffer[0] + 1;
+  return _buffer[VS2_PACKET_LENGTH] + 1;
 }
 
 PacketType PacketVS2::packetType() const {
-  return static_cast<PacketType>(_buffer[1]);
+  return static_cast<PacketType>(_buffer[VS2_PACKET_TYPE]);
 }
 
 FunctionCode PacketVS2::functionCode() const {
-  return static_cast<FunctionCode>(_buffer[2] & 0x1F);
+  return static_cast<FunctionCode>(_buffer[VS2_FUNCTION_CODE_ID] & 0x1F);
 }
 
 uint8_t PacketVS2::id() const {
-  return _buffer[2] >> 5 & 0x07;
+  return _buffer[VS2_FUNCTION_CODE_ID] >> 5 & 0x07;
 }
 
 uint16_t PacketVS2::address() const {
-  uint16_t retVal = _buffer[3] << 8;
-  retVal |= _buffer[4];
+  uint16_t retVal = _buffer[VS2_ADDRESS_HIGH] << 8;
+  retVal |= _buffer[VS2_ADDRESS_LOW];
   return retVal;
 }
 
 uint8_t PacketVS2::dataLength() const {
-  return _buffer[5];
+  return _buffer[VS2_DATA_LENGTH];
 }
 
 const uint8_t* PacketVS2::data() const {
   if (functionCode() == FunctionCode::WRITE) return nullptr;
-  return &_buffer[6];
+  return &_buffer[VS2_DATA];
 }
 
 uint8_t PacketVS2::checksum() const {
   uint8_t retVal = 0;
-  for (std::size_t i = 0; i <= _buffer[0]; ++i) {
+  for (std::size_t i = 0; i <= _buffer[VS2_PACKET_LENGTH]; ++i) {
     retVal += _buffer[i];
   }
   return retVal;
 }
 
 void PacketVS2::reset() {
-  _buffer[0] = 0x00;
+  _buffer[VS2_PACKET_LENGTH] = 0x00;
 }
 
 }  // end namespace VitoWiFi

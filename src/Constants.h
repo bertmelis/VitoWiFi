@@ -15,6 +15,15 @@ the LICENSE file.
 #define VW_START_PAYLOAD_LENGTH 10
 #endif
 
+#define VS2_PACKET_LENGTH    0
+#define VS2_PACKET_TYPE      1
+#define VS2_FUNCTION_CODE_ID 2
+#define VS2_ADDRESS_HIGH     3
+#define VS2_ADDRESS_LOW      4
+#define VS2_DATA_LENGTH      5
+#define VS2_DATA             6
+
+
 namespace VitoWiFi {
 
 constexpr size_t START_PAYLOAD_LENGTH = VW_START_PAYLOAD_LENGTH;
