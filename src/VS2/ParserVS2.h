@@ -22,7 +22,7 @@ class ParserVS2 {
  public:
   ParserVS2();
   ParserResult parse(const uint8_t b);
-  const VitoWiFi::PacketVS2& packet() const;
+  VitoWiFi::PacketVS2& packet();
   void reset();
 
  private:

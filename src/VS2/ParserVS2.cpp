@@ -112,7 +112,7 @@ ParserResult ParserVS2::parse(const uint8_t b) {
   return ParserResult::CONTINUE;
 }
 
-const VitoWiFi::PacketVS2& ParserVS2::packet() const {
+VitoWiFi::PacketVS2& ParserVS2::packet() {
   return _packet;
 }
 
