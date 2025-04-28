@@ -72,7 +72,7 @@ bool PacketVS2::createPacket(PacketType pt, FunctionCode fc, uint8_t id, uint16_
   if (fc == FunctionCode::WRITE) {
     _buffer[VS2_PACKET_LENGTH] = 0x05 + len;  // 0x05 = standard length: mt, fc, addr(2), len + data
   } else {
-    _buffer[VS2_PACKET_LENGTH++] = 0x05;
+    _buffer[VS2_PACKET_LENGTH] = 0x05;
   }
   _buffer[VS2_PACKET_TYPE] = static_cast<uint8_t>(pt);
   _buffer[VS2_FUNCTION_CODE_ID] = static_cast<uint8_t>(fc) | id << 5;
