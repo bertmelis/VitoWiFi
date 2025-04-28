@@ -95,7 +95,7 @@ ParserResult ParserVS2::parse(const uint8_t b) {
     break;
 
   case ParserStep::PAYLOAD:
-    _packet[VS2_DATA_LENGTH + _packet.dataLength() - _payloadLength--] = b;
+    _packet[VS2_DATA + _packet.dataLength() - _payloadLength--] = b;
     if (_payloadLength == 0) {
       _step = ParserStep::CHECKSUM;
     }
