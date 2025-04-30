@@ -28,6 +28,7 @@ class Datapoint {
   int decodeToString(char* buffer, std::size_t maxLen, const uint8_t* data, uint8_t length) const;
   int decodeToString(char* buffer, std::size_t maxLen, const PacketVS2& packet) const;
   void encode(uint8_t* buf, uint8_t len, const VariantValue& value) const;
+  void encode(uint8_t* buf, uint8_t len, const char* value) const;
 
  protected:
   const char* _name;

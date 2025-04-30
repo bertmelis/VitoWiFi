@@ -74,6 +74,18 @@ void test_TempEncode() {
   TEST_ASSERT_EQUAL_HEX8_ARRAY(expected, buffer, len);
 }
 
+void test_TempEncodeStr() {
+  Datapoint dp("temp", 0x0000, 2, VitoWiFi::div10);
+  const uint8_t expected[] = {0x07, 0x01};
+  const char* value = "26.3";
+  const uint8_t len = 2;
+  uint8_t buffer[len] = {0};
+
+  dp.encode(buffer, len, value);
+
+  TEST_ASSERT_EQUAL_HEX8_ARRAY(expected, buffer, len);
+}
+
 void test_TempShortDecode() {
   Datapoint dp("temp", 0x0000, 1, VitoWiFi::noconv);
   const uint8_t data[] = {0x10};

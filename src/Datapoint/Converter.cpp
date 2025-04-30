@@ -17,6 +17,11 @@ int Converter::toString(char* buf, std::size_t maxLen, VariantValue value) const
   return 0;
 }
 
+void Converter::fromString(const char* buf, VariantValue* result) const {
+  (void) buf;
+  return VariantValue(0ULL);
+}
+
 VariantValue Div10Convert::decode(const uint8_t* data, uint8_t len) const {
   assert(len == 1 || len == 2);
   float retVal = 0;
@@ -44,6 +49,15 @@ void Div10Convert::encode(uint8_t* buf, uint8_t len, const VariantValue& val) co
 
 int Div10Convert::toString(char* buf, std::size_t maxLen, VariantValue value) const {
   return snprintf(buf, maxLen, "%.1f", static_cast<float>(value));
+}
+
+void Div10Convert::fromString(const char* buf, VariantValue* result) const {
+  char* end = nullptr;
+  float ret = std::strtof(buf, &end);
+  if (buf == end || ret == HUGE_VALF) {
+    vw_log_e("Could not convert string to float");
+  }
+  result = VariantValue(ret);
 }
 
 VariantValue Div2Convert::decode(const uint8_t* data, uint8_t len) const {

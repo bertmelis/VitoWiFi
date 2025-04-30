@@ -13,6 +13,7 @@ the LICENSE file.
 #include <cmath>
 #include <cstring>
 #include <cstddef>
+#include <cstdlib>  // std::stof... conversions
 
 #include "../Logging.h"
 #include "ConversionHelpers.h"
@@ -55,6 +56,7 @@ class Converter {
   virtual VariantValue decode(const uint8_t* data, uint8_t len) const = 0;
   virtual void encode(uint8_t* buf, uint8_t len, const VariantValue& val) const = 0;
   virtual int toString(char* buf, std::size_t maxLen, VariantValue value) const;
+  virtual void fromString(const char* buf, VariantValue* result) const;
   bool operator==(const Converter& rhs) const {
     return (this == &rhs);
   }
@@ -65,6 +67,7 @@ class Div10Convert : public Converter {
   VariantValue decode(const uint8_t* data, uint8_t len) const override;
   void encode(uint8_t* buf, uint8_t len, const VariantValue& val) const override;
   int toString(char* buf, std::size_t maxLen, VariantValue value) const override;
+  void fromString(const char* buf, VariantValue* result) const override;  // C-string = 0-terminated
 };
 
 class Div2Convert : public Converter {
