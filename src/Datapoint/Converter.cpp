@@ -81,6 +81,15 @@ int Div2Convert::toString(char* buf, std::size_t maxLen, VariantValue value) con
   return snprintf(buf, maxLen, "%.1f", static_cast<float>(value));
 }
 
+void Div2Convert::fromString(const char* buf, VariantValue* result) const {
+  char* end = nullptr;
+  float ret = std::strtof(buf, &end);
+  if (buf == end || ret == HUGE_VALF) {
+    vw_log_e("Could not convert string to float");
+  }
+  *result = VariantValue(ret);
+}
+
 VariantValue Div3600Convert::decode(const uint8_t* data, uint8_t len) const {
   assert(len == 4);
   (void) len;
@@ -102,6 +111,15 @@ void Div3600Convert::encode(uint8_t* buf, uint8_t len, const VariantValue& val) 
 
 int Div3600Convert::toString(char* buf, std::size_t maxLen, VariantValue value) const {
   return snprintf(buf, maxLen, "%.4f", static_cast<float>(value));
+}
+
+void Div3600Convert::fromString(const char* buf, VariantValue* result) const {
+  char* end = nullptr;
+  float ret = std::strtof(buf, &end);
+  if (buf == end || ret == HUGE_VALF) {
+    vw_log_e("Could not convert string to float");
+  }
+  *result = VariantValue(ret);
 }
 
 VariantValue NoconvConvert::decode(const uint8_t* data, uint8_t len) const {

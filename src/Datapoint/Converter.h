@@ -58,7 +58,7 @@ class Converter {
   virtual VariantValue decode(const uint8_t* data, uint8_t len) const = 0;
   virtual void encode(uint8_t* buf, uint8_t len, const VariantValue& val) const = 0;
   virtual int toString(char* buf, std::size_t maxLen, VariantValue value) const;
-  virtual void fromString(const char* buf, VariantValue* result) const;
+  virtual void fromString(const char* buf, VariantValue* result) const;  // buf = c-string, 0-terminated
   bool operator==(const Converter& rhs) const {
     return (this == &rhs);
   }
@@ -69,7 +69,7 @@ class Div10Convert : public Converter {
   VariantValue decode(const uint8_t* data, uint8_t len) const override;
   void encode(uint8_t* buf, uint8_t len, const VariantValue& val) const override;
   int toString(char* buf, std::size_t maxLen, VariantValue value) const override;
-  void fromString(const char* buf, VariantValue* result) const override;  // C-string = 0-terminated
+  void fromString(const char* buf, VariantValue* result) const override;
 };
 
 class Div2Convert : public Converter {
@@ -77,6 +77,7 @@ class Div2Convert : public Converter {
   VariantValue decode(const uint8_t* data, uint8_t len) const override;
   void encode(uint8_t* buf, uint8_t len, const VariantValue& val) const override;
   int toString(char* buf, std::size_t maxLen, VariantValue value) const override;
+  void fromString(const char* buf, VariantValue* result) const override;
 };
 
 class Div3600Convert : public Converter {
@@ -84,6 +85,7 @@ class Div3600Convert : public Converter {
   VariantValue decode(const uint8_t* data, uint8_t len) const override;
   void encode(uint8_t* buf, uint8_t len, const VariantValue& val) const override;
   int toString(char* buf, std::size_t maxLen, VariantValue value) const override;
+  void fromString(const char* buf, VariantValue* result) const override;
 };
 
 class NoconvConvert : public Converter {

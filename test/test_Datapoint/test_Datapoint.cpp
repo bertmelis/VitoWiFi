@@ -171,6 +171,18 @@ void test_HourEncode() {
   TEST_ASSERT_EQUAL_HEX8_ARRAY(expected, buffer, len);
 }
 
+void test_HourEncodeStr() {
+  Datapoint dp("hour", 0x0000, 4, VitoWiFi::div3600);
+  const uint8_t expected[] = {0x80, 0x8F, 0x21, 0x61};
+  const char* value = "452663.72";
+  const uint8_t len = 4;
+  uint8_t buffer[len] = {0};
+
+  dp.encode(buffer, len, value);
+
+  TEST_ASSERT_EQUAL_HEX8_ARRAY(expected, buffer, len);
+}
+
 
 void test_CountDecode() {
   Datapoint dp("count", 0x0000, 4, VitoWiFi::noconv);
@@ -247,13 +259,25 @@ void test_COPDecodeStr() {
 }
 
 void test_COPEncode() {
-  Datapoint dp("count", 0x0000, 2, VitoWiFi::div10);
+  Datapoint dp("count", 0x0000, 1, VitoWiFi::div10);
   const uint8_t expected[] = {0x1A};
   const float value = 2.6;
   const uint8_t len = 1;
   uint8_t buffer[len] = {0};
 
   dp.encode(buffer, len, VariantValue(value));
+
+  TEST_ASSERT_EQUAL_HEX8_ARRAY(expected, buffer, len);
+}
+
+void test_COPEncodeStr() {
+  Datapoint dp("count", 0x0000, 1, VitoWiFi::div10);
+  const uint8_t expected[] = {0x1A};
+  const char* value = "2.6";
+  const uint8_t len = 1;
+  uint8_t buffer[len] = {0};
+
+  dp.encode(buffer, len, value);
 
   TEST_ASSERT_EQUAL_HEX8_ARRAY(expected, buffer, len);
 }
@@ -298,6 +322,7 @@ int main() {
   RUN_TEST(test_HourDecode);
   RUN_TEST(test_HourDecodeStr);
   RUN_TEST(test_HourEncode);
+  RUN_TEST(test_HourEncodeStr);
   RUN_TEST(test_CountDecode);
   RUN_TEST(test_CountEncode);
   RUN_TEST(test_CountShortDecode);
@@ -305,6 +330,7 @@ int main() {
   RUN_TEST(test_COPDecode);
   RUN_TEST(test_COPDecodeStr);
   RUN_TEST(test_COPEncode);
+  RUN_TEST(test_COPEncodeStr);
   RUN_TEST(test_ScheduleEncode);
   RUN_TEST(test_ScheduleDecode);
   return UNITY_END();
