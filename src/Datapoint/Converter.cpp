@@ -58,7 +58,7 @@ void Div10Convert::fromString(const char* buf, VariantValue* result) const {
   if (buf == end || ret == HUGE_VALF) {
     vw_log_e("Could not convert string to float");
   }
-  result = VariantValue(ret);
+  *result = VariantValue(ret);
 }
 
 VariantValue Div2Convert::decode(const uint8_t* data, uint8_t len) const {
