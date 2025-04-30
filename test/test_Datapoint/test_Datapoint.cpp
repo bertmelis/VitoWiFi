@@ -40,17 +40,26 @@ void test_TempDecode() {
   Datapoint dp("temp", 0x0000, 2, VitoWiFi::div10);
   const uint8_t data[] = {0x07, 0x01};
   const float expected = 26.3;
-  const char* expectedStr = "26.3";
   PacketVS2 packet;
   packet.createPacket(PacketType::RESPONSE, FunctionCode::READ, 0, 0x5525, 2, data);
 
   float result = dp.decode(packet);
-  char resultStr[20];
-  int resultStrLen = dp.decodeToString(resultStr, 20, packet);
 
   TEST_ASSERT_EQUAL_FLOAT(expected, result);
-  TEST_ASSERT(resultStrLen > 0);
-  TEST_ASSERT_EQUAL_STRING(expectedStr, resultStr);
+}
+
+void test_TempDecodeStr() {
+  Datapoint dp("temp", 0x0000, 2, VitoWiFi::div10);
+  const uint8_t data[] = {0x07, 0x01};
+  const char* expected = "26.3";
+  PacketVS2 packet;
+  packet.createPacket(PacketType::RESPONSE, FunctionCode::READ, 0, 0x5525, 2, data);
+
+  char result[20];
+  int resultLen = dp.decodeToString(result, 20, packet);
+
+  TEST_ASSERT(resultLen > 0);
+  TEST_ASSERT_EQUAL_STRING(expected, result);
 }
 
 void test_TempEncode() {
@@ -116,17 +125,26 @@ void test_HourDecode() {
   Datapoint dp("hour", 0x0000, 4, VitoWiFi::div3600);
   const uint8_t data[] = {0x80, 0x8F, 0x21, 0x61};
   const float expected = 452663.72;
-  const char* expectedStr = "452663.7xxx";  // take float inaccuracy into account
   PacketVS2 packet;
   packet.createPacket(PacketType::RESPONSE, FunctionCode::READ, 0, 0x0000, 4, data);
 
   float result = dp.decode(packet);
-  char resultStr[20];
-  int resultStrLen = dp.decodeToString(resultStr, 20, packet);
 
   TEST_ASSERT_EQUAL_FLOAT(expected, result);
-  TEST_ASSERT(resultStrLen > 0);
-  TEST_ASSERT_EQUAL_STRING_LEN(expectedStr, resultStr, 8);
+}
+
+void test_HourDecodeStr() {
+  Datapoint dp("hour", 0x0000, 4, VitoWiFi::div3600);
+  const uint8_t data[] = {0x80, 0x8F, 0x21, 0x61};
+  const char* expected = "452663.7xxx";  // take float inaccuracy into account
+  PacketVS2 packet;
+  packet.createPacket(PacketType::RESPONSE, FunctionCode::READ, 0, 0x0000, 4, data);
+
+  char result[20];
+  int resultLen = dp.decodeToString(result, 20, packet);
+
+  TEST_ASSERT(resultLen > 0);
+  TEST_ASSERT_EQUAL_STRING_LEN(expected, result, 8);
 }
 
 void test_HourEncode() {
@@ -194,18 +212,27 @@ void test_COPDecode() {
   Datapoint dp("count", 0x0000, 1, VitoWiFi::div10);
   const uint8_t data[] = {0x1A};
   const float expected = 2.6;
-  const char* expectedStr = "2.6";
   PacketVS2 packet;
   packet.createPacket(PacketType::RESPONSE, FunctionCode::READ, 0, 0x0000, 1, data);
 
   float result = dp.decode(packet);
 
-  char resultStr[20];
-  int resultStrLen = dp.decodeToString(resultStr, 20, packet);
+  TEST_ASSERT_EQUAL_FLOAT(expected, result);
+}
+
+void test_COPDecodeStr() {
+  Datapoint dp("count", 0x0000, 1, VitoWiFi::div10);
+  const uint8_t data[] = {0x1A};
+  const char* expected = "2.6";
+  PacketVS2 packet;
+  packet.createPacket(PacketType::RESPONSE, FunctionCode::READ, 0, 0x0000, 1, data);
+
+  char result[20];
+  int resultLen = dp.decodeToString(result, 20, packet);
 
   TEST_ASSERT_EQUAL_FLOAT(expected, result);
-  TEST_ASSERT(resultStrLen > 0);
-  TEST_ASSERT_EQUAL_STRING(expectedStr, resultStr);
+  TEST_ASSERT(resultLen > 0);
+  TEST_ASSERT_EQUAL_STRING(expected, result);
 }
 
 void test_COPEncode() {
@@ -252,17 +279,20 @@ int main() {
   RUN_TEST(test_Bool);
   RUN_TEST(test_TempDecode);
   RUN_TEST(test_TempEncode);
+  RUN_TEST(test_TempDecodeStr);
   RUN_TEST(test_TempShortDecode);
   RUN_TEST(test_TempShortEncode);
   RUN_TEST(test_StatusDecode);
   RUN_TEST(test_StatusEncode);
   RUN_TEST(test_HourDecode);
+  RUN_TEST(test_HourDecodeStr);
   RUN_TEST(test_HourEncode);
   RUN_TEST(test_CountDecode);
   RUN_TEST(test_CountEncode);
   RUN_TEST(test_CountShortDecode);
   RUN_TEST(test_CountShortEncode);
   RUN_TEST(test_COPDecode);
+  RUN_TEST(test_COPDecodeStr);
   RUN_TEST(test_COPEncode);
   RUN_TEST(test_ScheduleEncode);
   RUN_TEST(test_ScheduleDecode);
