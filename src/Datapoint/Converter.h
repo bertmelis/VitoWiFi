@@ -22,6 +22,7 @@ namespace VitoWiFi {
 
 class VariantValue {
  public:
+  VariantValue(): _value() {}
   explicit VariantValue(uint8_t value): _value(value) {}
   explicit VariantValue(uint16_t value): _value(value) {}
   explicit VariantValue(uint32_t value): _value(value) {}
@@ -37,6 +38,7 @@ class VariantValue {
 
  protected:
   union _Value {
+    _Value(): _uint64Val(0) {}
     _Value(uint8_t v): _uint8Val(v) {}
     _Value(uint16_t v): _uint16Val(v) {}
     _Value(uint32_t v): _uint32Val(v) {}
