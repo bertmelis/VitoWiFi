@@ -48,14 +48,13 @@ VariantValue Datapoint::decode(const PacketVS2& packet) const {
 }
 
 void Datapoint::encode(uint8_t* buf, uint8_t len, const VariantValue& value) const {
-  return (*_converter).encode(buf, len, value);
+  (*_converter).encode(buf, len, value);
 }
 
 void Datapoint::encode(uint8_t* buf, uint8_t len, const char* value) const {
   VariantValue convertedVal;
-  if ((*_converter).fromString(value, &convertedVal)) {
-    encode(buf, len, convertedVal);
-  }
+  (*_converter).fromString(value, &convertedVal);
+  encode(buf, len, convertedVal);
 }
 
 int Datapoint::decodeToString(char* buffer, std::size_t maxLen, const uint8_t* data, uint8_t length) const {
