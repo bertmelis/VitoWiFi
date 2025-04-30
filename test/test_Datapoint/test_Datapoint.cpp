@@ -230,7 +230,6 @@ void test_COPDecodeStr() {
   char result[20];
   int resultLen = dp.decodeToString(result, 20, packet);
 
-  TEST_ASSERT_EQUAL_FLOAT(expected, result);
   TEST_ASSERT(resultLen > 0);
   TEST_ASSERT_EQUAL_STRING(expected, result);
 }
