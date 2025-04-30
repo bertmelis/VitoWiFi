@@ -19,7 +19,8 @@ int Converter::toString(char* buf, std::size_t maxLen, VariantValue value) const
 
 void Converter::fromString(const char* buf, VariantValue* result) const {
   (void) buf;
-  return VariantValue(0ULL);
+  uint64_t retVal = 0;
+  result = VariantValue(retVal);
 }
 
 VariantValue Div10Convert::decode(const uint8_t* data, uint8_t len) const {
