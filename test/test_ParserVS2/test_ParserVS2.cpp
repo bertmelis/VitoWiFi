@@ -8,6 +8,8 @@ the LICENSE file.
 
 #include <unity.h>
 
+#include <cstring> // std::memcpy
+
 #include <VS2/ParserVS2.h>
 
 using VitoWiFiInternals::ParserVS2;
@@ -118,8 +120,8 @@ void test_ok_writeresponse() {
 
   // inject data into packet
   const uint8_t data[2] = {0x01, 0x02}; 
-  TEST_ASSERT(_parser.packet().setLength(_parser.packet().length() + _parser.packet().dataLength()));
-  std::memcpy(&_parser.packet()[VS2_DATA], data, _parser.packet().dataLength());
+  TEST_ASSERT(parser.packet().setLength(parser.packet().length() + parser.packet().dataLength()));
+  std::memcpy(&parser.packet()[VS2_DATA], data, parser.packet().dataLength());
 
   TEST_ASSERT_EQUAL(ParserResult::COMPLETE, result);
   TEST_ASSERT_EQUAL_UINT(length, bytesRead);
