@@ -100,8 +100,8 @@ void test_ok_writeresponse() {
     0x02,  // flags: id + function code (0 + write)
     0x23,  // address 1
     0x23,  // address 2
-    0x01,  // payload length
-    0x4F   // cs
+    0x02,  // payload length
+    0x50   // cs
   };
   const std::size_t length = 8;
   const std::size_t packetLength = 6;
@@ -116,6 +116,11 @@ void test_ok_writeresponse() {
     }
   }
 
+  // inject data into packet
+  const uint8_t data[2] = {0x01, 0x02}; 
+  TEST_ASSERT(_parser.packet().setLength(_parser.packet().length() + _parser.packet().dataLength()));
+  std::memcpy(&_parser.packet()[VS2_DATA], data, _parser.packet().dataLength());
+
   TEST_ASSERT_EQUAL(ParserResult::COMPLETE, result);
   TEST_ASSERT_EQUAL_UINT(length, bytesRead);
   TEST_ASSERT_EQUAL_UINT8(packetLength, parser.packet().length());
@@ -124,7 +129,7 @@ void test_ok_writeresponse() {
   TEST_ASSERT_EQUAL_UINT8(FunctionCode::WRITE, parser.packet().functionCode());
   TEST_ASSERT_EQUAL_UINT16(0x2323, parser.packet().address());
   TEST_ASSERT_EQUAL_UINT8(0x01, parser.packet().dataLength());
-  TEST_ASSERT_NULL(parser.packet().data());
+  TEST_ASSERT_EQUAL_UINT8_ARRAY(data, parser.packet().data(), 2);
 }
 
 void test_spuriousbytes() {

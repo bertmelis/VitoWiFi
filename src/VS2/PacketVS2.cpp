@@ -128,7 +128,6 @@ uint8_t PacketVS2::dataLength() const {
 }
 
 const uint8_t* PacketVS2::data() const {
-  if (functionCode() == FunctionCode::WRITE) return nullptr;
   return &_buffer[VS2_DATA];
 }
 
