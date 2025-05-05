@@ -26,7 +26,7 @@ void test_ok_requestRead() {
     0x25,  // address 2
     0x02   // payload length
   };
-  const std::size_t length = 6;
+  const std::size_t length = 5;
   const uint8_t checksum = 0x82;
 
   PacketVS2 packet;
@@ -52,7 +52,7 @@ void test_ok_requestWrite() {
     0x01,  // payload length
     0x01   // payload
   };
-  const std::size_t length = 7;
+  const std::size_t length = 6;
   const uint8_t checksum = 0x50;
 
   uint8_t payload[1] = {0x01};
@@ -80,7 +80,7 @@ void test_packetId() {
     0x02   // payload length
   };
   const uint8_t packetId = 5;
-  const std::size_t length = 6;
+  const std::size_t length = 5;
   const uint8_t checksum = 0x22;
 
   PacketVS2 packet;
