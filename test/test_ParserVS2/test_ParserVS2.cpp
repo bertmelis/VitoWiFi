@@ -34,7 +34,7 @@ void test_ok_request() {
     0x82   // cs
   };
   const std::size_t length = 8;
-  const std::size_t packetLength = 6;
+  const std::size_t packetLength = 5;
 
   std::size_t bytesRead = 0;
   ParserResult result = ParserResult::ERROR;
@@ -70,7 +70,7 @@ void test_ok_readresponse() {
     0x8D   // cs
   };
   const std::size_t length = 10;
-  const std::size_t packetLength = 8;
+  const std::size_t packetLength = 7;
   const uint8_t data[2] = {0x07, 0x01};
 
   std::size_t bytesRead = 0;
@@ -106,7 +106,7 @@ void test_ok_writeresponse() {
     0x50   // cs
   };
   const std::size_t length = 8;
-  const std::size_t packetLength = 6;
+  const std::size_t packetLength = 5;
 
   std::size_t bytesRead = 0;
   ParserResult result = ParserResult::ERROR;
@@ -119,18 +119,19 @@ void test_ok_writeresponse() {
   }
 
   // inject data into packet
-  const uint8_t data[2] = {0x01, 0x02}; 
+  const uint8_t dataLength = 2;
+  const uint8_t data[dataLength] = {0x01, 0x02}; 
   TEST_ASSERT(parser.packet().setLength(parser.packet().length() + parser.packet().dataLength()));
   std::memcpy(&parser.packet()[VS2_DATA], data, parser.packet().dataLength());
 
   TEST_ASSERT_EQUAL(ParserResult::COMPLETE, result);
   TEST_ASSERT_EQUAL_UINT(length, bytesRead);
-  TEST_ASSERT_EQUAL_UINT8(packetLength, parser.packet().length());
+  TEST_ASSERT_EQUAL_UINT8(packetLength + dataLength, parser.packet().length());
   TEST_ASSERT_EQUAL_UINT8(PacketType::RESPONSE, parser.packet().packetType());
   TEST_ASSERT_EQUAL_UINT8(0x00, parser.packet().id());
   TEST_ASSERT_EQUAL_UINT8(FunctionCode::WRITE, parser.packet().functionCode());
   TEST_ASSERT_EQUAL_UINT16(0x2323, parser.packet().address());
-  TEST_ASSERT_EQUAL_UINT8(0x01, parser.packet().dataLength());
+  TEST_ASSERT_EQUAL_UINT8(dataLength, parser.packet().dataLength());
   TEST_ASSERT_EQUAL_UINT8_ARRAY(data, parser.packet().data(), 2);
 }
 
@@ -150,7 +151,7 @@ void test_spuriousbytes() {
     0x8D   // cs
   };
   const std::size_t length = 12;
-  const std::size_t packetLength = 8;
+  const std::size_t packetLength = 7;
   const uint8_t data[2] = {0x07, 0x01};
 
   std::size_t bytesRead = 0;

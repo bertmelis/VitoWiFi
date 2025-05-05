@@ -97,12 +97,12 @@ bool PacketVS2::setLength(uint8_t length) {
     _allocatedLength = toAllocate;
     _buffer = newBuffer;
   }
-  _buffer[0] = length;
+  _buffer[VS2_PACKET_LENGTH] = length;
   return true;
 }
 
 uint8_t PacketVS2::length() const {
-  return _buffer[VS2_PACKET_LENGTH] + 1;
+  return _buffer[VS2_PACKET_LENGTH];
 }
 
 PacketType PacketVS2::packetType() const {

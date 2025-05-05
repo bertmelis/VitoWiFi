@@ -84,8 +84,8 @@ ParserResult ParserVS2::parse(const uint8_t b) {
       // read requests and write responses don't have a data payload
       _step = ParserStep::CHECKSUM;
     } else {
-      if (b != _packet.length() - 6U) {
-        vw_log_w("Invalid payload length: %u (expected %u)", b, _packet.length() - 6U);
+      if (b != _packet.length() - 5U) {
+        vw_log_w("Invalid payload length: %u (expected %u)", b, _packet.length() - 5U);
         _step = ParserStep::STARTBYTE;
         return ParserResult::ERROR;
       }
