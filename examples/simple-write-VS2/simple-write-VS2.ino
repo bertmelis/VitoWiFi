@@ -43,7 +43,7 @@ void onResponse(const VitoWiFi::PacketVS2& response, const VitoWiFi::Datapoint& 
   }
   SERIAL2.print("\n");
 
-  if (response.packetType == VitoWiFi::PacketType::ERROR) {
+  if (response.packetType() == VitoWiFi::PacketType::ERROR) {
     SERIAL2.printf("Request %s returned error\n", request.name());
     return;
   }
