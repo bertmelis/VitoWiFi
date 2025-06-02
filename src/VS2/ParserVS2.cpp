@@ -104,6 +104,7 @@ ParserResult ParserVS2::parse(const uint8_t b) {
   case ParserStep::CHECKSUM:
     if (_packet.checksum() != b) {
       vw_log_w("Invalid checksum: 0x%02x (calculated 0x%02x)", b, _packet.checksum());
+      _step = ParserStep::STARTBYTE;
       return ParserResult::CS_ERROR;
     }
     _step = ParserStep::STARTBYTE;
