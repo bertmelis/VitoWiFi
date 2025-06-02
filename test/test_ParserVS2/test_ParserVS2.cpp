@@ -92,6 +92,43 @@ void test_ok_readresponse() {
   TEST_ASSERT_EQUAL_UINT8_ARRAY(data, parser.packet().data(), 2);
 }
 
+void test_nok_readresponse() {
+  const uint8_t stream[] = {
+    0x41,  // start byte
+    0x06,  // length
+    0x03,  // packet type (error)
+    0x01,  // flags: id + function code (0 + read)
+    0x77,  // address 1
+    0x60,  // address 2
+    0x01,  // payload length
+    0x01,  // payload
+    0xe3   // cs
+  };
+  const std::size_t length = 9;
+  const std::size_t packetLength = 7;
+  const uint8_t data[1] = {0x01};
+
+  std::size_t bytesRead = 0;
+  ParserResult result = ParserResult::ERROR;
+
+  while (bytesRead < length) {
+    result = parser.parse(stream[bytesRead++]);
+    if (result != ParserResult::CONTINUE) {
+      break;
+    }
+  }
+
+  TEST_ASSERT_EQUAL(ParserResult::COMPLETE, result);
+  TEST_ASSERT_EQUAL_UINT(length, bytesRead);
+  TEST_ASSERT_EQUAL_UINT8(packetLength, parser.packet().length());
+  TEST_ASSERT_EQUAL_UINT8(PacketType::ERROR, parser.packet().packetType());
+  TEST_ASSERT_EQUAL_UINT8(0x00, parser.packet().id());
+  TEST_ASSERT_EQUAL_UINT8(FunctionCode::READ, parser.packet().functionCode());
+  TEST_ASSERT_EQUAL_UINT16(0x7760, parser.packet().address());
+  TEST_ASSERT_EQUAL_UINT8(0x01, parser.packet().dataLength());
+  TEST_ASSERT_EQUAL_UINT8_ARRAY(data, parser.packet().data(), 1);
+}
+
 void test_ok_writeresponse() {
   const uint8_t stream[] = {
     0x41,  // start byte
@@ -287,6 +324,7 @@ int main() {
   UNITY_BEGIN();
   RUN_TEST(test_ok_request);
   RUN_TEST(test_ok_readresponse);
+  RUN_TEST(test_nok_readresponse);
   RUN_TEST(test_ok_writeresponse);
   RUN_TEST(test_spuriousbytes);
   RUN_TEST(test_invalidLength);
