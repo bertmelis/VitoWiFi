@@ -43,6 +43,11 @@ void onResponse(const VitoWiFi::PacketVS2& response, const VitoWiFi::Datapoint& 
   }
   SERIAL2.print("\n");
 
+  if (response.packetType() == VitoWiFi::PacketType::ERROR) {
+    SERIAL2.printf("Request %s returned error\n", request.name());
+    return;
+  }
+
   // the raw data can be decoded using the datapoint. Be sure to use the correct type
   SERIAL2.printf("%s: ", request.name());
   if (request.converter() == VitoWiFi::div10) {
