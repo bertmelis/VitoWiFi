@@ -28,7 +28,7 @@ void Div10Convert::encode(uint8_t* buf, uint8_t len, const VariantValue& val) co
   assert(len == 1 || len == 2);
   (void) len;
   float srcVal = val;
-  int16_t tmp = floor((srcVal * 10.f) + 0.5);
+  int16_t tmp = std::floor((srcVal * 10.f) + 0.5f);
   if (len == 2) {
     buf[1] = tmp >> 8;
   }
@@ -47,7 +47,7 @@ void Div2Convert::encode(uint8_t* buf, uint8_t len, const VariantValue& val) con
   assert(len == 1);
   (void) len;
   float srcVal = val;
-  int8_t tmp = floor((srcVal * 2.f) + 0.5);
+  int8_t tmp = std::floor((srcVal * 2.f) + 0.5f);
   buf[0] = tmp;
 }
 
@@ -63,7 +63,7 @@ void Div3600Convert::encode(uint8_t* buf, uint8_t len, const VariantValue& val) 
   assert(len == 4);
   (void) len;
   float srcVal = val;
-  uint32_t tmp = floor((srcVal * 3600.f) + 0.5);
+  uint32_t tmp = std::floor((srcVal * 3600.f) + 0.5f);
   buf[3] = tmp >> 24;
   buf[2] = tmp >> 16;
   buf[1] = tmp >> 8;
