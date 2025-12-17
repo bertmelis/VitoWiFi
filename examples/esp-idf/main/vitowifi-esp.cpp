@@ -123,9 +123,7 @@ void onError(VitoWiFi::OptolinkResult error, const VitoWiFi::Datapoint& request)
   }
 }
 
-uint64_t millis() {
-  return std::chrono::duration_cast<std::chrono::duration<uint32_t, std::milli>>(std::chrono::system_clock::now().time_since_epoch()).count();
-}
+#define millis() xTaskGetTickCount() * portTICK_PERIOD_MS
 
 void yieldIfNecessary(){
   static uint64_t lastYield = 0;
