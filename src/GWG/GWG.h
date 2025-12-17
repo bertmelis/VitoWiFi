@@ -37,7 +37,8 @@ class GWG {
   #if defined(ARDUINO_ARCH_ESP8266)
   explicit GWG(SoftwareSerial* interface);
   #endif
-  #else
+  #endif
+  #if defined(__linux__)
   explicit GWG(const char* interface);
   #endif
   template<class C>

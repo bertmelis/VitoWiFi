@@ -37,7 +37,8 @@ class VS2 {
   #if defined(ARDUINO_ARCH_ESP8266)
   explicit VS2(SoftwareSerial* interface);
   #endif
-  #else
+  #endif
+  #if defined(__linux__)
   explicit VS2(const char* interface);
   #endif
   template<class C>

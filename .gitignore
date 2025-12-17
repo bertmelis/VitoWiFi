@@ -1,4 +1,10 @@
 .pio
 .vscode
+.idea
 cov
 *cov.info
+build
+cmake-build-*
+sdkconfig
+managed_components
+dependencies.lock

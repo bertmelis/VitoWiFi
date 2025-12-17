@@ -12,7 +12,7 @@ the LICENSE file.
 #include <cstdint>
 #include <cstddef>
 
-#if defined(__linux__)
+#if defined(__linux__) || defined(ESP_PLATFORM)
   #include <chrono>  // NOLINT [build/c++11]
   #define vw_millis() std::chrono::duration_cast<std::chrono::duration<uint32_t, std::milli>>(std::chrono::system_clock::now().time_since_epoch()).count()
 #else

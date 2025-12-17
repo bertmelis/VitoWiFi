@@ -52,8 +52,9 @@ VS2::VS2(SoftwareSerial* interface)
   }
 }
 #endif
+#endif
 
-#else
+#if defined(__linux__)
 VS2::VS2(const char* interface)
 : _state(State::UNDEFINED)
 , _currentMillis(vw_millis())
