@@ -64,8 +64,9 @@ GWG::GWG(SoftwareSerial* interface)
   }
 }
 #endif
+#endif
 
-#else
+#if defined(__linux__)
 GWG::GWG(const char* interface)
 : _state(State::UNDEFINED)
 , _currentMillis(vw_millis())

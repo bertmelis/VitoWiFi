@@ -65,7 +65,9 @@ VS1::VS1(SoftwareSerial* interface)
 }
 #endif
 
-#else
+#endif
+
+#if defined(__linux__)
 VS1::VS1(const char* interface)
 : _state(State::UNDEFINED)
 , _currentMillis(vw_millis())
