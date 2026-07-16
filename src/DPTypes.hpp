@@ -49,7 +49,7 @@ class DPType {
  public:
   DPType() : _length(0) {}
   void setLength(size_t length) { _length = length; }
-  virtual const size_t getLength() const { return _length; }
+  virtual size_t getLength() const { return _length; }
  protected:
   size_t _length;
 };

@@ -135,7 +135,7 @@ class DPValue {
       snprintf(c, s, "%u", v.u16.value);
       break;
     case UINT32_T:
-      snprintf(c, s, "%u", v.u32.value);
+      snprintf(c, s, "%lu", v.u32.value);
       break;
     case UINT64_T:
       snprintf(c, s, "%llu", v.u64.value);
