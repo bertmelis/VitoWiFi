@@ -273,8 +273,10 @@ void VS1::_send() {
 
 // wait for data to receive
 // when done, move to SYN_RECV
+// never read more than the requested length: _responseBuffer is only
+// guaranteed to hold _currentDatapoint.length() bytes
 void VS1::_receive() {
-  while (_interface->available()) {
+  while (_bytesTransferred < _currentDatapoint.length() && _interface->available()) {
     _responseBuffer[_bytesTransferred] = _interface->read();
     ++_bytesTransferred;
     _lastMillis = _currentMillis;
